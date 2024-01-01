@@ -25,7 +25,7 @@ Under ["5.4 Main options"](https://ffmpeg.org/ffmpeg-all.html#toc-Main-options):
 
 ### silencedetect script
 
-When `cd` in directory containing file `gen.mp3`, and with a 'gen' subdirectory (else remove `gen/`)
+When `cd` in directory containing file `gen.mp3`:
 
 ```bash
 ffmpeg -nostats -i gen.mp3 -af silencedetect=noise=-30dB:d=3.5 -f null - 2> silence.log
@@ -47,5 +47,38 @@ Only options in docs are `-filter:v` (seems to be for Video) and `-filter:a`, fo
 
 `2> silence.log`: Print out to that log file (see not on `2` next). Just leave this off (including the 2) and it will print to console instead.
 
-`2>`: weird. I can find no reason why `2` is here. The `>` seems obvious, perhaps saying push output to this file instead of to console? But why `2`? Find no examples in docs.
+`2>`: weird. I can find no reason why `2` is here.
 
+`-t`: duration (input/output)
+
+`-to` position (input/output): "Stop writing the output or reading the input at position." Note also: "`-to` and `-t` are mutually exclusive and `-t` has priority."
+
+`-vcodec copy`: without the picture info doesn't copy...
+
+```bash
+ffmpeg -ss 347.0 -t 576.5 -i gen.mp3 gen-ch2.mp3
+```
+
+```bash
+ffmpeg -ss 05:47 -i gen.mp3 -vcodec copy -acodec copy -t 03:50 gen.2.mp3
+```
+
+```bash
+ffmpeg -ss 05:47 -i gen.mp3 -vcodec copy -acodec copy -to 03:50 gen.2.mp3
+```
+
+```py
+import os
+
+list = [
+  ('0:00:00.00', '0:05:45.01', '05:44', '3.79'),
+  ('0:05:46.80', '0:09:37.13', '03:48', '3.76'),
+]
+
+for i in range(len(list)):
+  itm = list[i]
+  sc = f'ffmpeg -ss {itm[0]} -to {itm[1]} -i gen.mp3 -vcodec copy -acodec copy aud/gen-{(i+1)}.mp3'
+  print(os.popen(sc).read())
+```
+
+Save above as eg `script1.py`, then run in terminal `python script1.py`.
