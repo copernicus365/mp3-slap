@@ -4,9 +4,9 @@ public partial class FFSilenceTracksParser(string text)
 {
 	readonly string text = text.NullIfEmptyTrimmed();
 
-	public List<TrackTStamp> Stamps { get; private set; }
+	public List<TrackTimeStamp> Stamps { get; private set; }
 
-	public List<TrackTStamp> Run()
+	public List<TrackTimeStamp> Run()
 	{
 		if(text.IsNullOrEmpty())
 			return null;
@@ -33,7 +33,7 @@ public partial class FFSilenceTracksParser(string text)
 
 			// difficult because reports at first silence
 			// [silencedetect @ 0x600000754240] silence_start: 344.017
-			TrackTStamp stamp = new(lastEnd, start, sildur);
+			TrackTimeStamp stamp = new(lastEnd, start, sildur);
 			lastEnd = end;
 			return stamp;
 		})
@@ -41,13 +41,12 @@ public partial class FFSilenceTracksParser(string text)
 		.ToList();
 
 		double bogusDur = 0.001;
-		Stamps.Add(new TrackTStamp(lastEnd, lastEnd + bogusDur, bogusDur));
+		Stamps.Add(new TrackTimeStamp(lastEnd, lastEnd + bogusDur, bogusDur));
 
 		return Stamps;
 	}
 
 	//[GeneratedRegex("""\[silencedetect @ 0x\d{4,18}\] silence_start\: (\d+\.\d+)\s?\n\[silencedetect @ 0x\d{4,18}\] silence_end\: (\d+\.\d+) \| silence_duration\: (\d+\.\d+)\n""")]
-	[GeneratedRegex("""\[silencedetect @ 0x\d{4,18}\] silence_start\: (\d+\.?\d*)\s?\n\[silencedetect @ 0x\d{4,18}\] silence_end\: (\d+\.?\d*) \| silence_duration\: (\d+\.?\d*)""")]
+	[GeneratedRegex("""\[silencedetect @ 0x[0-9a-zA-Z]{4,18}\] silence_start\: (\d+\.?\d*)\s?\n\[silencedetect @ 0x[0-9a-zA-Z]{4,18}\] silence_end\: (\d+\.?\d*) \| silence_duration\: (\d+\.?\d*)""")]
 	private static partial Regex RxGetLog();
 }
-
