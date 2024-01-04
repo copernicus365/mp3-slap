@@ -10,9 +10,12 @@ public class ParseCsvTests : BaseTest
 
 		TrackTimeStampsCsv csv = new();
 		csv.Parse(csvText);
+
+		True(csv.Count == 17);
 		csv.CombineCuts();
 
 		True(csv.Valid);
+		True(csv.Count == 10);
 
 		string result = csv.Write();
 

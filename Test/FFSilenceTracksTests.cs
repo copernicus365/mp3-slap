@@ -1,6 +1,6 @@
 namespace Test;
 
-public class FFSilenceTracksT : BaseTest
+public class FFSilenceTracksTests : BaseTest
 {
 	void hhh()
 	{
@@ -25,7 +25,6 @@ public class FFSilenceTracksT : BaseTest
 		List<TrackTimeStamp> tracks = split.Run();
 
 		True(tracks.Count.InRange(44, 52));
-
 
 		string result = tracks.JoinToString(v => $"  {v.ToCsvString(1)},", "\n");
 		//$"  ('{v.Start}', '{v.End}', '{v.Duration}')", "\n");

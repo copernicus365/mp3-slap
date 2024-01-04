@@ -12,10 +12,14 @@ public class AlbumToTracksInfo
 
 	public string[] RelPaths { get; private set; }
 
+	public string LogFolderName { get; set; } = LogFolderNameDef;
+
+	public static string LogFolderNameDef { get; set; } = "logs";
+
 	public AlbumToTracksInfo(string dir)
 	{
 		Dir = CleanDirPath(dir);
-		LogDir = $"{Dir}logs/";
+		LogDir = $"{Dir}{LogFolderName}/";
 	}
 
 	public void Init(string[] files)
@@ -26,13 +30,13 @@ public class AlbumToTracksInfo
 
 
 	public static (string dir, string fname, string value, string logDir) GetSilenceLogPathInfo(
-		string path, bool parsedTxt)
+		string path, bool parsedTxt, string logDirName)
 	{
 		path = CleanPath(path);
 		string fname = Path.GetFileName(path).NullIfEmptyTrimmed();
 		if(fname == null) return default;
 		string dir = CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
-		string logDir = $"{dir}logs/";
+		string logDir = $"{dir}{logDirName}/";
 		// IF not null, above ensures dir trails with '/'
 		string logPath = GetLogPath(logDir, fname, parsedTxt);
 		return (dir, fname, logPath, logDir);
@@ -49,8 +53,8 @@ public class AlbumToTracksInfo
 	public string GetLogPath(string fileName, bool parsedTxt)
 		=> GetLogPath(LogDir, fileName, parsedTxt);
 
-	public static string GetSilenceLogPath(string path, bool parsedTxt)
-		=> GetSilenceLogPathInfo(path, parsedTxt).value;
+	public static string GetSilenceLogPath(string path, bool parsedTxt, string logFolderName = null)
+		=> GetSilenceLogPathInfo(path, parsedTxt, logFolderName ?? LogFolderNameDef).value;
 
 	public static string[] GetFilesFromDirectory(
 		string dir,
@@ -94,7 +98,7 @@ public class AlbumToTracksInfo
 	{
 		string silStr = silenceInSecondsMin.ToString("0.##");
 
-		var logPathInfo = GetSilenceLogPathInfo(inputPath, parsedTxt: true);
+		var logPathInfo = GetSilenceLogPathInfo(inputPath, parsedTxt: true, LogFolderName);
 		string logPath = logPathInfo.value;
 		string logDir = logPathInfo.logDir;
 
@@ -125,7 +129,7 @@ public class AlbumToTracksInfo
 
 			string script = GetSilenceDetectionCallsToFFMpeg(silenceInSecondsMin, inputP, includeFFMpeg: false);
 
-			var logPathInfo = GetSilenceLogPathInfo(inputP, parsedTxt: true);
+			var logPathInfo = GetSilenceLogPathInfo(inputP, parsedTxt: true, LogFolderName);
 
 			string logPath = logPathInfo.value;
 
