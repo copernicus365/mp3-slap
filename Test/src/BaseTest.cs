@@ -16,6 +16,7 @@ public class BaseTest : XUnitTestBase
         string vsOutLogPath = VsOutLogPath;
     }
 
+
     public string FullResourcePath(string after = null)
         => $"{RootProjectDirectory}{ResourceBasePath.Replace(".", "/")}/{after}";
 
