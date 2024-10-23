@@ -10,7 +10,7 @@ public class FFSilenceTracksTests : BaseTest
 		};
 	}
 
-	[Fact]//
+	[Fact]
 	public void Test1()
 	{
 		string log = DataString("log1-genesis.txt");
@@ -79,8 +79,6 @@ for i in range(len(list)):
 		string writePath = GetDataDirPath("sample-results/results-dan1.csv");
 		File.WriteAllText(writePath, result);
 	}
-
-
 
 	[Fact]
 	public void TestTSFormats()
