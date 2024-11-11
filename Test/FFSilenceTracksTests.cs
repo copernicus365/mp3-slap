@@ -10,13 +10,22 @@ public class FFSilenceTracksTests : BaseTest
 		};
 	}
 
+	static string _getSampleFFMpegSilenceLogPATH(string fname)
+		=> $"sample-ffmpeg-silence-logs/{fname}";
+
+	string _getSilenceLog(string fname)
+		=> DataString(_getSampleFFMpegSilenceLogPATH(fname));
+
 	[Fact]
 	public void Test1()
 	{
-		string log = DataString("log1-genesis.txt");
+		string log = _getSilenceLog("log1-genesis.txt");
 
-		string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log1.txt"; // use when experimenting live running repeatedly
-		log = File.ReadAllText(extLogPath);
+		bool getOverwriteLog = false;
+		if(getOverwriteLog) {
+			string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log1.txt"; // use when experimenting live running repeatedly
+			log = File.ReadAllText(extLogPath);
+		}
 
 		True(log != null);
 
