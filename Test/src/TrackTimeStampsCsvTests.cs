@@ -1,12 +1,12 @@
 namespace Test;
 
-public class ParseCsvTests : BaseTest
+public class TrackTimeStampsCsvTests : BaseTest
 {
 	[Fact]
 	public void TestParseCuts1()
 	{
 		//string csvText = GetDataDirPath($"{SampleResultsDirName}/results-dan3.csv");
-		string csvText = DataString($"{SampleResultsDirName}/results-dan1.csv");
+		string csvText = DataString($"{SampleResultsDirName}/silencedetect-log-parsed#niv-suchet-27-daniel.mp3--n1.csv");
 
 		TrackTimeStampsCsv csv = new();
 		csv.Parse(csvText);
@@ -19,7 +19,7 @@ public class ParseCsvTests : BaseTest
 
 		string result = csv.Write();
 
-		string writePath = GetDataDirPath($"{SampleResultsDirName}/results-dan4-test-combine-cuts.csv");
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
 		File.WriteAllText(writePath, result);
 	}
 

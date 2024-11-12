@@ -6,7 +6,7 @@ public class AlbumToTracksInfo(string dir)
 {
 	public string Dir { get; private set; } = CleanDirPath(dir);
 
-	public bool WriteCsvsOnly { get; set; }
+	public bool WriteCsvs { get; set; }
 
 	public string LogDir => $"{Dir}{LogFolderName}/";
 
@@ -95,9 +95,7 @@ public class AlbumToTracksInfo(string dir)
 
 	public List<Mp3ToSplitPathsInfo> SilenceDetLogsWritten;
 
-	public async Task RunSilenceDetectScript_1(
-		double silenceInSecondsMin,
-		bool runProcess = true)
+	public async Task RUN(double silenceInSecondsMin, bool runProcess = true)
 	{
 		SilenceDetLogsWritten = [];
 
@@ -118,17 +116,24 @@ public class AlbumToTracksInfo(string dir)
 
 			awriter.Init(silenceInSecondsMin, isFirstRun: i == 0);
 
-			sb
-				.AppendLine($"# write silence detect log at '{info.SilenceDetectCsvParsedLogPath}'\n")
-				.AppendLine(info.FFMpegScript);
+			string script = $@"""
+echo --- i: {i,2} run silence detect on: '{info.FileName}' ---
 
-			if(runProcess) {
-				if(WriteCsvsOnly) {
-					awriter.GetAndWriteCsvParsed();
-				}
-				else {
-					await ProcessHelper.Run("ffmpeg", info.FFMpegScriptArgs);
-				}
+echo log: '{info.SilenceDetectCsvParsedLogPath}
+
+sleep 2
+
+{info.FFMpegScript}
+""";
+			script = script.Trim('"'); // ?! can't get """ type string to not put "quotes"!
+
+			sb.AppendLine(script);
+
+			if(WriteCsvs) {
+				awriter.GetAndWriteCsvParsed();
+			}
+			else if(runProcess) {
+				await ProcessHelper.Run("git", script);
 			}
 		}
 

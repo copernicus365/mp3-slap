@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="data\sample-ffmpeg-silence-logs\genesis-ff-silences-log2.log" />
     <None Remove="data\sample-ffmpeg-silence-logs\old-log-vs-new.txt" />
+    <None Remove="data\sample-ffmpeg-silence-logs\silencedetect-log#niv-suchet-01-genesis.mp3.log" />
   </ItemGroup>
 
 
@@ -67,6 +67,7 @@
 
 
   <ItemGroup>
+    <Folder Include="data\csv-parsed-logs\write-temp\" />
     <Folder Include="data\logs\" />
   </ItemGroup>
 

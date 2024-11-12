@@ -45,5 +45,5 @@ public class BaseTest : XUnitTestBase
 		Assert.True(match);
 	}
 
-	public const string SampleResultsDirName = "sample-silence-log-csv-results";
+	public const string SampleResultsDirName = "csv-parsed-logs"; //"sample-silence-log-csv-results";
 }
