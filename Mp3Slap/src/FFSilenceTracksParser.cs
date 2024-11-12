@@ -1,4 +1,4 @@
-﻿namespace Mp3Slap;
+namespace Mp3Slap;
 
 public partial class FFSilenceTracksParser(string text)
 {
@@ -47,6 +47,6 @@ public partial class FFSilenceTracksParser(string text)
 	}
 
 	//[GeneratedRegex("""\[silencedetect @ 0x\d{4,18}\] silence_start\: (\d+\.\d+)\s?\n\[silencedetect @ 0x\d{4,18}\] silence_end\: (\d+\.\d+) \| silence_duration\: (\d+\.\d+)\n""")]
-	[GeneratedRegex("""\[silencedetect @ 0x[0-9a-zA-Z]{4,18}\] silence_start\: (\d+\.?\d*)\s?\n\[silencedetect @ 0x[0-9a-zA-Z]{4,18}\] silence_end\: (\d+\.?\d*) \| silence_duration\: (\d+\.?\d*)""")]
+	[GeneratedRegex("""\[silencedetect @ 0x?[0-9a-zA-Z]{4,18}\] silence_start\: (\d+\.?\d*)\s?\n\[silencedetect @ 0x?[0-9a-zA-Z]{4,18}\] silence_end\: (\d+\.?\d*) \| silence_duration\: (\d+\.?\d*)""")]
 	private static partial Regex RxGetLog();
 }
