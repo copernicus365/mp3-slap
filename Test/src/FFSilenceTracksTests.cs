@@ -2,28 +2,23 @@ namespace Test;
 
 public class FFSilenceTracksTests : BaseTest
 {
-	void hhh()
-	{
-		var items = new (string start, string end, string duration, string silenceDur)[] {
-			("0:00:00.00", "0:05:45.01", "05:44", "3.79"),
-			("0:05:46.80", "0:09:37.13", "03:48", "3.76")
-		};
-	}
-
 	static string _getSampleFFMpegSilenceLogPATH(string fname)
 		=> $"sample-ffmpeg-silence-logs/{fname}";
 
-	string _getSilenceLog(string fname)
+	string _GetFFSilencesRawLog(string fname)
 		=> DataString(_getSampleFFMpegSilenceLogPATH(fname));
 
 	[Fact]
 	public void Test1()
 	{
-		string log = _getSilenceLog("log1-genesis.txt");
+		string log = _GetFFSilencesRawLog(
+			//"genesis-ff-silences-log1.log");
+			"genesis-ff-silences-log2.log");
 
 		bool getOverwriteLog = false;
 		if(getOverwriteLog) {
-			string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log1.txt"; // use when experimenting live running repeatedly
+			//string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log1.txt"; // use when experimenting live running repeatedly
+			string extLogPath = GenDataLogsPath("log1.txt");
 			log = File.ReadAllText(extLogPath);
 		}
 
@@ -65,7 +60,8 @@ for i in range(len(list)):
 	public void TestLiveLog()
 	{
 		// use when experimenting live running repeatedly
-		string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log2.txt";
+		//string extLogPath = "/Users/nikos/repos/praxis/mp3-split/messiah/log2.txt";
+		string extLogPath = GenDataLogsPath("log2.txt");
 
 		string log = File.ReadAllText(extLogPath);
 
@@ -75,9 +71,14 @@ for i in range(len(list)):
 
 		List<TrackTimeStamp> tracks = split.Run();
 
+		string srcPath =
+			IgnoreRootDirPath("suchet/NIV-Suchet-27-Daniel.mp3");
+		// "/Users/nikos/repos/praxis/mp3-split/messiah/NIV-Suchet-27-Daniel.mp3"
+		//$"{RootProjectDirectory}../ignore/";
+
 		TrackTimeStampsCsv csv = new() {
 			Name = "Daniel",
-			SrcPath = "/Users/nikos/repos/praxis/mp3-split/messiah/NIV-Suchet-27-Daniel.mp3",
+			SrcPath = srcPath,
 			LogPath = extLogPath,
 			Pad = 0,
 			Stamps = tracks
@@ -85,12 +86,12 @@ for i in range(len(list)):
 
 		string result = csv.Write();
 
-		string writePath = GetDataDirPath("sample-results/results-dan1.csv");
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/results-dan1.csv");
 		File.WriteAllText(writePath, result);
 	}
 
-	[Fact]
-	public void TestTSFormats()
+	//[Fact]
+	void _PlayWithTSFormatsNoTest()
 	{
 		var ts1 = TimeSpan.FromMinutes(1.533);
 		var ts2 = TimeSpan.FromSeconds(1.774);

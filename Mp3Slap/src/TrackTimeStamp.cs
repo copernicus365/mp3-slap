@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mp3Slap;
 
 public class TrackTimeStamp
@@ -86,8 +88,10 @@ public class TrackTimeStamp
 				continue;
 			}
 
-			if(!TimeSpan.TryParse(val, out TimeSpan ts))
+			if(!TryParseTSLenient(val, out TimeSpan ts))
 				return null;
+			//if(!TimeSpan.TryParse(val, out TimeSpan ts))
+			//	return null;
 
 			switch(i) {
 				case 0: start = ts; break;
@@ -101,6 +105,20 @@ public class TrackTimeStamp
 			return null;
 
 		return new TrackTimeStamp(start, end, dur, silence) { IsCut = isCut };
+	}
+
+	public static bool TryParseTSLenient([NotNullWhen(true)] string? s, out TimeSpan result)
+	{
+		if(TimeSpan.TryParse(s, null, out result))
+			return true;
+
+		if(s.Count(c => c == ':') == 1) {
+			s = "0:" + s;
+			if(TimeSpan.TryParse(s, null, out result))
+				return true;
+		}
+
+		return false;
 	}
 
 	public void CombineFollowingCuts(Span<TrackTimeStamp> arr)
