@@ -21,9 +21,13 @@ dir = "C:/Dropbox/Vids/mp3-split/mp3-split/test1";
 
 AlbumToTracksInfo ati = new(dir) {
 	LogFolderName = "logs5",
+	VerboseScript = false,
 	WriteCsvs = false,
+	RemoveRootDirFromScript = true,
 };
 
-await ati.RUN(silenceInSecondsMin: 2.0, runProcess: true);
+await ati.RUN(silenceInSecondsMin: 2.0, runProcess: false);
+
+string script = ati.Scripts;
 
 WriteLine("end mp3 splitter!");
