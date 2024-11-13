@@ -2,6 +2,12 @@ using System.Text;
 
 namespace Mp3Slap;
 
+/// <summary>
+/// AFTER MANY FAILUIRES getting Python script ran by an array to work, I GAVE UP
+/// and went back to an extremely simple bash script, also having no echos, just single
+/// line calls. ALSO gave up, SADLY!, running a process, just can't get it to work!
+/// So generating a script, copy it and run it...
+/// </summary>
 public class AlbumToTracksInfo(string dir)
 {
 	public string Dir { get; private set; } = CleanDirPath(dir);
@@ -15,6 +21,8 @@ public class AlbumToTracksInfo(string dir)
 	public string[] RelPaths { get; private set; }
 
 	public string LogFolderName { get; set; } = LogFolderNameDef;
+
+	public bool RemoveRootDirFromScript { get; set; }
 
 	public static string LogFolderNameDef { get; set; } = "logs";
 
@@ -50,8 +58,8 @@ public class AlbumToTracksInfo(string dir)
 	public static string GetLogPath(string logDir, string fileName, bool parsedTxt)
 	{
 		string logPath = parsedTxt
-			? $"{logDir}silencedetect-log-parsed#{fileName.ToLower()}.csv"
-			: $"{logDir}silencedetect-log#{fileName.ToLower()}.log";
+			? $"{logDir}log#{fileName.ToLower()}#silencedetect-parsed.csv"
+			: $"{logDir}log#{fileName.ToLower()}#silencedetect.log";
 		return logPath;
 	}
 
@@ -90,8 +98,11 @@ public class AlbumToTracksInfo(string dir)
 	public static string CleanToRelative(string dir, string path)
 		=> path.StartsWith(dir) ? path[dir.Length..] : path;
 
+	public string Scripts { get; private set; }
 
-	public string SilenceDetectScripts { get; private set; }
+	public bool VerboseScript { get; set; }
+
+	public string ScriptsP { get; private set; }
 
 	public List<Mp3ToSplitPathsInfo> SilenceDetLogsWritten;
 
@@ -104,6 +115,13 @@ public class AlbumToTracksInfo(string dir)
 		Init(paths);
 
 		StringBuilder sb = new();
+		sb
+			.AppendLine("#!/bin/sh")
+			.AppendLine()
+			.AppendLine("echo \"+++FFMpeg Silence Detect Script +++\"")
+			.AppendLine();
+
+		ScriptWriter sw = new();
 
 		for(int i = 0; i < Paths.Length; i++) {
 			string inputP = Paths[i];
@@ -112,11 +130,13 @@ public class AlbumToTracksInfo(string dir)
 
 			SilenceDetLogsWritten.Add(info);
 
+			sw.Infos.Add(info);
+
 			AlbumLogsWriter awriter = new(info);
 
 			awriter.Init(silenceInSecondsMin, isFirstRun: i == 0);
 
-			string script = $@"""
+			string script = $"""
 echo --- i: {i,2} run silence detect on: '{info.FileName}' ---
 
 echo log: '{info.SilenceDetectCsvParsedLogPath}
@@ -127,7 +147,16 @@ sleep 2
 """;
 			script = script.Trim('"'); // ?! can't get """ type string to not put "quotes"!
 
-			sb.AppendLine(script);
+			if(VerboseScript) {
+				sb
+					.AppendLine(script)
+					.AppendLine();
+			}
+			else {
+				sb
+					.AppendLine(info.FFMpegScript)
+					.AppendLine();
+			}
 
 			if(WriteCsvs) {
 				awriter.GetAndWriteCsvParsed();
@@ -137,10 +166,65 @@ sleep 2
 			}
 		}
 
-		SilenceDetectScripts = sb.ToString();
+		ScriptsP = sw.Write();
+
+		Scripts = sb.ToString();
+
+		Mp3ToSplitPathsInfo fInfo = SilenceDetLogsWritten[0];
+
+		string dir = fInfo.Directory;
+		string scriptPth = dir + "run-ffmpeg-silence-det-script.sh";
+
+		if(RemoveRootDirFromScript) {
+			Scripts = Scripts.Replace(dir, "");
+		}
+
+		File.WriteAllText(scriptPth, Scripts);
 	}
 }
 
+public class ScriptWriter
+{
+	public List<Mp3ToSplitPathsInfo> Infos = [];
+
+	public string Script { get; set; }
+
+	public string Write()
+	{
+		var arr = Infos;
+		if(arr.IsNulle())
+			return Script = null;
+
+		int i = 0;
+
+		string varValsArr = arr.JoinToString(v => $"    ({i++}, \"{v.FileName}\", \"{v.FilePath}\", \"{v.SilenceDetectRawLogPath}\", \"{v.FFMpegScript}\")", ",\n");
+
+		string script = $"""
+arr = [
+{varValsArr}
+]
+
+""";
+
+		string loop1 = """
+for i in arr:
+    idx = i[0]
+    fname = i[1]
+    fileP = i[2]
+    logP = i[3]
+    script = i[4]
+
+    print(f"--- i: {idx} run silence detect on: '{fname}' ---")
+
+    print(f" -log: '{logP}")
+
+    subprocess.call(script, shell=True)
+
+""";
+
+		return Script = script + "\n" + loop1;
+	}
+}
 
 //public static (string dir, string fname, string value, string logDir) GetSilenceLogPathInfo(
 //	string path, bool parsedTxt, string logDirName)
