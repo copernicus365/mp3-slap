@@ -27,7 +27,7 @@ public class FFSilenceTracksParserTests : BaseTest
 	[Fact]
 	public void TestGenesisLogNew()
 	{
-		string log = _GetFFSilencesRawLog("silencedetect-log#niv-suchet-01-genesis.mp3.log");
+		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect.log");
 
 		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
 
@@ -37,7 +37,7 @@ public class FFSilenceTracksParserTests : BaseTest
 	[Fact]
 	public void TestGenesisLogOld()
 	{
-		string log = _GetFFSilencesRawLog("silencedetect-log#niv-suchet-01-genesis.mp3-OLD.log");
+		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect-OLD.log");
 
 		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCount: 51);
 	}
@@ -45,7 +45,7 @@ public class FFSilenceTracksParserTests : BaseTest
 	[Fact]
 	public void ConvertRawLogDanielLogOld()
 	{
-		string log = _GetFFSilencesRawLog("silencedetect-log#niv-suchet-27-daniel.mp3.log");
+		string log = _GetFFSilencesRawLog("log#niv-suchet-27-daniel.mp3#silencedetect.log");
 
 		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCount: 17);
 	}

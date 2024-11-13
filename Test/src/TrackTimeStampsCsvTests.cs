@@ -6,7 +6,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	public void TestParseCuts1()
 	{
 		//string csvText = GetDataDirPath($"{SampleResultsDirName}/results-dan3.csv");
-		string csvText = DataString($"{SampleResultsDirName}/silencedetect-log-parsed#niv-suchet-27-daniel.mp3--n1.csv");
+		string csvText = DataString($"{SampleResultsDirName}/log#niv-suchet-27-daniel.mp3#silencedetect-parsed--n1.csv");
 
 		TrackTimeStampsCsv csv = new();
 		csv.Parse(csvText);
