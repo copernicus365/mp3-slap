@@ -10,7 +10,7 @@ namespace Mp3Slap;
 /// </summary>
 public class AlbumToTracksInfo(string dir)
 {
-	public string Dir { get; private set; } = CleanDirPath(dir);
+	public string Dir { get; private set; } = PathHelper.CleanDirPath(dir);
 
 	public bool WriteCsvs { get; set; }
 
@@ -28,18 +28,18 @@ public class AlbumToTracksInfo(string dir)
 
 	public void Init(string[] files)
 	{
-		Paths = files.Select(f => CleanPath(f)).ToArray();
-		RelPaths = Paths.Select(f => CleanToRelative(Dir, f)).ToArray();
+		Paths = files.Select(f => PathHelper.CleanPath(f)).ToArray();
+		RelPaths = Paths.Select(f => PathHelper.CleanToRelative(Dir, f)).ToArray();
 	}
 
 
 	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName)
 	{
-		path = CleanPath(path);
+		path = PathHelper.CleanPath(path);
 		string fname = Path.GetFileName(path).NullIfEmptyTrimmed();
 		if(fname == null) return default;
 
-		string dir = CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
+		string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
 		string logDir = $"{dir}{logDirName}/";
 
 		Mp3ToSplitPathsInfo info = new() {
@@ -47,56 +47,13 @@ public class AlbumToTracksInfo(string dir)
 			FileName = fname,
 			FilePath = path,
 			LogDirectory = logDir,
-			SilenceDetectRawLogPath = GetLogPath(logDir, fname, parsedTxt: false),
-			SilenceDetectCsvParsedLogPath = GetLogPath(logDir, fname, parsedTxt: true)
+			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
+			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true)
 		};
 		// IF not null, above ensures dir trails with '/'
 		return info;
 	}
 
-
-	public static string GetLogPath(string logDir, string fileName, bool parsedTxt)
-	{
-		string logPath = parsedTxt
-			? $"{logDir}log#{fileName.ToLower()}#silencedetect-parsed.csv"
-			: $"{logDir}log#{fileName.ToLower()}#silencedetect.log";
-		return logPath;
-	}
-
-	public static string[] GetFilesFromDirectory(
-		string dir,
-		string extensionType = "mp3",
-		bool includeSubDirectories = false)
-	{
-		extensionType = extensionType.NullIfEmptyTrimmed();
-		ArgumentException.ThrowIfNullOrEmpty(extensionType);
-
-		dir = CleanDirPath(dir);
-
-		if(!Directory.Exists(dir))
-			throw new DirectoryNotFoundException(dir);
-
-		string[] files = Directory.GetFiles(dir, "*." + extensionType, includeSubDirectories
-			? SearchOption.AllDirectories
-			: SearchOption.TopDirectoryOnly);
-
-		return files;
-	}
-
-	public static string CleanDirPath(string dir)
-	{
-		dir = dir.NullIfEmptyTrimmed();
-		if(dir == null) return null;
-		dir = CleanPath(dir);
-		if(dir.Last() != '/')
-			dir += '/';
-		return dir;
-	}
-
-	public static string CleanPath(string path) => path.Replace('\\', '/');
-
-	public static string CleanToRelative(string dir, string path)
-		=> path.StartsWith(dir) ? path[dir.Length..] : path;
 
 	public string Scripts { get; private set; }
 
@@ -104,13 +61,13 @@ public class AlbumToTracksInfo(string dir)
 
 	public string ScriptsP { get; private set; }
 
-	public List<Mp3ToSplitPathsInfo> SilenceDetLogsWritten;
+	public List<Mp3ToSplitPathsInfo> Infos;
 
-	public async Task RUN(double silenceInSecondsMin, bool runProcess = true)
+	public async Task RUN(double silenceInSecs, bool runProcess = true)
 	{
-		SilenceDetLogsWritten = [];
+		Infos = [];
 
-		string[] paths = GetFilesFromDirectory(Dir, "mp3");
+		string[] paths = PathHelper.GetFilesFromDirectory(Dir, "mp3");
 
 		Init(paths);
 
@@ -122,19 +79,22 @@ public class AlbumToTracksInfo(string dir)
 			.AppendLine();
 
 		ScriptWriter sw = new();
+		Mp3ToSplitPathsInfo first = null;
 
 		for(int i = 0; i < Paths.Length; i++) {
 			string inputP = Paths[i];
 
 			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(inputP, LogFolderName);
 
-			SilenceDetLogsWritten.Add(info);
+			Infos.Add(info);
 
 			sw.Infos.Add(info);
+			if(first == null)
+				first = info;
 
 			AlbumLogsWriter awriter = new(info);
 
-			awriter.Init(silenceInSecondsMin, isFirstRun: i == 0);
+			awriter.Init(silenceInSecs, isFirstRun: i == 0);
 
 			string script = $"""
 echo --- i: {i,2} run silence detect on: '{info.FileName}' ---
@@ -170,13 +130,12 @@ sleep 2
 
 		Scripts = sb.ToString();
 
-		Mp3ToSplitPathsInfo fInfo = SilenceDetLogsWritten[0];
+		Mp3ToSplitPathsInfo fInfo = Infos.FirstOrDefault();
 
-		string dir = fInfo.Directory;
-		string scriptPth = dir + "run-ffmpeg-silence-det-script.sh";
+		string scriptPth = $"{fInfo.Directory}run-ffmpeg-silence-det-script-{silenceInSecs}s.sh";
 
 		if(RemoveRootDirFromScript) {
-			Scripts = Scripts.Replace(dir, "");
+			Scripts = Scripts.Replace(fInfo.Directory, "");
 		}
 
 		File.WriteAllText(scriptPth, Scripts);

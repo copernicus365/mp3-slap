@@ -7,13 +7,19 @@ public class TrackTimeStampsCsv
 {
 	public string Name { get; set; }
 
+	public string FileName { get; set; }
+
 	public int Count => Stamps?.Count ?? 0;
 
 	public double Pad { get; set; }
 
+	public string SrcDir { get; set; }
+
 	public string SrcPath { get; set; }
 
 	public string LogPath { get; set; }
+
+	public string CsvLogPath { get; set; }
 
 	public List<TrackTimeStamp> Stamps { get; set; }
 

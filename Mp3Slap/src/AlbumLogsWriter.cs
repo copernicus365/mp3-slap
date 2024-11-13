@@ -43,6 +43,36 @@ public class AlbumLogsWriter(Mp3ToSplitPathsInfo info)
 			File.WriteAllText(writePath, result);
 	}
 
+	public static FFSilenceTracksParser GetAndWriteCsvParsed(
+		TrackTimeStampsCsv csv,
+		//string logP, // info.SilenceDetectRawLogPath;
+		//string filePath, // info.FilePath
+		//string csvWritePath, // info.SilenceDetectCsvParsedLogPath;
+		bool write = true)
+	{
+		string logP = csv.LogPath;
+
+		if(!File.Exists(logP)) {
+			$"Log file doesn't exist: '{logP}'".Print();
+			return null;
+		}
+
+		string log = File.ReadAllText(logP);
+		if(log == null)
+			return null;
+
+		FFSilenceTracksParser split = new(log);
+
+		csv.Stamps = split.Run();
+
+		string result = csv.Write();
+
+		if(write)
+			File.WriteAllText(csv.CsvLogPath, result);
+
+		return split;
+	}
+
 	public string GetFFMpegDetectSilenceScript(
 		double silenceInSecondsMin)
 	{
