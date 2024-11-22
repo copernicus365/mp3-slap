@@ -24,18 +24,21 @@ public static class PathHelper
 
 	public static string[] GetFilesFromDirectory(
 		string dir,
-		string extensionType = "mp3",
+		string searchPattern,
 		bool includeSubDirectories = false)
 	{
-		extensionType = extensionType.NullIfEmptyTrimmed();
-		ArgumentException.ThrowIfNullOrEmpty(extensionType);
+		searchPattern = searchPattern.NullIfEmptyTrimmed();
+		ArgumentException.ThrowIfNullOrEmpty(searchPattern);
 
 		dir = CleanDirPath(dir);
 
 		if(!Directory.Exists(dir))
 			throw new DirectoryNotFoundException(dir);
 
-		string[] files = Directory.GetFiles(dir, "*." + extensionType, includeSubDirectories
+		string[] files = Directory.GetFiles(
+			path: dir,
+			searchPattern: searchPattern,
+			searchOption: includeSubDirectories
 			? SearchOption.AllDirectories
 			: SearchOption.TopDirectoryOnly);
 

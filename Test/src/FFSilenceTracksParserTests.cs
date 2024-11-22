@@ -1,3 +1,5 @@
+using Mp3Slap.SilenceDetect;
+
 namespace Test;
 
 public class FFSilenceTracksParserTests : BaseTest

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Mp3Slap;
+namespace Mp3Slap.SilenceDetect;
 
 /// <summary>
 /// AFTER MANY FAILUIRES getting Python script ran by an array to work, I GAVE UP
@@ -8,23 +8,31 @@ namespace Mp3Slap;
 /// line calls. ALSO gave up, SADLY!, running a process, just can't get it to work!
 /// So generating a script, copy it and run it...
 /// </summary>
-public class AlbumToTracksInfo(string dir)
+public class AlbumToTracksInfo
 {
-	public string Dir { get; private set; } = PathHelper.CleanDirPath(dir);
+	readonly SilenceDetectWriteFFMpegScriptArgs args;
+	readonly double _silenceDuration;
+
+	public string Dir => args.Directory;
+	public bool RemoveRootDirFromScript => args.WriteRelativePaths;
+	public bool VerboseScript => args.Verbose;
+
+	public string LogFolderName { get; private set; }
+
+
+	public AlbumToTracksInfo(SilenceDetectWriteFFMpegScriptArgs args, double silenceDuration)
+	{
+		this.args = args;
+		_silenceDuration = silenceDuration;
+		LogFolderName = args.GetLogFolderName(_silenceDuration, fullPath: false);
+	}
 
 	public bool WriteCsvs { get; set; }
-
-	public string LogDir => $"{Dir}{LogFolderName}/";
 
 	public string[] Paths { get; private set; }
 
 	public string[] RelPaths { get; private set; }
 
-	public string LogFolderName { get; set; } = LogFolderNameDef;
-
-	public bool RemoveRootDirFromScript { get; set; }
-
-	public static string LogFolderNameDef { get; set; } = "logs";
 
 	public void Init(string[] files)
 	{
@@ -57,17 +65,23 @@ public class AlbumToTracksInfo(string dir)
 
 	public string Scripts { get; private set; }
 
-	public bool VerboseScript { get; set; }
-
 	public string ScriptsP { get; private set; }
 
 	public List<Mp3ToSplitPathsInfo> Infos;
 
-	public async Task RUN(double silenceInSecs, bool runProcess = true)
+	public async Task RUN()
 	{
 		Infos = [];
 
-		string[] paths = PathHelper.GetFilesFromDirectory(Dir, "mp3");
+		string[] paths = PathHelper.GetFilesFromDirectory(
+			Dir,
+			searchPattern: args.AudioFilesSearchPattern,
+			includeSubDirectories: args.IncludeSubDirectories);
+
+		if(paths.IsNulle()) {
+			$"No files found".Print();
+			return;
+		}
 
 		Init(paths);
 
@@ -94,7 +108,7 @@ public class AlbumToTracksInfo(string dir)
 
 			AlbumLogsWriter awriter = new(info);
 
-			awriter.Init(silenceInSecs, isFirstRun: i == 0);
+			awriter.Init(_silenceDuration, isFirstRun: i == 0);
 
 			string script = $"""
 echo --- i: {i,2} run silence detect on: '{info.FileName}' ---
@@ -119,11 +133,12 @@ sleep 2
 			}
 
 			if(WriteCsvs) {
+				$"".Print();
 				awriter.GetAndWriteCsvParsed();
 			}
-			else if(runProcess) {
-				await ProcessHelper.Run("git", script);
-			}
+			//else if(runProcess) {
+			//	await ProcessHelper.Run("git", script);
+			//}
 		}
 
 		ScriptsP = sw.Write();
@@ -132,7 +147,7 @@ sleep 2
 
 		Mp3ToSplitPathsInfo fInfo = Infos.FirstOrDefault();
 
-		string scriptPth = $"{fInfo.Directory}run-ffmpeg-silence-det-script-{silenceInSecs}s.sh";
+		string scriptPth = $"{fInfo.Directory}run-ffmpeg-silence-det-script-{_silenceDuration}s.sh";
 
 		if(RemoveRootDirFromScript) {
 			Scripts = Scripts.Replace(fInfo.Directory, "");
@@ -184,49 +199,3 @@ for i in arr:
 		return Script = script + "\n" + loop1;
 	}
 }
-
-//public static (string dir, string fname, string value, string logDir) GetSilenceLogPathInfo(
-//	string path, bool parsedTxt, string logDirName)
-//{
-//	path = CleanPath(path);
-//	string fname = Path.GetFileName(path).NullIfEmptyTrimmed();
-//	if(fname == null) return default;
-//	string dir = CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
-//	string logDir = $"{dir}{logDirName}/";
-//	// IF not null, above ensures dir trails with '/'
-//	string logPath = GetLogPath(logDir, fname, parsedTxt);
-//	return (dir, fname, logPath, logDir);
-//}
-
-//(string dir, string fname, string value, string logDir)
-
-//public string GetLogPath(string fileName, bool parsedTxt)
-//	=> GetLogPath(LogDir, fileName, parsedTxt);
-
-//public static string GetSilenceLogPath(string path, bool parsedTxt, string logFolderName = null)
-//	=> GetSilenceLogPathInfo(path, parsedTxt, logFolderName ?? LogFolderNameDef).value;
-
-//public string GetSilenceDetectionCallsToFFMpeg(
-//	double silenceInSecondsMin,
-//	string inputPath,
-//	bool includeFFMpeg = true)
-//{
-//	string silStr = silenceInSecondsMin.ToString("0.##");
-
-//	var logPathInfo = GetSilenceLogPathInfo(inputPath, parsedTxt: false, LogFolderName);
-//	string logPath = logPathInfo.value;
-//	string logDir = logPathInfo.logDir;
-
-//	string val = $"""-nostats -i '{inputPath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{logPath}' """;
-//	if(includeFFMpeg)
-//		val = "ffmpeg " + val;
-//	return val;
-//}
-
-//string script = GetSilenceDetectionCallsToFFMpeg(silenceInSecondsMin, inputP, includeFFMpeg: false);
-//string logPath = logPathInfo.value;
-//SilenceDetLogsWritten.Add(
-//	(Paths[i],
-//	GetLogPath(logPathInfo.fname, parsedTxt: false),
-//	GetLogPath(logPathInfo.fname, parsedTxt: true)));
-//var logPathInfo = GetSilenceLogPathInfo(inputP, parsedTxt: true, LogFolderName);

@@ -1,4 +1,4 @@
-namespace Mp3Slap;
+namespace Mp3Slap.SilenceDetect;
 
 public partial class LogFileNames
 {

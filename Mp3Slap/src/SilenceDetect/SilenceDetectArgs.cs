@@ -1,7 +1,6 @@
 namespace Mp3Slap.SilenceDetect;
 
-// silencedetect-write-ffmpeg-script
-// ffsilence
+// silencedetect-write-ffmpeg-script, ffsilence
 public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgsBase
 {
 	/// <summary>
@@ -9,11 +8,14 @@ public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgsBase
 	/// </summary>
 	public bool WriteRelativePaths { get; set; }
 
-	public string AudioFilesSearch { get; set; } = "*.mp3";
+	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
+
+	public bool IncludeSubDirectories { get; set; } = false;
+
+	public const string AudioFilesSearchPatternDef = "*.mp3";
 }
 
-// convert-ffmpeg-silence-logs-to-csv
-// tocsv
+// convert-ffmpeg-silence-logs-to-csv, tocsv
 public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgsBase
 {
 
@@ -27,13 +29,14 @@ public class SilenceDetectArgsBase
 
 	public string LogFolderFullPath { get; set; }
 
-	public const string DefaultLogFolder = $"logs-{DurationFolderID}s";
+	public const string DefaultLogFolder = $"logs-{DurationFolderID}";
 
 	public const string DurationFolderID = "{duration}";
 
-	public double[] SilenceDurations { get; set; }
+	public double[] SilenceDurations { get => silenceDurations; set => silenceDurations = value; }
+	double[] silenceDurations;
 
-	public bool? Verbose { get; set; }
+	public bool Verbose { get; set; }
 
 	public SResult INIT()
 	{
@@ -54,11 +57,17 @@ public class SilenceDetectArgsBase
 			? LogFolder
 			: PathHelper.CleanDirPath(Path.GetFullPath(Path.Combine(Directory, LogFolder)));
 
-		// validate durations:
+		var r = validateDurs(ref silenceDurations);
+		if(!r.Success)
+			return r;
 
-		var durs = SilenceDurations;
+		return new(true);
+	}
+
+	SResult validateDurs(ref double[] durs)
+	{
 		if(durs.IsNulle())
-			return new(false, "No durations set");
+			return new(false, "No duration(s) set");
 
 		if(durs.Any(d => d <= 0))
 			return new(false, "Invalid durations");

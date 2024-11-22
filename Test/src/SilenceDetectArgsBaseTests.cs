@@ -83,6 +83,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 		SilenceDetectArgsBase d1 = new() {
 			Directory = "C:\\Temp\\test1\\..\\",
 			LogFolder = "hi1\\logs1-{duration}s",
+			SilenceDurations = [2]
 		};
 
 		SResult res = d1.INIT();
