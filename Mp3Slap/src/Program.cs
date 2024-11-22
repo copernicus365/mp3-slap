@@ -97,7 +97,7 @@ public class Runner
 				case RunnerType.WriteFFMpegSilenceScript: { //silence
 					AlbumToTracksInfo ati = new(stg.Directory) {
 						LogFolderName = logsNm,
-						RemoveRootDirFromScript = false, 
+						RemoveRootDirFromScript = false,
 					};
 
 					await ati.RUN(silenceInSecs: silenceLen, runProcess: false);
