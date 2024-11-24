@@ -8,11 +8,11 @@ namespace Mp3Slap.SilenceDetect;
 /// line calls. ALSO gave up, SADLY!, running a process, just can't get it to work!
 /// So generating a script, copy it and run it...
 /// </summary>
-public class AlbumToTracksInfo
+public class WriteFFMpegSilenceDetectScript
 {
 	readonly SilenceDetectWriteFFMpegScriptArgs args;
 	readonly double _silenceDuration;
-
+	
 	public string Dir => args.Directory;
 	public bool RemoveRootDirFromScript => args.WriteRelativePaths;
 	public bool VerboseScript => args.Verbose;
@@ -20,7 +20,7 @@ public class AlbumToTracksInfo
 	public string LogFolderName { get; private set; }
 
 
-	public AlbumToTracksInfo(SilenceDetectWriteFFMpegScriptArgs args, double silenceDuration)
+	public WriteFFMpegSilenceDetectScript(SilenceDetectWriteFFMpegScriptArgs args, double silenceDuration)
 	{
 		this.args = args;
 		_silenceDuration = silenceDuration;

@@ -23,7 +23,7 @@ public class RunSilenceDetect
 
 					var sdargs = args as SilenceDetectWriteFFMpegScriptArgs;
 
-					AlbumToTracksInfo ati = new(sdargs, silenceDur);
+					WriteFFMpegSilenceDetectScript ati = new(sdargs, silenceDur);
 
 					await ati.RUN();
 
