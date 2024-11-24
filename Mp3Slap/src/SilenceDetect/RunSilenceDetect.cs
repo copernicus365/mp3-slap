@@ -1,5 +1,3 @@
-using static System.Console;
-
 namespace Mp3Slap.SilenceDetect;
 
 public enum RunnerType
@@ -11,7 +9,7 @@ public enum RunnerType
 
 public class RunSilenceDetect
 {
-	public async Task RUN(RunnerType type, SilenceDetectArgsBase args)
+	public async Task RUN(RunnerType type, SilenceDetectArgs args)
 	{
 		double[] durations = args.SilenceDurations;
 
@@ -33,13 +31,10 @@ public class RunSilenceDetect
 				}
 				case RunnerType.ConvertFFMpegSilenceLogsToCSVs: {
 
-					var fargs = args as ConvertFFMpegSilenceLogsToCSVArgs;
+					string logsDir = args.GetLogFolderName(silenceDur, fullPath: true);
 
-					string logsNm = args.GetLogFolderName(silenceDur, fullPath: false);
-
-					// write csvs from raw results
-					RunParserOnLogsFolder ff = new();
-					ff.RUN(logsDir: args.Directory + '/' + logsNm);
+					FFMpegSilenceLogToCSVConverter.ConvertFFMpegSilenceLogsToCSVs(
+						logsDir: logsDir, srcDir: null, pad: silenceDur);
 
 					break;
 				}

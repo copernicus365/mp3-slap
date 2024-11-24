@@ -1,6 +1,10 @@
 namespace Mp3Slap.SilenceDetect;
 
-public class AlbumLogsWriter(Mp3ToSplitPathsInfo info)
+/// <summary>
+/// Was named till recently `AlbumLogsWriter` .. ?
+/// </summary>
+/// <param name="info"></param>
+public class FFMpegSilenceLogToCSVConverter(Mp3ToSplitPathsInfo info)
 {
 	public void Init(double silenceInSecondsMin, bool isFirstRun = true)
 	{
@@ -43,7 +47,13 @@ public class AlbumLogsWriter(Mp3ToSplitPathsInfo info)
 			File.WriteAllText(writePath, result);
 	}
 
-	public static FFSilenceTracksParser GetAndWriteCsvParsed(
+	public string GetFFMpegDetectSilenceScript(double silenceInSecondsMin)
+	{
+		string silStr = silenceInSecondsMin.ToString("0.##");
+		return info.FFMpegScriptArgs = $"""-nostats -i '{info.FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{info.SilenceDetectRawLogPath}' """;
+	}
+
+	public static FFSilenceTracksParser ConvertFFMpegSilenceLogToCSV(
 		TrackTimeStampsCsv csv,
 		//string logP, // info.SilenceDetectRawLogPath;
 		//string filePath, // info.FilePath
@@ -73,11 +83,26 @@ public class AlbumLogsWriter(Mp3ToSplitPathsInfo info)
 		return split;
 	}
 
-	public string GetFFMpegDetectSilenceScript(
-		double silenceInSecondsMin)
+	public static void ConvertFFMpegSilenceLogsToCSVs(string logsDir, string srcDir = null, double pad = 3)
 	{
-		string silStr = silenceInSecondsMin.ToString("0.##");
-		return info.FFMpegScriptArgs = $"""-nostats -i '{info.FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{info.SilenceDetectRawLogPath}' """;
+		string[] logsPaths = PathHelper.GetFilesFromDirectory(logsDir, "*.log", includeSubDirectories: false);
+
+		TrackTimeStampsCsv first = null;
+
+		for(int i = 0; i < logsPaths.Length; i++) {
+			string path = logsPaths[i];
+
+			TrackTimeStampsCsv tcsv = LogFileNames.GetPathsEtc(path, pad, srcDir);
+			if(tcsv == null)
+				continue;
+
+			if(first == null) {
+				first = tcsv;
+				srcDir = first.SrcDir;
+			}
+
+			FFSilenceTracksParser ffP = ConvertFFMpegSilenceLogToCSV(tcsv);
+		}
 	}
 
 }

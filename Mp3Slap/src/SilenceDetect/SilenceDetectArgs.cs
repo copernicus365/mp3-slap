@@ -1,7 +1,7 @@
 namespace Mp3Slap.SilenceDetect;
 
 // silencedetect-write-ffmpeg-script, ffsilence
-public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgsBase
+public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
 {
 	/// <summary>
 	/// Scripts to run ffmpeg, make them have relative paths
@@ -16,12 +16,12 @@ public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgsBase
 }
 
 // convert-ffmpeg-silence-logs-to-csv, tocsv
-public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgsBase
+public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
 {
 
 }
 
-public class SilenceDetectArgsBase
+public class SilenceDetectArgs
 {
 	public string Directory { get; set; }
 

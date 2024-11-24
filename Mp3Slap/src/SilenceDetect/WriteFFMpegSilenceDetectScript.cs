@@ -106,7 +106,7 @@ public class WriteFFMpegSilenceDetectScript
 			if(first == null)
 				first = info;
 
-			AlbumLogsWriter awriter = new(info);
+			FFMpegSilenceLogToCSVConverter awriter = new(info);
 
 			awriter.Init(_silenceDuration, isFirstRun: i == 0);
 

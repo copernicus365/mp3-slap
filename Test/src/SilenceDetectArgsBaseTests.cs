@@ -7,7 +7,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void Standard_NotRootedLogFolder()
 	{
-		SilenceDetectArgsBase d1 = new() {
+		SilenceDetectArgs d1 = new() {
 			Directory = "C:\\Temp\\test1",
 			LogFolder = "logs1-{duration}s",
 		};
@@ -27,7 +27,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void ResolveLogPathRelativeNav()
 	{
-		SilenceDetectArgsBase d1 = new() {
+		SilenceDetectArgs d1 = new() {
 			Directory = "C:\\Temp\\test1",
 			LogFolder = "..\\logs1-{duration}s",
 		};
@@ -47,7 +47,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void RootedLogFolder1()
 	{
-		SilenceDetectArgsBase d1 = new() {
+		SilenceDetectArgs d1 = new() {
 			Directory = "C:\\Temp\\test1",
 			LogFolder = "\\hi1\\logs1-{duration}s",
 		};
@@ -67,7 +67,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void Error_DirectoryNotAbsolute()
 	{
-		SilenceDetectArgsBase d1 = new() {
+		SilenceDetectArgs d1 = new() {
 			Directory = "Temp\\test1",
 			LogFolder = "\\hi1\\logs1-{duration}s",
 		};
@@ -80,7 +80,7 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void FixDirectoryNav()
 	{
-		SilenceDetectArgsBase d1 = new() {
+		SilenceDetectArgs d1 = new() {
 			Directory = "C:\\Temp\\test1\\..\\",
 			LogFolder = "hi1\\logs1-{duration}s",
 			SilenceDurations = [2]
