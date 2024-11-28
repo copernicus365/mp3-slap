@@ -5,49 +5,51 @@ using CommandLine.EasyBuilder.Auto;
 
 using Mp3Slap.SilenceDetect;
 
-namespace Mp3Slap.Console;
+namespace Mp3Slap.Console.SilenceDetect;
 
-public class BuildCommandLineApp
-{
-	public static RootCommand BuildApp()
-	{
-		RootCommand rootCmd = new("mp3 SLAP! Helper lib to ffmpeg and etc");
-
-		rootCmd.AddAutoCommand<SilenceDetectWriteFFMpegArgs1>();
-
-		return rootCmd;
-	}
-}
-
-[Command(
-	"write-ffsilence-script",
-	description: "Writes a series of ffmpeg silencedetect scripts, one per detected input audio file, and a single script that can be called to run them all. These will generate ffmpeg's arcane and difficult logs, but other commands here can be used to process those.",
-	Alias = "silenceff")]
-public class SilenceDetectWriteFFMpegArgs1
+public class SilenceDetectShared
 {
 	[Option(
 		"--logs-folder-name",
 		"-logname",
 		description: "Name of the folder in which the scripts will be written to. If seeking more silence durations than one, typically you'll want this to have {duration} within it",
-		DefVal = SilenceDetectArgs.DefaultLogFolder)]
+		DefVal = SilenceDetectArgs.DefaultLogFolder,
+		Required = true)]
 	public string LogFolderName { get; set; }
-
-	[Option(
-		"--current-directory",
-		"-d",
-		"Sets active current directory")]
-	public string CurrentDirectory { get; set; }
 
 	[Option(
 		"--silence-durations",
 		"-dur",
-		"Minimum duration of silence to detect, in seconds, comma separated")]
+		"Minimum duration of silence to detect, in seconds, comma separated",
+		Required = true)]
 	public string DurationsStr {
 		get => Durations?.JoinToString(",");
 		set => Durations = ArgParsers.DoubleArray(value, out string err);
 	}
 
 	public double[] Durations { get; set; }
+
+	[Option(
+		"--verbose",
+		"-v",
+		description: "Verbose or not.",
+		DefVal = true)]
+	public bool Verbose { get; set; }
+}
+
+[Command(
+	"write-ffsilence-script",
+	description: "Writes a series of ffmpeg silencedetect scripts, one per detected input audio file, and a single script that can be called to run them all. These will generate ffmpeg's arcane and difficult logs, but other commands here can be used to process those.",
+	Alias = "silenceff")]
+public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
+{
+	[Option(
+		"--last-name",
+		"-ln",
+		description: "Bogus last name",
+		DefVal = "Trump",
+		Required = true)]
+	public string LastName { get; set; }
 
 	[Option(
 		"--write-relative-paths",
@@ -70,21 +72,14 @@ public class SilenceDetectWriteFFMpegArgs1
 		DefVal = false)]
 	public bool IncludeSubDirectories { get; set; }
 
-	[Option(
-		"--verbose",
-		description: "Verbose or not.",
-		DefVal = true)]
-	public bool Verbose { get; set; }
-
 	public async Task HandleAsync()
 	{
 		await Task.Delay(2100);
 
-		if(CurrentDirectory.IsNulle())
-			CurrentDirectory = ConsoleRun.CurrentDirectory;
+		string currDir = ConsoleRun.CurrentDirectory;
 
 		SilenceDetectWriteFFMpegScriptArgs args = new() {
-			Directory = CurrentDirectory,
+			Directory = currDir,
 			SilenceDurations = Durations,
 			LogFolder = LogFolderName,
 			WriteRelativePaths = WriteRelativePaths,
