@@ -3,6 +3,7 @@ using System.CommandLine.Parsing;
 
 using CommandLine.EasyBuilder;
 
+using Mp3Slap.Console;
 using Mp3Slap.SilenceDetect;
 
 using static System.Console;
@@ -11,22 +12,23 @@ namespace Mp3Slap;
 
 public class ConsoleRun
 {
-	public static string CurrentDirectory = null;
+	public static string CurrentDirectory;
+
+	public static bool IsDebug = true; // Environment.GetEnvironmentVariable("DEBUG") == "true";
 
 	public static async Task<int> Main(string[] args)
 	{
-		CurrentDirectory = Environment.CurrentDirectory;
+		SetCurrDir(IsDebug && args.IsNulle()
+			? "C:/Dropbox/Music/Bible/Suchet-NIV-1Album" //"C:/Dropbox/Vids/mp3-split/mp3-split/test1"
+			: Environment.CurrentDirectory, print: true);
 
-		bool doDiffDir = true;
-		if(doDiffDir)
-			CurrentDirectory = "C:/Dropbox/Music/Bible/Suchet-NIV-1Album";
-		// CurrentDirectory = "C:/Dropbox/Vids/mp3-split/mp3-split/test1"
+		RootCommand rootCommand =
+			BuildCommandLineApp.BuildApp(); // BuildConsoleLineApp();
 
-		CurrentDirectory = PathHelper.CleanDirPath(CurrentDirectory);
-
-		RootCommand rootCommand = BuildConsoleLineApp();
-
-		rootCommand.Invoke("-h");
+		if(args.NotNulle())
+			rootCommand.Invoke(args);
+		else
+			rootCommand.Invoke("-h");
 
 		while(true) {
 			Write("Input: ");
@@ -36,6 +38,13 @@ public class ConsoleRun
 				? await rootCommand.InvokeAsync(args)
 				: await rootCommand.InvokeAsync(arg);
 		}
+	}
+
+	static void SetCurrDir(string dir, bool print = true)
+	{
+		CurrentDirectory = PathHelper.CleanDirPath(dir);
+		if(print)
+			WriteLine($"Current directory: {CurrentDirectory}");
 	}
 
 	static RootCommand BuildConsoleLineApp()
@@ -50,11 +59,17 @@ public class ConsoleRun
 			.DefaultValue(SilenceDetectArgs.DefaultLogFolder)
 			.Alias("-logname");
 
+		Option<DirectoryInfo> currentDirOpt = new Option<DirectoryInfo>(
+			name: "--current-directory",
+			description: "Sets active current directory")
+			.Alias("-d");
+		rootCmd.AddGlobalOption(currentDirOpt);
+
 		Option<double[]> silenceDurOpt = new Option<double[]>(
 			name: "--silence-durations",
 			parseArgument: ArgParsers.DoubleArray,
 			description: "Minimum duration of silence to detect, in seconds, comma separated.")
-			.Alias("-d");
+			.Alias("-dur");
 
 		Command silenceDetWriteFFMpeg = new Command(
 			name: "write-ffsilence-script",
@@ -149,4 +164,6 @@ public class ConsoleRun
 
 		return rootCmd;
 	}
+
+
 }
