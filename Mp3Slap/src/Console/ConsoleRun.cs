@@ -49,9 +49,13 @@ public class ConsoleRun
 	{
 		RootCommand rootCmd = new("mp3 SLAP! Helper lib to ffmpeg and etc");
 
-		rootCmd.AddAutoCommand<SetDirectoryCmd>();
+		Command setDirCmd = rootCmd.AddAutoCommand<SetDirectoryCmd>();
+
+		setDirCmd.AddAutoCommand<PrintCurrDirectoryCmd>();
 
 		rootCmd.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
+
+		rootCmd.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
 
 		return rootCmd;
 	}

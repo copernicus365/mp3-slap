@@ -12,15 +12,23 @@ namespace Mp3Slap.Console.SilenceDetect;
 	Alias = "ff-to-csv")]
 public class ConvertFFLogsToCSVsCmd : SilenceDetectShared
 {
+	[Option("--pad", description: "Amount to pad beginning of audio with", DefVal = 0.3)]
+	public double Pad { get; set; }
+
 	public async Task HandleAsync()
 	{
+		if(_parseDurationsError != null || Durations.IsNulle()) {
+			$"Durations invalid: {_parseDurationsError}".Print();
+			return;
+		}
 		string currDir = ConsoleRun.CurrentDirectory;
 
-		SilenceDetectArgs args = new() {
+		ConvertFFMpegSilenceLogsToCSVArgs args = new() {
 			Directory = currDir,
 			SilenceDurations = Durations,
 			LogFolder = LogFolderName,
 			Verbose = Verbose,
+			Pad = Pad,
 		};
 
 		SResult initRes = args.INIT();

@@ -3,7 +3,7 @@ using CommandLine.EasyBuilder.Auto;
 namespace Mp3Slap.Console;
 
 [Command(
-	"set-current-directory",
+	"current-directory",
 	Alias = "curr-dir",
 	Description = "Sets the current environment directory for the app globally")]
 public class SetDirectoryCmd
@@ -39,10 +39,13 @@ new: {ConsoleRun.CurrentDirectory}".Print();
 	}
 }
 
-/*
-rootCmd.AddGlobalOption(
-	new Option<DirectoryInfo>(
-		name: "--current-directory",
-		description: "Sets active current directory")
-		.Alias("-d"));
-*/
+[Command("print", description: "Prints current directory")]
+public class PrintCurrDirectoryCmd
+{
+	public void Handle()
+	{
+		$@"Current root directory:
+app: {ConsoleRun.CurrentDirectory}
+env: {Environment.CurrentDirectory}".Print();
+	}
+}

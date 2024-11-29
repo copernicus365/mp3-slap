@@ -24,8 +24,10 @@ public class SilenceDetectShared
 		Required = true)]
 	public string DurationsStr {
 		get => Durations?.JoinToString(",");
-		set => Durations = ArgParsers.DoubleArray(value, out string err);
+		set => Durations = ArgParsers.DoubleArray(value, out _parseDurationsError);
 	}
+
+	protected string _parseDurationsError;
 
 	public double[] Durations { get; set; }
 

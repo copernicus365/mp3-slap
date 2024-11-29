@@ -20,25 +20,25 @@ public partial class FFSilenceTracksParser(string text)
 		int idx = -1;
 
 		Stamps = rx.Matches(cText)
-		.Select(m => {
-			if(m.Groups.Count < 4)
-				return null;
+			.Select(m => {
+				if(m.Groups.Count < 4)
+					return null;
 
-			double start = m.Groups[1].Value.ToDoubleN() ?? -1;
-			double end = m.Groups[2].Value.ToDoubleN() ?? -1;
-			double sildur = m.Groups[3].Value.ToDoubleN() ?? -1;
+				double start = m.Groups[1].Value.ToDoubleN() ?? -1;
+				double end = m.Groups[2].Value.ToDoubleN() ?? -1;
+				double sildur = m.Groups[3].Value.ToDoubleN() ?? -1;
 
-			if(start < 0 || end <= start || sildur <= 0)
-				return null;
+				if(start < 0 || end <= start || sildur <= 0)
+					return null;
 
-			// difficult because reports at first silence
-			// [silencedetect @ 0x600000754240] silence_start: 344.017
-			TrackTimeStamp stamp = new(lastEnd, start, sildur);
-			lastEnd = end;
-			return stamp;
-		})
-		.Where(v => v != null && v.Duration > TimeSpan.Zero)
-		.ToList();
+				// difficult because reports at first silence
+				// [silencedetect @ 0x600000754240] silence_start: 344.017
+				TrackTimeStamp stamp = new(lastEnd, start, sildur);
+				lastEnd = end;
+				return stamp;
+			})
+			.Where(v => v != null && v.Duration > TimeSpan.Zero)
+			.ToList();
 
 		double bogusDur = 0.001;
 		Stamps.Add(new TrackTimeStamp(lastEnd, lastEnd + bogusDur, bogusDur));

@@ -12,4 +12,11 @@ public class Mp3ToSplitPathsInfo
 	public string FFMpegScriptArgs { get; set; }
 
 	public string FFMpegScript => FFMpegScriptArgs == null ? null : "ffmpeg " + FFMpegScriptArgs;
+
+	public string SetFFMpegDetectSilenceScript(double silenceInSecondsMin)
+	{
+		string silStr = silenceInSecondsMin.ToString("0.##");
+		return FFMpegScriptArgs = $"""-nostats -i '{FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{SilenceDetectRawLogPath}' """;
+	}
+
 }

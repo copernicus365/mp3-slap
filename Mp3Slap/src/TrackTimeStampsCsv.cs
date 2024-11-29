@@ -42,7 +42,7 @@ public class TrackTimeStampsCsv
 
 		for(int i = 0; i < Stamps.Count; i++) {
 			TrackTimeStamp st = Stamps[i];
-			string res = st.ToCsvString(pad: Pad);
+			string res = st.ToCsvString2(); // pad: Pad);
 			sb.AppendLine(res);
 		}
 		sb.AppendLine();

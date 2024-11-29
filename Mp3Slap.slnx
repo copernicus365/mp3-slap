@@ -3,6 +3,7 @@
     <File Path=".gitignore" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="../CommandLine.EasyBuilder/CommandLine.EasyBuilder/CommandLine.EasyBuilder.csproj" Id="44df2bf7-f2a6-47e9-9ec4-7543f2a58767" />
   <Project Path="Mp3Slap/Mp3Slap.csproj" />
   <Project Path="Test/Test.csproj" />
 </Solution>

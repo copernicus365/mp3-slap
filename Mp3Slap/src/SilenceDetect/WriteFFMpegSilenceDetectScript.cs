@@ -12,7 +12,7 @@ public class WriteFFMpegSilenceDetectScript
 {
 	readonly SilenceDetectWriteFFMpegScriptArgs args;
 	readonly double _silenceDuration;
-	
+
 	public string Dir => args.Directory;
 	public bool RemoveRootDirFromScript => args.WriteRelativePaths;
 	public bool VerboseScript => args.Verbose;
@@ -41,14 +41,14 @@ public class WriteFFMpegSilenceDetectScript
 	}
 
 
-	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName)
+	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName, double silenceDur)
 	{
 		path = PathHelper.CleanPath(path);
 		string fname = Path.GetFileName(path).NullIfEmptyTrimmed();
 		if(fname == null) return default;
 
 		string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
-		string logDir = $"{dir}{logDirName}/";
+		string logDir = $"{dir}{logDirName}";
 
 		Mp3ToSplitPathsInfo info = new() {
 			Directory = dir,
@@ -58,6 +58,8 @@ public class WriteFFMpegSilenceDetectScript
 			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
 			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true)
 		};
+		info.SetFFMpegDetectSilenceScript(silenceDur);
+
 		// IF not null, above ensures dir trails with '/'
 		return info;
 	}
@@ -98,22 +100,25 @@ public class WriteFFMpegSilenceDetectScript
 		for(int i = 0; i < Paths.Length; i++) {
 			string inputP = Paths[i];
 
-			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(inputP, LogFolderName);
-
+			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(inputP, LogFolderName, _silenceDuration);
 			Infos.Add(info);
+
+			if(i == 0 && !Directory.Exists(info.LogDirectory))
+				Directory.CreateDirectory(info.LogDirectory);
 
 			sw.Infos.Add(info);
 			if(first == null)
 				first = info;
 
-			FFMpegSilenceLogToCSVConverter awriter = new(info);
+			//FFMpegSilenceLogToCSVConverter awriter = new(info);
 
-			awriter.Init(_silenceDuration, isFirstRun: i == 0);
+			//awriter.Init(_silenceDuration, isFirstRun: i == 0);
+
 
 			string script = $"""
-echo --- i: {i,2} run silence detect on: '{info.FileName}' ---
+echo "--- i: {i,2} run silence detect on: '{info.FileName}' ---"
 
-echo log: '{info.SilenceDetectCsvParsedLogPath}
+echo "log: '{info.SilenceDetectCsvParsedLogPath}"
 
 sleep 2
 
@@ -132,10 +137,10 @@ sleep 2
 					.AppendLine();
 			}
 
-			if(WriteCsvs) {
-				$"".Print();
-				awriter.GetAndWriteCsvParsed();
-			}
+			//if(WriteCsvs) {
+			//	$"".Print();
+			//	awriter.GetAndWriteCsvParsed();
+			//}
 			//else if(runProcess) {
 			//	await ProcessHelper.Run("git", script);
 			//}

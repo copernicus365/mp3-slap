@@ -32,7 +32,7 @@ public partial class LogFileNames
 	}
 
 
-	public static TrackTimeStampsCsv GetPathsEtc(string rawLogPath, double pad, string srcDir = null)
+	public static TrackTimeStampsCsv GetPathsEtc(string rawLogPath, string srcDir = null)
 	{
 		rawLogPath = PathHelper.CleanPath(rawLogPath);
 
@@ -54,7 +54,6 @@ public partial class LogFileNames
 			SrcPath = srcDir + fileName,
 			LogPath = rawLogPath,
 			CsvLogPath = GetLogPath(dir, fileName, parsedTxt: true),
-			Pad = pad, // > 0 ? pad : 3,
 		};
 		return csv;
 	}

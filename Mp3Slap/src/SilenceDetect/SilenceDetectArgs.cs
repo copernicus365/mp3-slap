@@ -18,7 +18,7 @@ public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
 // convert-ffmpeg-silence-logs-to-csv, tocsv
 public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
 {
-
+	public double Pad { get; set; }
 }
 
 public class SilenceDetectArgs
