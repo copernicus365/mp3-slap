@@ -13,7 +13,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 		TrackTimeStampsCsv csv = new();
 		csv.Parse(csvText);
 
-		int expCount = 10;
+		int expCount = 11;
 
 		True(csv.Count == expCount);
 		csv.CombineCuts();

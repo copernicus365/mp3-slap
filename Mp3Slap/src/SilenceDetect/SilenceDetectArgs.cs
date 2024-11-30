@@ -21,6 +21,17 @@ public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
 	public double Pad { get; set; }
 }
 
+public class WriteSplitScriptArgs
+{
+	public string RemovePrefix { get; set; } // "NIV-Suchet-01-
+
+	public string SrcFile { get; set; } //src="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/NIV-Suchet-01-Genesis.mp3"
+
+	public string CSVStamps { get; set; } //log="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/logs-3.5/log#NIV-Suchet-01-Genesis.mp3#silencedetect.log"
+
+	public string ExtrDir { get; set; } // test
+}
+
 public class SilenceDetectArgs
 {
 	public string Directory { get; set; }

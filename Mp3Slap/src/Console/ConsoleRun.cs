@@ -57,12 +57,14 @@ public class ConsoleRun
 
 		rootCmd.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
 
+		rootCmd.AddAutoCommand<WriteSplitScriptCmd>();
+
 		return rootCmd;
 	}
 
 	public static void SetCurrDir(string dir, bool print = true)
 	{
-		CurrentDirectory = PathHelper.CleanDirPath(dir);
+		Environment.CurrentDirectory = CurrentDirectory = PathHelper.CleanDirPath(dir);
 		if(print)
 			WriteLine($"Current directory: {CurrentDirectory}");
 	}

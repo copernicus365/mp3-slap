@@ -96,11 +96,13 @@ public class FFMpegSilenceLogToCSVConverter
 		return split;
 	}
 
-	public static void ConvertFFMpegSilenceLogsToCSVs(string logsDir, double pad, string srcDir = null)
+	public static List<FFSilenceTracksParser> ConvertFFMpegSilenceLogsToCSVs(string logsDir, double pad, string srcDir = null)
 	{
 		string[] logsPaths = PathHelper.GetFilesFromDirectory(logsDir, "*.log", includeSubDirectories: false);
 
 		TrackTimeStampsCsv first = null;
+
+		List<FFSilenceTracksParser> parsed = [];
 
 		for(int i = 0; i < logsPaths.Length; i++) {
 			string path = logsPaths[i];
@@ -115,7 +117,9 @@ public class FFMpegSilenceLogToCSVConverter
 			}
 
 			FFSilenceTracksParser ffP = ConvertFFMpegSilenceLogToCSV(tcsv, pad);
+		
+			parsed.Add(ffP);
 		}
+		return parsed;
 	}
-
 }

@@ -20,8 +20,7 @@ public class TrackTimeStamp
 
 		SilenceDuration = TimeSpan.FromSeconds(silenceDuration);
 
-		if(paddedDuration > 0)
-			SetPads(TimeSpan.FromSeconds(paddedDuration));
+		SetPads(TimeSpan.FromSeconds(paddedDuration));
 	}
 
 	public TrackTimeStamp(double start, double end, double? silenceDuration = null, double pad = 0)

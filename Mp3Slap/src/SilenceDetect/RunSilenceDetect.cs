@@ -5,6 +5,7 @@ public enum RunnerType
 	None = 0,
 	WriteFFMpegSilenceScript = 1,
 	ConvertFFMpegSilenceLogsToCSVs = 2,
+	WriteSplitScript = 3,
 }
 
 public class RunSilenceDetect
@@ -41,6 +42,12 @@ public class RunSilenceDetect
 						srcDir: null,
 						pad: csvArgs.Pad); // // silenceDur);
 
+					break;
+				}
+				case RunnerType.WriteSplitScript: {
+					WriteMp3SplitterScript script = new() {
+						 
+					};
 					break;
 				}
 			}
