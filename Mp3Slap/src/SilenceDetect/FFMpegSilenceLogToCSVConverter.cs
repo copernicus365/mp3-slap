@@ -4,71 +4,17 @@ namespace Mp3Slap.SilenceDetect;
 /// Was named till recently `AlbumLogsWriter` .. ?
 /// </summary>
 /// <param name="info"></param>
-public class FFMpegSilenceLogToCSVConverter
+public class FFMpegSilenceLogToCSVConverter //(Mp3ToSplitPathsInfo info)
 {
-	Mp3ToSplitPathsInfo info;
-
-	public FFMpegSilenceLogToCSVConverter(Mp3ToSplitPathsInfo info)
-	{
-		this.info = info;
-	}
-
-	public void Init(double silenceInSecondsMin, bool isFirstRun = true)
-	{
-		string script = GetFFMpegDetectSilenceScript(silenceInSecondsMin);
-
-		if(isFirstRun && !Directory.Exists(info.LogDirectory))
-			Directory.CreateDirectory(info.LogDirectory);
-	}
-
-	public void GetAndWriteCsvParsed(double pad, bool noWrite = false)
-	{
-		string logP = info.SilenceDetectRawLogPath;
-
-		if(!File.Exists(logP)) {
-			$"Log file doesn't exist: '{logP}'".Print();
-			return;
-		}
-
-		string log = File.ReadAllText(logP);
-		if(log == null)
-			return;
-
-		FFSilenceTracksParser split = new(log);
-
-		List<TrackTimeStamp> tracks = split.Run();
-
-		TrackTimeStampsCsv csv = new() {
-			Name = "Daniel",
-			SrcPath = info.FilePath,
-			LogPath = logP,
-			Pad = 0,
-			Stamps = tracks
-		};
-
-		if(pad > 0)
-			tracks.SetPads(pad);
-
-		string result = csv.Write();
-
-		string writePath = info.SilenceDetectCsvParsedLogPath;
-
-		if(!noWrite)
-			File.WriteAllText(writePath, result);
-	}
-
-	public string GetFFMpegDetectSilenceScript(double silenceInSecondsMin)
-	{
-		string silStr = silenceInSecondsMin.ToString("0.##");
-		return info.FFMpegScriptArgs = $"""-nostats -i '{info.FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{info.SilenceDetectRawLogPath}' """;
-	}
+	//public string GetFFMpegDetectSilenceScript(double silenceInSecondsMin)
+	//{
+	//	string silStr = silenceInSecondsMin.ToString("0.##");
+	//	return info.FFMpegScriptArgs = $"""-nostats -i '{info.FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{info.SilenceDetectRawLogPath}' """;
+	//}
 
 	public static FFSilenceTracksParser ConvertFFMpegSilenceLogToCSV(
 		TrackTimeStampsCsv csv,
 		double pad,
-		//string logP, // info.SilenceDetectRawLogPath;
-		//string filePath, // info.FilePath
-		//string csvWritePath, // info.SilenceDetectCsvParsedLogPath;
 		bool write = true)
 	{
 		string logP = csv.LogPath;
@@ -82,7 +28,19 @@ public class FFMpegSilenceLogToCSVConverter
 		if(log == null)
 			return null;
 
-		FFSilenceTracksParser split = new(log);
+		return ConvertFFMpegSilenceLogToCSV(log, csv, pad, write);
+	}
+
+	public static FFSilenceTracksParser ConvertFFMpegSilenceLogToCSV(
+		string log,
+		TrackTimeStampsCsv csv,
+		double pad,
+		bool write = true)
+	{
+		if(log == null)
+			return null;
+
+		FFSilenceTracksParser split = new(log, pad);
 
 		csv.Stamps = split.Run();
 
@@ -96,6 +54,32 @@ public class FFMpegSilenceLogToCSVConverter
 		return split;
 	}
 
+	public static FFSilenceTracksParser ConvertFFMpegSilenceLogToCSV_V2(
+		string log,
+		TrackTimeStampsCsv csv,
+		double pad,
+		bool write = true)
+	{
+		if(log == null)
+			return null;
+
+		FFSilenceTracksParser split = new(log, pad);
+
+		split.Run();
+
+		split.Stamps.SetPads(pad);
+
+		csv.Stamps = split.Stamps;
+
+		string result = csv.Write();
+
+		if(write)
+			File.WriteAllText(csv.CsvLogPath, result);
+
+		return split;
+	}
+
+
 	public static List<FFSilenceTracksParser> ConvertFFMpegSilenceLogsToCSVs(string logsDir, double pad, string srcDir = null)
 	{
 		string[] logsPaths = PathHelper.GetFilesFromDirectory(logsDir, "*.log", includeSubDirectories: false);
@@ -107,7 +91,7 @@ public class FFMpegSilenceLogToCSVConverter
 		for(int i = 0; i < logsPaths.Length; i++) {
 			string path = logsPaths[i];
 
-			TrackTimeStampsCsv tcsv = LogFileNames.GetPathsEtc(path, srcDir);
+			TrackTimeStampsCsv tcsv = LogFileNames.GetSilenceLogPathsEtc(path, srcDir);
 			if(tcsv == null)
 				continue;
 
@@ -121,5 +105,20 @@ public class FFMpegSilenceLogToCSVConverter
 			parsed.Add(ffP);
 		}
 		return parsed;
+	}
+
+	public static FFSilenceTracksParser GetParser(string path, string srcDir, double pad)
+	{
+		TrackTimeStampsCsv tcsv = LogFileNames.GetSilenceLogPathsEtc(path, srcDir);
+		if(tcsv == null)
+			return null;
+
+		//if(first == null) {
+		//	first = tcsv;
+		//	srcDir = first.SrcDir;
+		//}
+
+		FFSilenceTracksParser ffp = ConvertFFMpegSilenceLogToCSV(tcsv, pad);
+		return ffp;
 	}
 }

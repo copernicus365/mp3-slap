@@ -11,6 +11,8 @@ public class Mp3ToSplitPathsInfo
 
 	public double SilenceDuration { get; init; }
 
+	public List<TrackTimeStamp> Stamps { get; set; }
+
 	public string FFMpegScriptArgs { get; set; }
 
 	public string FFMpegScriptArgsNoLogPath { get; set; }

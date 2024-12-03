@@ -12,7 +12,7 @@ namespace Mp3Slap.CLI.SilenceDetect;
 	Alias = "ff-to-csv")]
 public class ConvertFFLogsToCSVsCmd : SilenceDetectShared
 {
-	[Option("--pad", description: "Amount to pad beginning of audio with", DefVal = 0.3)]
+	[Option("--pad", description: "Amount to pad beginning of audio with", DefVal = FFSilenceTracksParser.PadDefault)]
 	public double Pad { get; set; }
 
 	public async Task HandleAsync()

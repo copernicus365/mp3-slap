@@ -35,7 +35,9 @@ public class MegaSilenceDetectCmd
 
 	public double[] Durations { get; set; }
 
-	[Option("--pad", description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.", DefVal = 0.3)]
+	[Option("--pad",
+		description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.",
+		DefVal = FFSilenceTracksParser.PadDefault)]
 	public double Pad { get; set; }
 
 	[Option(
@@ -66,6 +68,14 @@ public class MegaSilenceDetectCmd
 		DefVal = false)]
 	public bool IncludeSubDirectories { get; set; }
 
+	[Option(
+		"--write-ffmpeg-logs",
+		alias: null,
+		"Flag if to write the ffmpeg silencedetect original logs. It is these that are obtained by running ffmpeg, and then converted to the more readable csv results (not needed except for diagnostics)",
+		DefVal = false)]
+	public bool WriteFFMpegSilenceLogs { get; set; }
+
+
 	public async Task HandleAsync()
 	{
 		if(_parseDurationsError != null || Durations.IsNulle()) {
@@ -84,6 +94,8 @@ public class MegaSilenceDetectCmd
 			IncludeSubDirectories = IncludeSubDirectories,
 			Verbose = Verbose,
 			Pad = Pad,
+			RunFFScript = true,
+			WriteFFMpegSilenceLogs = WriteFFMpegSilenceLogs,
 		};
 
 		SResult initRes = args.INIT();
@@ -92,8 +104,6 @@ public class MegaSilenceDetectCmd
 			return;
 		}
 
-		MegaSilenceDetectScriptsHub hub = new();
-
-		await hub.RUN(args);
+		MegaSilenceDetectScript[] results = await MegaSilenceDetectScript.RunManyDurations(args);
 	}
 }

@@ -35,12 +35,10 @@ public class RunSilenceDetect
 					var csvArgs = args as ConvertFFMpegSilenceLogsToCSVArgs;
 					string logsDir = args.GetLogFolderName(silenceDur, fullPath: true);
 
-					FFMpegSilenceLogToCSVConverter conv = new(null);
-
 					FFMpegSilenceLogToCSVConverter.ConvertFFMpegSilenceLogsToCSVs(
 						logsDir: logsDir,
 						srcDir: null,
-						pad: csvArgs.Pad); // // silenceDur);
+						pad: csvArgs.Pad);
 
 					break;
 				}

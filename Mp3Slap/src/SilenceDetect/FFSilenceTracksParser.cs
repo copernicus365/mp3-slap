@@ -1,8 +1,10 @@
 namespace Mp3Slap.SilenceDetect;
 
-public partial class FFSilenceTracksParser(string text)
+public partial class FFSilenceTracksParser(string text, double pad = FFSilenceTracksParser.PadDefault)
 {
 	readonly string text = text.NullIfEmptyTrimmed();
+
+	public const double PadDefault = 0.3;
 
 	public List<TrackTimeStamp> Stamps { get; private set; }
 
@@ -26,14 +28,14 @@ public partial class FFSilenceTracksParser(string text)
 
 				double start = m.Groups[1].Value.ToDoubleN() ?? -1;
 				double end = m.Groups[2].Value.ToDoubleN() ?? -1;
-				double sildur = m.Groups[3].Value.ToDoubleN() ?? -1;
+				double silenceDur = m.Groups[3].Value.ToDoubleN() ?? -1;
 
-				if(start < 0 || end <= start || sildur <= 0)
+				if(start < 0 || end <= start || silenceDur <= 0)
 					return null;
 
 				// difficult because reports at first silence
 				// [silencedetect @ 0x600000754240] silence_start: 344.017
-				TrackTimeStamp stamp = new(lastEnd, start, sildur);
+				TrackTimeStamp stamp = new(lastEnd, start, silenceDur, pad: pad);
 				lastEnd = end;
 				return stamp;
 			})

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 
 using DotNetXtensions;
@@ -87,9 +88,9 @@ public class MegaSilenceDetectScript
 		_startScript();
 
 		for(int i = 0; i < Paths.Length; i++) {
-			string inputP = Paths[i];
+			string audioFullP = Paths[i];
 
-			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(inputP, LogFolderName, _silenceDuration);
+			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(audioFullP, LogFolderName, _silenceDuration);
 			Infos.Add(info);
 
 			if(i == 0 && !Directory.Exists(info.LogDirectory))
@@ -97,14 +98,37 @@ public class MegaSilenceDetectScript
 
 			_addScipt(i, info);
 
-			if(args.RunFFScript) {
-				info.FFSplitOutput = await ProcessHelper.RunFFMpegProcess(info.FFMpegScriptArgsNoLogPath);		
-			}
+			if(!args.RunFFScript)
+				continue;
+
+			info.FFSplitOutput = await ProcessHelper.RunFFMpegProcess(info.FFMpegScriptArgsNoLogPath);
+
+			if(args.WriteFFMpegSilenceLogs)
+				File.WriteAllText(info.SilenceDetectRawLogPath, info.FFSplitOutput);
+
+			ParseStampsAndWrite(info);
 		}
 
 		Scripts = sb.ToString();
 
 		_writeFinalCombinedFFMpegShellScriptsToFile(Infos.First().Directory);
+	}
+
+	public void ParseStampsAndWrite(Mp3ToSplitPathsInfo info)
+	{
+		FFSilenceTracksParser split = new(
+			text: info.FFSplitOutput,
+			pad: args.Pad);
+
+		info.Stamps = split.Run();
+		//split.Stamps.SetPads(args.Pad);
+
+		TrackTimeStampsCsvV2 csv2 = new();
+		csv2.InitForWrite(info.FileName, args.Pad, split.Stamps, filePath: info.FilePath);
+
+		string csvContent = csv2.Write();
+
+		File.WriteAllText(info.SilenceDetectCsvParsedLogPath, csvContent);
 	}
 
 	void _startScript()
@@ -155,4 +179,23 @@ sleep 2
 		if(args.WriteFFMpegSilenceLogs)
 			File.WriteAllText(scriptPth, Scripts);
 	}
+
+
+	public static async Task<MegaSilenceDetectScript[]> RunManyDurations(MegaSilenceDetectArgs args)
+	{
+		double[] durations = args.SilenceDurations;
+
+		MegaSilenceDetectScript[] scripts = new MegaSilenceDetectScript[durations.Length];
+
+		for(int i = 0; i < durations.Length; i++) {
+			double silenceDur = durations[i];
+
+			MegaSilenceDetectScript script = scripts[i] = new(args, silenceDur);
+			await script.RUN();
+
+			string scr = script.Scripts;
+		}
+		return scripts;
+	}
+
 }
