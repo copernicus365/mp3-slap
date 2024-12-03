@@ -58,9 +58,8 @@ public class WriteFFMpegSilenceDetectScript
 			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
 			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true)
 		};
-		info.SetFFMpegDetectSilenceScript(silenceDur);
+		info.Init();
 
-		// IF not null, above ensures dir trails with '/'
 		return info;
 	}
 
@@ -95,7 +94,6 @@ public class WriteFFMpegSilenceDetectScript
 			.AppendLine();
 
 		ScriptWriter sw = new();
-		Mp3ToSplitPathsInfo first = null;
 
 		for(int i = 0; i < Paths.Length; i++) {
 			string inputP = Paths[i];
@@ -107,8 +105,6 @@ public class WriteFFMpegSilenceDetectScript
 				Directory.CreateDirectory(info.LogDirectory);
 
 			sw.Infos.Add(info);
-			if(first == null)
-				first = info;
 
 			//FFMpegSilenceLogToCSVConverter awriter = new(info);
 

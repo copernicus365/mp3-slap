@@ -7,7 +7,11 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 
-public class SilenceDetectShared
+[Command(
+	"silence-detect",
+	description: "Mega: runs ffmpeg silencedetect scripts, one per detected input audio file, and then immediately converts that output (internally received) to converted CSV silence detect files.",
+	Alias = "sd")]
+public class MegaSilenceDetectCmd
 {
 	[Option(
 		"--logs-folder-name",
@@ -31,27 +35,15 @@ public class SilenceDetectShared
 
 	public double[] Durations { get; set; }
 
+	[Option("--pad", description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.", DefVal = 0.3)]
+	public double Pad { get; set; }
+
 	[Option(
 		"--verbose",
 		"-v",
 		description: "Verbose or not.",
 		DefVal = true)]
 	public bool Verbose { get; set; }
-}
-
-[Command(
-	"write-ffsilence-script",
-	description: "Writes a series of ffmpeg silencedetect scripts, one per detected input audio file, and a single script that can be called to run them all. These will generate ffmpeg's arcane and difficult logs, but other commands here can be used to process those.",
-	Alias = "silenceff")]
-public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
-{
-	[Option(
-		"--last-name",
-		"-ln",
-		description: "Bogus last name",
-		DefVal = "Trump",
-		Required = true)]
-	public string LastName { get; set; }
 
 	[Option(
 		"--write-relative-paths",
@@ -76,9 +68,14 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 
 	public async Task HandleAsync()
 	{
+		if(_parseDurationsError != null || Durations.IsNulle()) {
+			$"Durations invalid: {_parseDurationsError}".Print();
+			return;
+		}
+
 		string currDir = ConsoleRun.CurrentDirectory;
 
-		SilenceDetectWriteFFMpegScriptArgs args = new() {
+		MegaSilenceDetectArgs args = new() {
 			Directory = currDir,
 			SilenceDurations = Durations,
 			LogFolder = LogFolderName,
@@ -86,7 +83,7 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 			AudioFilesSearchPattern = AudioFilesSearchPattern,
 			IncludeSubDirectories = IncludeSubDirectories,
 			Verbose = Verbose,
-			// [2.0, 2.3, 2.5, 2.7, 3.0, 3.3, 3.7];
+			Pad = Pad,
 		};
 
 		SResult initRes = args.INIT();
@@ -95,8 +92,8 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 			return;
 		}
 
-		RunSilenceDetect runner = new();
-		await runner.RUN(RunnerType.WriteFFMpegSilenceScript, args);
+		MegaSilenceDetectScriptsHub hub = new();
 
+		await hub.RUN(args);
 	}
 }

@@ -3,24 +3,26 @@ using System.CommandLine.Parsing;
 
 using CommandLine.EasyBuilder;
 
-using Mp3Slap.Console;
-using Mp3Slap.Console.SilenceDetect;
+using Mp3Slap.CLI.SilenceDetect;
 
 using static System.Console;
 
-namespace Mp3Slap;
+namespace Mp3Slap.CLI;
 
 public class ConsoleRun
 {
 	public static string CurrentDirectory;
 
-	public static bool IsDebug = true; // Environment.GetEnvironmentVariable("DEBUG") == "true";
+	public static bool IsDebug =
+#if DEBUG
+	true;
+#else
+	false;
+#endif
 
 	public static async Task<int> Main(string[] args)
 	{
-		SetCurrDir(IsDebug && args.IsNulle()
-			? "C:/Dropbox/Music/Bible/Suchet-NIV-1Album" //"C:/Dropbox/Vids/mp3-split/mp3-split/test1"
-			: Environment.CurrentDirectory, print: true);
+		SetCurrDirStartup(args);
 
 		RootCommand rootCommand =
 			//OldFunctionalBuildApp.BuildApp(CurrentDirectory)
@@ -47,19 +49,41 @@ public class ConsoleRun
 	/// </summary>
 	public static RootCommand BuildApp()
 	{
-		RootCommand rootCmd = new("mp3 SLAP! Helper lib to ffmpeg and etc");
+		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and etc");
 
-		Command setDirCmd = rootCmd.AddAutoCommand<SetDirectoryCmd>();
+		r.AddAutoCommand<SetDirectoryCmd>()
+			.AddAutoCommand<PrintCurrDirectoryCmd>(); // adds print sub-cmd to first returned cd cmd
 
-		setDirCmd.AddAutoCommand<PrintCurrDirectoryCmd>();
+		r.AddAutoCommand<MegaSilenceDetectCmd>();
 
-		rootCmd.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
+		r.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
 
-		rootCmd.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
+		r.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
 
-		rootCmd.AddAutoCommand<WriteSplitScriptCmd>();
+		r.AddAutoCommand<WriteSplitScriptCmd>();
 
-		return rootCmd;
+		r.AddAutoCommand<Test1Cmd>();
+
+		return r;
+	}
+
+	public static void SetCurrDirStartup(string[] args)
+	{
+		string dir = Environment.CurrentDirectory;
+
+		if(IsDebug && args.IsNulle()) {
+			string path = ProjectPath.ProjPath("ignore/startup-debug-path.txt");
+			if(File.Exists(path)) {
+				string content = File.ReadAllLines(path)
+					.Select(ln => ln.NullIfEmptyTrimmed())
+					.Where(ln => ln != null && !ln.StartsWith('#'))
+					.FirstOrDefault();
+
+				if(content.InRange(8, 120) && Directory.Exists(content))
+					dir = content;
+			}
+		}
+		SetCurrDir(dir, print: true);
 	}
 
 	public static void SetCurrDir(string dir, bool print = true)

@@ -5,7 +5,7 @@ using CommandLine.EasyBuilder.Auto;
 
 using Mp3Slap.SilenceDetect;
 
-namespace Mp3Slap.Console.SilenceDetect;
+namespace Mp3Slap.CLI.SilenceDetect;
 
 public class OldFunctionalBuildApp
 {

@@ -1,6 +1,24 @@
 namespace Mp3Slap.SilenceDetect;
 
-// silencedetect-write-ffmpeg-script, ffsilence
+public class MegaSilenceDetectArgs : SilenceDetectArgs
+{
+	/// <summary>
+	/// Scripts to run ffmpeg, make them have relative paths
+	/// </summary>
+	public bool WriteRelativePaths { get; set; }
+
+	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
+	public const string AudioFilesSearchPatternDef = "*.mp3";
+
+	public bool IncludeSubDirectories { get; set; } = false;
+
+	public double Pad { get; set; }
+
+	public bool WriteFFMpegSilenceLogs { get; set; }
+
+	public bool RunFFScript { get; set; } = true;
+}
+
 public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
 {
 	/// <summary>
@@ -15,7 +33,6 @@ public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
 	public const string AudioFilesSearchPatternDef = "*.mp3";
 }
 
-// convert-ffmpeg-silence-logs-to-csv, tocsv
 public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
 {
 	public double Pad { get; set; }

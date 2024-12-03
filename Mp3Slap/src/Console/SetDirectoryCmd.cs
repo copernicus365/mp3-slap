@@ -1,10 +1,10 @@
 using CommandLine.EasyBuilder.Auto;
 
-namespace Mp3Slap.Console;
+namespace Mp3Slap.CLI;
 
 [Command(
 	"current-directory",
-	Alias = "curr-dir",
+	Alias = "cd",
 	Description = "Sets the current environment directory for the app globally")]
 public class SetDirectoryCmd
 {

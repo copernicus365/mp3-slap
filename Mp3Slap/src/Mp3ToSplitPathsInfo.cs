@@ -9,14 +9,30 @@ public class Mp3ToSplitPathsInfo
 	public string SilenceDetectRawLogPath { get; init; }
 	public string SilenceDetectCsvParsedLogPath { get; init; }
 
+	public double SilenceDuration { get; init; }
+
 	public string FFMpegScriptArgs { get; set; }
+
+	public string FFMpegScriptArgsNoLogPath { get; set; }
 
 	public string FFMpegScript => FFMpegScriptArgs == null ? null : "ffmpeg " + FFMpegScriptArgs;
 
-	public string SetFFMpegDetectSilenceScript(double silenceInSecondsMin)
+	public string GetFFMpegScript(bool withLogPaths) => "ffmpeg " + (withLogPaths ? FFMpegScriptArgs : FFMpegScriptArgsNoLogPath);
+
+	public void Init()
 	{
-		string silStr = silenceInSecondsMin.ToString("0.##");
-		return FFMpegScriptArgs = $"""-nostats -i '{FilePath}' -af silencedetect=noise=-30dB:d={silStr} -f null - 2> '{SilenceDetectRawLogPath}' """;
+		FFMpegScriptArgs = SetFFMpegDetectSilenceScript(true);
+		FFMpegScriptArgsNoLogPath = SetFFMpegDetectSilenceScript(false);
 	}
 
+	public string SetFFMpegDetectSilenceScript(bool writeToLog)
+	{
+		string silStr = SilenceDuration.ToString("0.##");
+		string val = $"""-nostats -i "{FilePath}" -af silencedetect=noise=-30dB:d={silStr} -f null -""";
+		if(writeToLog)
+			val += $""" 2> "{SilenceDetectRawLogPath}" """;
+		return val;
+	}
+
+	public string FFSplitOutput { get; set; }
 }

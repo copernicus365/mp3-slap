@@ -24,5 +24,10 @@
   <!--<ItemGroup>
     <ProjectReference Include="..\..\CommandLine.EasyBuilder\CommandLine.EasyBuilder\CommandLine.EasyBuilder.csproj" />
   </ItemGroup>-->
+  <ItemGroup>
+    <Content Include="ignore\startup-debug-path.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

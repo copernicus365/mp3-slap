@@ -23,6 +23,7 @@ public static class PathHelper
 	//}
 
 	public static string[] GetFilesFromDirectory(
+
 		string dir,
 		string searchPattern,
 		bool includeSubDirectories = false)
