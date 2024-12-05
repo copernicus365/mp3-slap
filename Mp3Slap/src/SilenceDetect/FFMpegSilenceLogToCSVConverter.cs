@@ -79,10 +79,9 @@ public class FFMpegSilenceLogToCSVConverter //(Mp3ToSplitPathsInfo info)
 		return split;
 	}
 
-
 	public static List<FFSilenceTracksParser> ConvertFFMpegSilenceLogsToCSVs(string logsDir, double pad, string srcDir = null)
 	{
-		string[] logsPaths = PathHelper.GetFilesFromDirectory(logsDir, "*.log", includeSubDirectories: false);
+		string[] logsPaths = PathHelper.GetSilenceDetectLogPaths(logsDir);
 
 		TrackTimeStampsCsv first = null;
 

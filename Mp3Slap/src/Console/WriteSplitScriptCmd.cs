@@ -24,7 +24,7 @@ public class WriteSplitScriptCmd
 	[Option("-f", description: "Source (mp3 etc) file path")]
 	public FileInfo SrcFile { get; set; }
 
-	public async Task HandleAsync()
+	public void Handle()
 	{
 		string currDir = ConsoleRun.CurrentDirectory;
 

@@ -10,6 +10,11 @@ public partial class LogFileNames
 		return logPath;
 	}
 
+	public static string GetAuditionMarkersPath(string logDir, string fileName)
+	{
+		string logPath = $"{logDir}log#{fileName}#audition-markers.csv";
+		return logPath;
+	}
 
 	public static string GetParsedCsvPathFromRaw(string file)
 	{

@@ -14,9 +14,16 @@ namespace Mp3Slap.CLI.SilenceDetect;
 public class MegaSilenceDetectCmd
 {
 	[Option(
+		"--mode",
+		"-m",
+		"Mode to run",
+		DefVal = SilenceDetectMode.fullrun)]
+	public SilenceDetectMode Mode { get; set; }
+
+	[Option(
 		"--logs-folder-name",
 		"-logname",
-		description: "Name of the folder in which the scripts will be written to. If seeking more silence durations than one, typically you'll want this to have {duration} within it",
+		description: "Name of the folder in which the scripts will be written to. Will have the duration appended to it",
 		DefVal = SilenceDetectArgs.DefaultLogFolder,
 		Required = true)]
 	public string LogFolderName { get; set; }
@@ -104,6 +111,24 @@ public class MegaSilenceDetectCmd
 			return;
 		}
 
-		MegaSilenceDetectScript[] results = await MegaSilenceDetectScript.RunManyDurations(args);
+		MegaSilenceDetectScript[] results2 = await MegaSilenceDetectScript.RunManyDurations(
+			args,
+			async script => {
+				switch(Mode) {
+					case SilenceDetectMode.fullrun:
+						await script.RUN_All();
+						break;
+					case SilenceDetectMode.audcsv:
+					default:
+						await script.RUN_Write_AuditionMarkerCSVs_From_SilenceCSVs();
+						break;
+				}
+			});
 	}
+}
+
+public enum SilenceDetectMode
+{
+	fullrun,
+	audcsv
 }

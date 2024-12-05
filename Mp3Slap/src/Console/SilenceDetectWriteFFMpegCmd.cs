@@ -12,7 +12,7 @@ public class SilenceDetectShared
 	[Option(
 		"--logs-folder-name",
 		"-logname",
-		description: "Name of the folder in which the scripts will be written to. If seeking more silence durations than one, typically you'll want this to have {duration} within it",
+		description: "Name of the folder in which the scripts will be written to. Will have the duration appended to it",
 		DefVal = SilenceDetectArgs.DefaultLogFolder,
 		Required = true)]
 	public string LogFolderName { get; set; }

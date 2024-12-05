@@ -46,4 +46,32 @@ public static class PathHelper
 		return files;
 	}
 
+	public static string[] GetSilenceDetectLogPaths(string logsDir, bool includeSubDirs = false)
+	{
+		string[] logsPaths = GetFilesFromDirectory(logsDir, "*silencedetect.log", includeSubDirectories: includeSubDirs);
+		return logsPaths;
+	}
+
+	public static string[] GetSilenceDetectCsvLogPaths(string logsDir, bool includeSubDirs = false)
+	{
+		string[] logsPaths = GetFilesFromDirectory(logsDir, "*silencedetect-parsed.csv", includeSubDirectories: includeSubDirs);
+		return logsPaths;
+	}
+}
+
+public static class GenHelperX
+{
+	public static string DigitsCountFrmt(this int len)
+	{
+		if(len < 10)
+			return "0";
+		if(len < 100)
+			return "00";
+		if(len >= 100)
+			return "000";
+		if(len >= 1000)
+			return "0000";
+		return "00000";
+	}
+
 }

@@ -1,7 +1,6 @@
-using System.ComponentModel;
 using System.Text;
 
-using DotNetXtensions;
+using Mp3Slap.Csv;
 
 namespace Mp3Slap.SilenceDetect;
 
@@ -53,6 +52,7 @@ public class MegaSilenceDetectScript
 			LogDirectory = logDir,
 			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
 			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true),
+			AuditionMarkersCsvPath = LogFileNames.GetAuditionMarkersPath(logDir, fname),
 			SilenceDuration = silenceDur,
 		};
 		info.Init();
@@ -69,7 +69,7 @@ public class MegaSilenceDetectScript
 
 	StringBuilder sb;
 
-	public async Task RUN()
+	public void SetInfos()
 	{
 		Infos = [];
 
@@ -85,8 +85,6 @@ public class MegaSilenceDetectScript
 
 		Init(paths);
 
-		_startScript();
-
 		for(int i = 0; i < Paths.Length; i++) {
 			string audioFullP = Paths[i];
 
@@ -95,6 +93,40 @@ public class MegaSilenceDetectScript
 
 			if(i == 0 && !Directory.Exists(info.LogDirectory))
 				Directory.CreateDirectory(info.LogDirectory);
+		}
+	}
+
+	public async Task RUN_Write_AuditionMarkerCSVs_From_SilenceCSVs()
+	{
+		for(int i = 0; i < Infos.Count; i++) {
+			Mp3ToSplitPathsInfo info = Infos[i];
+
+			if(!File.Exists(info.SilenceDetectCsvParsedLogPath))
+				continue;
+
+			string silenceDetCsvLog = File.ReadAllText(info.SilenceDetectCsvParsedLogPath);
+
+			TrackTimeStampsCsvV2 csv2 = new();
+			info.Stamps = csv2.Parse(silenceDetCsvLog);
+
+			AuditionCsv acsv = new();
+			acsv.SetMarkers(info.Stamps, "Ch ", firstDesc: $"From mp3-slap silence csv logs - {csv2.FileName}");
+
+			string audCsv = acsv.WriteCsv(includeHeader: true);
+
+			File.WriteAllText(info.AuditionMarkersCsvPath, audCsv);
+		}
+	}
+
+	public async Task RUN_All()
+	{
+		if(Infos.IsNulle())
+			return;
+
+		_startScript();
+
+		for(int i = 0; i < Infos.Count; i++) {
+			Mp3ToSplitPathsInfo info = Infos[i];
 
 			_addScipt(i, info);
 
@@ -181,7 +213,7 @@ sleep 2
 	}
 
 
-	public static async Task<MegaSilenceDetectScript[]> RunManyDurations(MegaSilenceDetectArgs args)
+	public static async Task<MegaSilenceDetectScript[]> RunManyDurations(MegaSilenceDetectArgs args, Func<MegaSilenceDetectScript, Task> run)
 	{
 		double[] durations = args.SilenceDurations;
 
@@ -191,7 +223,10 @@ sleep 2
 			double silenceDur = durations[i];
 
 			MegaSilenceDetectScript script = scripts[i] = new(args, silenceDur);
-			await script.RUN();
+
+			script.SetInfos();
+
+			await run(script);
 
 			string scr = script.Scripts;
 		}

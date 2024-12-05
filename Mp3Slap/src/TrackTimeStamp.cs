@@ -82,7 +82,7 @@ public class TrackTimeStamp
 	}
 
 
-	public const string Format1 = @"h\:mm\:ss\.ff";
+	public const string TSFrmt = @"h\:mm\:ss\.ff";
 
 	public override string ToString() => ToCsvString2(); // pad: 0);
 
@@ -91,10 +91,10 @@ public class TrackTimeStamp
 	/// alter w/out breaking change consideration.
 	/// </summary>
 	public string ToCsvString(double pad)
-		=> $"{add(Start, -pad).ToString(Format1)}, {add(End, pad).ToString(Format1)}, {Duration.ToString(Format1)}, {SilenceDuration.TotalSeconds:0.00}";
+		=> $"{add(Start, -pad).ToString(TSFrmt)}, {add(End, pad).ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}";
 
 	public string ToCsvString2()
-		=> $"\"{Start.ToString(Format1)}\", \"{End.ToString(Format1)}\", \"{Duration.ToString(Format1)}\", \"{SilenceDuration.TotalSeconds:0.00}\", \"{Pad.TotalSeconds:0.00}\", \"{PaddedStart.ToString(Format1)}\", \"{PaddedEnd.ToString(Format1)}\", \"{PaddedDuration.ToString(Format1)}\", ";
+		=> $"\"{Start.ToString(TSFrmt)}\", \"{End.ToString(TSFrmt)}\", \"{Duration.ToString(TSFrmt)}\", \"{SilenceDuration.TotalSeconds:0.00}\", \"{Pad.TotalSeconds:0.00}\", \"{PaddedStart.ToString(TSFrmt)}\", \"{PaddedEnd.ToString(TSFrmt)}\", \"{PaddedDuration.ToString(TSFrmt)}\", ";
 
 	//{Duration.ToTotalMinutesString2()}
 

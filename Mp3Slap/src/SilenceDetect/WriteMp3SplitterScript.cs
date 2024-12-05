@@ -36,7 +36,7 @@ public class WriteMp3SplitterScript
 
 	public void RUN(TrackTimeStamp[] stamps)
 	{
-		string digCount = DigitsCount(stamps.Length);
+		string digCount = stamps.Length.DigitsCountFrmt();
 
 		List<string> scripts = new(stamps.Length);
 
@@ -73,7 +73,7 @@ public class WriteMp3SplitterScript
 			$"""
 			echo "splitting "{name}"
 
-			ffmpeg -ss "{start.ToString(TrackTimeStamp.Format1)}" -i "{srcMp3}" -vcodec copy -acodec copy -to "{duration.ToString(TrackTimeStamp.Format1)}" "{file}"
+			ffmpeg -ss "{start.ToString(TrackTimeStamp.TSFrmt)}" -i "{srcMp3}" -vcodec copy -acodec copy -to "{duration.ToString(TrackTimeStamp.TSFrmt)}" "{file}"
 
 			""";
 		scriptSB.AppendLine(script);
@@ -90,16 +90,5 @@ public class WriteMp3SplitterScript
 			.AppendLine("echo \"+++FFMpeg Silence Detect Script +++\"")
 			.AppendLine();
 
-	}
-
-	static string DigitsCount(int len)
-	{
-		if(len < 10)
-			return "0";
-		if(len < 100)
-			return "00";
-		if(len >= 100)
-			return "000";
-		return "0000";
 	}
 }

@@ -57,7 +57,7 @@ public class SilenceDetectArgs
 
 	public string LogFolderFullPath { get; set; }
 
-	public const string DefaultLogFolder = $"logs-{DurationFolderID}";
+	public const string DefaultLogFolder = "logs"; // $"logs-{DurationFolderID}";
 
 	public const string DurationFolderID = "{duration}";
 
@@ -107,5 +107,6 @@ public class SilenceDetectArgs
 	}
 
 	public string GetLogFolderName(double dur, bool fullPath = false)
-		=> (fullPath ? LogFolderFullPath : LogFolder).Replace(DurationFolderID, dur.Round(2).ToString());
+		=> (fullPath ? LogFolderFullPath.CutEnd(1) : LogFolder.CutEnd(1)) + $"-{dur.Round(2)}/";
+		//=> (fullPath ? LogFolderFullPath : LogFolder).Replace(DurationFolderID, dur.Round(2).ToString());
 }

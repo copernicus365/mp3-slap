@@ -17,7 +17,7 @@ public class OldFunctionalBuildApp
 
 		Option<string> logFolderName = new Option<string>(
 			name: "--logs-folder-name",
-			description: "Name of the folder in which the scripts will be written to. If seeking more silence durations than one, typically you'll want this to have {duration} within it")
+			description: "Name of the folder in which the scripts will be written to. Will have the duration appended to it")
 			.DefaultValue(SilenceDetectArgs.DefaultLogFolder)
 			.Alias("-logname");
 
@@ -60,25 +60,25 @@ public class OldFunctionalBuildApp
 					.DefaultValue(true)
 					.Alias("-v"),
 				handle: async (double[] durations, string logFolderName, bool writeRelPaths, string searchPattern, bool includeSubdirs, bool verbose) => {
-					SilenceDetectWriteFFMpegScriptArgs args = new() {
-						Directory = currentDir,
-						SilenceDurations = durations,
-						LogFolder = logFolderName,
-						WriteRelativePaths = writeRelPaths,
-						AudioFilesSearchPattern = searchPattern,
-						IncludeSubDirectories = includeSubdirs,
-						Verbose = verbose,
-						// [2.0, 2.3, 2.5, 2.7, 3.0, 3.3, 3.7];
-					};
+					//SilenceDetectWriteFFMpegScriptArgs args = new() {
+					//	Directory = currentDir,
+					//	SilenceDurations = durations,
+					//	LogFolder = logFolderName,
+					//	WriteRelativePaths = writeRelPaths,
+					//	AudioFilesSearchPattern = searchPattern,
+					//	IncludeSubDirectories = includeSubdirs,
+					//	Verbose = verbose,
+					//	// [2.0, 2.3, 2.5, 2.7, 3.0, 3.3, 3.7];
+					//};
 
-					SResult initRes = args.INIT();
-					if(!initRes.Success) {
-						$"Config error (wasn't run): {initRes.Message}".Print();
-						return;
-					}
+					//SResult initRes = args.INIT();
+					//if(!initRes.Success) {
+					//	$"Config error (wasn't run): {initRes.Message}".Print();
+					//	return;
+					//}
 
-					RunSilenceDetect runner = new();
-					await runner.RUN(RunnerType.WriteFFMpegSilenceScript, args);
+					//RunSilenceDetect runner = new();
+					//await runner.RUN(RunnerType.WriteFFMpegSilenceScript, args);
 				},
 				rootCmd)
 				.Alias("silenceff");
@@ -95,21 +95,21 @@ public class OldFunctionalBuildApp
 					.DefaultValue(true)
 					.Alias("-v"),
 				handle: async (double[] durations, string logFolderName, bool verbose) => {
-					SilenceDetectArgs args = new() {
-						Directory = currentDir,
-						SilenceDurations = durations,
-						LogFolder = logFolderName,
-						Verbose = verbose,
-					};
+					//SilenceDetectArgs args = new() {
+					//	Directory = currentDir,
+					//	SilenceDurations = durations,
+					//	LogFolder = logFolderName,
+					//	Verbose = verbose,
+					//};
 
-					SResult initRes = args.INIT();
-					if(!initRes.Success) {
-						$"Config error (wasn't run): {initRes.Message}".Print();
-						return;
-					}
+					//SResult initRes = args.INIT();
+					//if(!initRes.Success) {
+					//	$"Config error (wasn't run): {initRes.Message}".Print();
+					//	return;
+					//}
 
-					RunSilenceDetect runner = new();
-					await runner.RUN(RunnerType.ConvertFFMpegSilenceLogsToCSVs, args);
+					//RunSilenceDetect runner = new();
+					//await runner.RUN(RunnerType.ConvertFFMpegSilenceLogsToCSVs, args);
 				},
 				rootCmd)
 				.Alias("ff-to-csv");

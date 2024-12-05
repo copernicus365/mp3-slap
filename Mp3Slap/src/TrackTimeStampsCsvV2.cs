@@ -74,17 +74,19 @@ public class TrackTimeStampsCsvV2
 		Pad = x.AttributeN("pad").ValueN().NullIfEmptyTrimmed().ToDoubleN() ?? 0;
 	}
 
-	public void Parse(string text)
+	public List<TrackTimeStamp> Parse(string text)
 	{
 		string[] lines = text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 		if(lines.IsNulle())
-			return;
+			return null;
 
 		string fline = lines[0];
 		if(fline[0] == '#' && fline.Contains("<info")) {
 			fline = fline[1..];
 			SetHeaderValsFromXml(fline);
 		}
+
+		Stamps ??= new(lines.Length);
 
 		for(int i = 0; i < lines.Length; i++) {
 			string ln = lines[i];
@@ -99,6 +101,7 @@ public class TrackTimeStampsCsvV2
 		}
 
 		Valid = Stamps.Count > 0;
+		return Stamps;
 	}
 
 	public void CombineCuts()
