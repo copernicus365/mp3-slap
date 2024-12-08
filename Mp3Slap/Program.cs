@@ -8,7 +8,7 @@ using Mp3Slap.CLI.SilenceDetect;
 
 using static System.Console;
 
-namespace Mp3Slap.General;
+namespace Mp3Slap;
 
 public class Program
 {
