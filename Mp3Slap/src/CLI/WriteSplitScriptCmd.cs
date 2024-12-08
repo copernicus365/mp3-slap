@@ -26,7 +26,7 @@ public class WriteSplitScriptCmd
 
 	public void Handle()
 	{
-		string currDir = ConsoleRun.CurrentDirectory;
+		string currDir = Program.CurrentDirectory;
 
 		if(TracksPath == null || !TracksPath.Exists)
 			return;

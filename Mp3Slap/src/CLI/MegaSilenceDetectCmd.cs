@@ -7,8 +7,19 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 
-public class SilenceDetectShared
+[Command(
+	"silence-detect",
+	description: "Mega: runs ffmpeg silencedetect scripts, one per detected input audio file, and then immediately converts that output (internally received) to converted CSV silence detect files.",
+	Alias = "sd")]
+public class MegaSilenceDetectCmd
 {
+	[Option(
+		"--mode",
+		"-m",
+		"Mode to run",
+		DefVal = SilenceDetectMode.fullrun)]
+	public SilenceDetectMode Mode { get; set; }
+
 	[Option(
 		"--logs-folder-name",
 		"-logname",
@@ -31,27 +42,17 @@ public class SilenceDetectShared
 
 	public double[] Durations { get; set; }
 
+	[Option("--pad",
+		description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.",
+		DefVal = FFSilenceTracksParser.PadDefault)]
+	public double Pad { get; set; }
+
 	[Option(
 		"--verbose",
 		"-v",
 		description: "Verbose or not.",
 		DefVal = true)]
 	public bool Verbose { get; set; }
-}
-
-[Command(
-	"write-ffsilence-script",
-	description: "Writes a series of ffmpeg silencedetect scripts, one per detected input audio file, and a single script that can be called to run them all. These will generate ffmpeg's arcane and difficult logs, but other commands here can be used to process those.",
-	Alias = "silenceff")]
-public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
-{
-	[Option(
-		"--last-name",
-		"-ln",
-		description: "Bogus last name",
-		DefVal = "Trump",
-		Required = true)]
-	public string LastName { get; set; }
 
 	[Option(
 		"--write-relative-paths",
@@ -74,11 +75,24 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 		DefVal = false)]
 	public bool IncludeSubDirectories { get; set; }
 
+	[Option(
+		"--write-ffmpeg-logs",
+		alias: null,
+		"Flag if to write the ffmpeg silencedetect original logs. It is these that are obtained by running ffmpeg, and then converted to the more readable csv results (not needed except for diagnostics)",
+		DefVal = false)]
+	public bool WriteFFMpegSilenceLogs { get; set; }
+
+
 	public async Task HandleAsync()
 	{
-		string currDir = ConsoleRun.CurrentDirectory;
+		if(_parseDurationsError != null || Durations.IsNulle()) {
+			$"Durations invalid: {_parseDurationsError}".Print();
+			return;
+		}
 
-		SilenceDetectWriteFFMpegScriptArgs args = new() {
+		string currDir = Program.CurrentDirectory;
+
+		MegaSilenceDetectArgs args = new() {
 			Directory = currDir,
 			SilenceDurations = Durations,
 			LogFolder = LogFolderName,
@@ -86,7 +100,9 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 			AudioFilesSearchPattern = AudioFilesSearchPattern,
 			IncludeSubDirectories = IncludeSubDirectories,
 			Verbose = Verbose,
-			// [2.0, 2.3, 2.5, 2.7, 3.0, 3.3, 3.7];
+			Pad = Pad,
+			RunFFScript = true,
+			WriteFFMpegSilenceLogs = WriteFFMpegSilenceLogs,
 		};
 
 		SResult initRes = args.INIT();
@@ -95,8 +111,24 @@ public class SilenceDetectWriteFFMpegCmd : SilenceDetectShared
 			return;
 		}
 
-		RunSilenceDetect runner = new();
-		await runner.RUN(RunnerType.WriteFFMpegSilenceScript, args);
-
+		MegaSilenceDetectScript[] results2 = await MegaSilenceDetectScript.RunManyDurations(
+			args,
+			async script => {
+				switch(Mode) {
+					case SilenceDetectMode.fullrun:
+						await script.RUN_All();
+						break;
+					case SilenceDetectMode.audcsv:
+					default:
+						await script.RUN_Write_AuditionMarkerCSVs_From_SilenceCSVs();
+						break;
+				}
+			});
 	}
+}
+
+public enum SilenceDetectMode
+{
+	fullrun,
+	audcsv
 }

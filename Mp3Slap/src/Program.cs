@@ -9,7 +9,7 @@ using static System.Console;
 
 namespace Mp3Slap.CLI;
 
-public class ConsoleRun
+public class Program
 {
 	public static string CurrentDirectory;
 
@@ -56,9 +56,9 @@ public class ConsoleRun
 
 		r.AddAutoCommand<MegaSilenceDetectCmd>();
 
-		r.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
+		//r.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
 
-		r.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
+		//r.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
 
 		r.AddAutoCommand<WriteSplitScriptCmd>();
 

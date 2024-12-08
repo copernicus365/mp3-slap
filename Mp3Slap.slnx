@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/root/">
     <File Path=".gitignore" />
+    <File Path="readme-notes.md" />
     <File Path="README.md" />
   </Folder>
   <Project Path="Mp3Slap/Mp3Slap.csproj" />

@@ -27,15 +27,15 @@ public class SetDirectoryCmd
 			return;
 		}
 
-		string origDir = ConsoleRun.CurrentDirectory;
+		string origDir = Program.CurrentDirectory;
 
 		Environment.CurrentDirectory =
-			ConsoleRun.CurrentDirectory =
+			Program.CurrentDirectory =
 			path;
 
 		$@"Changed root directory:
 old: {origDir}
-new: {ConsoleRun.CurrentDirectory}".Print();
+new: {Program.CurrentDirectory}".Print();
 	}
 }
 
@@ -45,7 +45,7 @@ public class PrintCurrDirectoryCmd
 	public void Handle()
 	{
 		$@"Current root directory:
-app: {ConsoleRun.CurrentDirectory}
+app: {Program.CurrentDirectory}
 env: {Environment.CurrentDirectory}".Print();
 	}
 }
