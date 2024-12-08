@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Mp3Slap;
+namespace Mp3Slap.General;
 
 public class TrackTimeStamp
 {
@@ -59,7 +59,7 @@ public class TrackTimeStamp
 
 	public bool SetPads(TimeSpan pad, TimeSpan? previousEndSilence = null)
 	{
-		if(pad <= TimeSpan.Zero || (previousEndSilence != null && previousEndSilence.Value <= TimeSpan.Zero))
+		if(pad <= TimeSpan.Zero || previousEndSilence != null && previousEndSilence.Value <= TimeSpan.Zero)
 			goto NOPAD;
 
 		Pad = pad;
@@ -167,7 +167,7 @@ public class TrackTimeStamp
 		return stamp;
 	}
 
-	public static bool TryParseTSLenient([NotNullWhen(true)] string? s, out TimeSpan result)
+	public static bool TryParseTSLenient([NotNullWhen(true)] string s, out TimeSpan result)
 	{
 		if(TimeSpan.TryParse(s, null, out result))
 			return true;

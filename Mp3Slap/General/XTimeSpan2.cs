@@ -1,4 +1,4 @@
-namespace DotNetXtensions;
+namespace Mp3Slap.General;
 
 public static class XTimeSpan2
 {

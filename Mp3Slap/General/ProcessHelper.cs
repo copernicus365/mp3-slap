@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Mp3Slap;
+namespace Mp3Slap.General;
 
 public static class ProcessHelper
 {
@@ -22,7 +22,7 @@ public static class ProcessHelper
 		this ProcessStartInfo startInfo,
 		TimeSpan delay = default)
 	{
-		var lines = await Start_GetLines(startInfo, delay);
+		var lines = await startInfo.Start_GetLines(delay);
 		string output = lines.JoinToString(v => v.line, "\n");
 		return output;
 	}

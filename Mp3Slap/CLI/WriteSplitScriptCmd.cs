@@ -3,6 +3,7 @@ using System.CommandLine;
 using CommandLine.EasyBuilder.Auto;
 
 using Mp3Slap.SilenceDetect;
+using Mp3Slap.General;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 

@@ -100,7 +100,7 @@ public class FFMpegSilenceLogToCSVConverter //(Mp3ToSplitPathsInfo info)
 			}
 
 			FFSilenceTracksParser ffP = ConvertFFMpegSilenceLogToCSV(tcsv, pad);
-		
+
 			parsed.Add(ffP);
 		}
 		return parsed;

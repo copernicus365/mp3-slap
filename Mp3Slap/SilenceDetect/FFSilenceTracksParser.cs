@@ -1,3 +1,5 @@
+using Mp3Slap.General;
+
 namespace Mp3Slap.SilenceDetect;
 
 public partial class FFSilenceTracksParser(string text, double pad = FFSilenceTracksParser.PadDefault)

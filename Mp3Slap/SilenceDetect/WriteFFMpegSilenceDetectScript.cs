@@ -1,5 +1,7 @@
 using System.Text;
 
+using Mp3Slap.General;
+
 namespace Mp3Slap.SilenceDetect;
 
 /// <summary>

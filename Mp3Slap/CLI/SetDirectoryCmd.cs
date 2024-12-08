@@ -1,5 +1,7 @@
 using CommandLine.EasyBuilder.Auto;
 
+using Mp3Slap.General;
+
 namespace Mp3Slap.CLI;
 
 [Command(

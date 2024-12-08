@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml.Linq;
 
-namespace Mp3Slap;
+namespace Mp3Slap.General;
 
 public class TrackTimeStampsCsvV2
 {

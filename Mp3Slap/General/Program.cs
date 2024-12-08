@@ -3,26 +3,18 @@ using System.CommandLine.Parsing;
 
 using CommandLine.EasyBuilder;
 
+using Mp3Slap.CLI;
 using Mp3Slap.CLI.SilenceDetect;
 
 using static System.Console;
 
-namespace Mp3Slap.CLI;
+namespace Mp3Slap.General;
 
 public class Program
 {
-	public static string CurrentDirectory;
-
-	public static bool IsDebug =
-#if DEBUG
-	true;
-#else
-	false;
-#endif
-
 	public static async Task<int> Main(string[] args)
 	{
-		SetCurrDirStartup(args);
+		INIT();
 
 		RootCommand rootCommand =
 			//OldFunctionalBuildApp.BuildApp(CurrentDirectory)
@@ -43,6 +35,8 @@ public class Program
 		}
 	}
 
+	public static bool IsDebug;
+
 	/// <summary>
 	/// This is so clean and simple now, can have it here at root,
 	/// leave the cmd specs to their own separate.
@@ -57,7 +51,6 @@ public class Program
 		r.AddAutoCommand<MegaSilenceDetectCmd>();
 
 		//r.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
-
 		//r.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
 
 		r.AddAutoCommand<WriteSplitScriptCmd>();
@@ -67,11 +60,20 @@ public class Program
 		return r;
 	}
 
-	public static void SetCurrDirStartup(string[] args)
+	public static string CurrentDirectory;
+
+	public static void INIT()
 	{
+		IsDebug =
+#if DEBUG
+	true;
+#else
+	false;
+#endif
+
 		string dir = Environment.CurrentDirectory;
 
-		if(IsDebug && args.IsNulle()) {
+		if(IsDebug) {
 			string path = ProjectPath.ProjPath("ignore/startup-debug-path.txt");
 			if(File.Exists(path)) {
 				string content = File.ReadAllLines(path)

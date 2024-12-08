@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Mp3Slap.Csv;
+namespace Mp3Slap.General;
 
 public class AuditionCsv
 {
