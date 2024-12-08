@@ -6,5 +6,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="Mp3Slap/Mp3Slap.csproj" />
-  <Project Path="Test/Test.csproj" />
+  <Project Path="Mp3Slap.Test/Mp3Slap.Test.csproj" />
 </Solution>

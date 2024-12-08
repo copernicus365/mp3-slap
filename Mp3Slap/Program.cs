@@ -16,9 +16,7 @@ public class Program
 	{
 		INIT();
 
-		RootCommand rootCommand =
-			//OldFunctionalBuildApp.BuildApp(CurrentDirectory)
-			BuildApp();
+		RootCommand rootCommand = BuildApp();
 
 		if(args.NotNulle())
 			rootCommand.Invoke(args);
@@ -26,7 +24,7 @@ public class Program
 			rootCommand.Invoke("-h");
 
 		while(true) {
-			Write("Input: ");
+			Write("\nInput: ");
 			string arg = ReadLine();
 
 			int res = arg == null
@@ -43,7 +41,7 @@ public class Program
 	/// </summary>
 	public static RootCommand BuildApp()
 	{
-		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and etc");
+		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and more");
 
 		r.AddAutoCommand<SetDirectoryCmd>()
 			.AddAutoCommand<PrintCurrDirectoryCmd>(); // adds print sub-cmd to first returned cd cmd
@@ -73,19 +71,26 @@ public class Program
 
 		string dir = Environment.CurrentDirectory;
 
-		if(IsDebug) {
-			string path = ProjectPath.ProjPath("ignore/startup-debug-path.txt");
-			if(File.Exists(path)) {
-				string content = File.ReadAllLines(path)
-					.Select(ln => ln.NullIfEmptyTrimmed())
-					.Where(ln => ln != null && !ln.StartsWith('#'))
-					.FirstOrDefault();
+		bool setFromStartupDebugTxt = IsDebug && TrySetRootDirFromStartupDebugTxt(ref dir);
 
-				if(content.InRange(8, 120) && Directory.Exists(content))
-					dir = content;
+		SetCurrDir(dir, print: true);
+	}
+
+	static bool TrySetRootDirFromStartupDebugTxt(ref string dir)
+	{
+		string path = ProjectPath.ProjPath("ignore/startup-debug-path.txt");
+		if(File.Exists(path)) {
+			string content = File.ReadAllLines(path)
+				.Select(ln => ln.NullIfEmptyTrimmed())
+				.Where(ln => ln != null && !ln.StartsWith('#'))
+				.FirstOrDefault();
+
+			if(content.InRange(8, 120) && Directory.Exists(content)) {
+				dir = content;
+				return true;
 			}
 		}
-		SetCurrDir(dir, print: true);
+		return false;
 	}
 
 	public static void SetCurrDir(string dir, bool print = true)
