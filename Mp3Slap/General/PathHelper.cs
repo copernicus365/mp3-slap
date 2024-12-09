@@ -17,11 +17,6 @@ public static class PathHelper
 	public static string CleanToRelative(string dir, string path)
 		=> path.StartsWith(dir) ? path[dir.Length..] : path;
 
-	//public static string FixDirPath(string dir)
-	//{
-
-	//}
-
 	public static string[] GetFilesFromDirectory(
 
 		string dir,
@@ -73,5 +68,4 @@ public static class GenHelperX
 			return "0000";
 		return "00000";
 	}
-
 }

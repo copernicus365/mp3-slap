@@ -1,5 +1,3 @@
-using Mp3Slap.General;
-
 namespace Mp3Slap.SilenceDetect;
 
 public class MegaSilenceDetectArgs : SilenceDetectArgs
@@ -19,6 +17,8 @@ public class MegaSilenceDetectArgs : SilenceDetectArgs
 	public bool WriteFFMpegSilenceLogs { get; set; }
 
 	public bool RunFFScript { get; set; } = true;
+
+	public bool WriteAuditionMarkerCsvs { get; set; } = true;
 }
 
 public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs

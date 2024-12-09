@@ -43,13 +43,19 @@ public class Program
 	{
 		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and more");
 
+		Command sdPar = r.AddAutoCommand<SilenceDetectParentCmd>();
+
+		Command runffCmd = sdPar.AddAutoCommand<RunFFMpegSilenceDetectCmd>();
+
+		runffCmd.AddAutoCommand<SilenceDetectFFLogToCsvSingleCmd>();
+
+
+		Command audCmd = sdPar.AddAutoCommand<AuditionMarkerCsvsCmd>();
+
+		audCmd.AddAutoCommand<AuditionMarkerCsvSingleCmd>();
+
 		r.AddAutoCommand<SetDirectoryCmd>()
-			.AddAutoCommand<PrintCurrDirectoryCmd>(); // adds print sub-cmd to first returned cd cmd
-
-		r.AddAutoCommand<MegaSilenceDetectCmd>();
-
-		//r.AddAutoCommand<SilenceDetectWriteFFMpegCmd>();
-		//r.AddAutoCommand<ConvertFFLogsToCSVsCmd>();
+			.AddAutoCommand<PrintCurrDirectoryCmd>();
 
 		r.AddAutoCommand<WriteSplitScriptCmd>();
 

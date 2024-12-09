@@ -25,8 +25,15 @@ public class TrackTimeStampsCsvV2
 	{
 		Pad = pad;
 		Stamps = stamps;
-		FileName = fileName ?? "";
-		FilePath = filePath ?? Path.GetFileName(FileName);
+
+		if(fileName.IsNullOrHasNone() && filePath.NotNulle()) {
+			FileName = Path.GetFileName(filePath);
+			FilePath = filePath; // Path.GetFullPath(filePath);
+		}
+		else {
+			FileName = fileName ?? "";
+			FilePath = filePath ?? Path.GetFileName(FileName);
+		}
 	}
 
 	public string Write()

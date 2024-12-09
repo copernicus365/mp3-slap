@@ -1,13 +1,9 @@
 using CommandLine.EasyBuilder.Auto;
 
-using Mp3Slap.General;
-
 namespace Mp3Slap.CLI;
 
-[Command(
-	"current-directory",
-	Alias = "cd",
-	Description = "Sets the current environment directory for the app globally")]
+[Command("current-directory", description: "Sets the current environment directory for the app globally",
+	Alias = "cd")]
 public class SetDirectoryCmd
 {
 	[Argument("value", description: "Directory path to set as root.")]

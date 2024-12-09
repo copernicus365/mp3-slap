@@ -15,21 +15,22 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="CommandLine.EasyBuilder" Version="1.0.5" />
     <PackageReference Include="DotNetXtensions" Version="4.3.0" />
     <PackageReference Include="DotNetXtensions.Json" Version="3.5.0" />
     <PackageReference Include="DotNetXtensions.Text" Version="3.3.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-    <PackageReference Include="CommandLine.EasyBuilder" Version="1.0.4" />
     <PackageReference Include="Glob" Version="1.2.0-alpha0037" />
   </ItemGroup>
 
-  <!--<ItemGroup>
-    <ProjectReference Include="..\..\CommandLine.EasyBuilder\CommandLine.EasyBuilder\CommandLine.EasyBuilder.csproj" />
-  </ItemGroup>-->
   <ItemGroup>
     <Content Include="ignore\startup-debug-path.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <!--<ItemGroup>
+    <ProjectReference Include="..\..\CommandLine.EasyBuilder\CommandLine.EasyBuilder\CommandLine.EasyBuilder.csproj" />
+  </ItemGroup>-->
 
 </Project>

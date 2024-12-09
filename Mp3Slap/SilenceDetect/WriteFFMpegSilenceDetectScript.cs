@@ -58,7 +58,7 @@ public class WriteFFMpegSilenceDetectScript
 			FilePath = path,
 			LogDirectory = logDir,
 			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
-			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true)
+			SilenceDetectCsvPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true)
 		};
 		info.Init();
 
@@ -116,7 +116,7 @@ public class WriteFFMpegSilenceDetectScript
 			string script = $"""
 echo "--- i: {i,2} run silence detect on: '{info.FileName}' ---"
 
-echo "log: '{info.SilenceDetectCsvParsedLogPath}"
+echo "log: '{info.SilenceDetectCsvPath}"
 
 sleep 2
 

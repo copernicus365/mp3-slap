@@ -51,7 +51,7 @@ public class MegaSilenceDetectScript
 			FilePath = path,
 			LogDirectory = logDir,
 			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
-			SilenceDetectCsvParsedLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true),
+			SilenceDetectCsvPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true),
 			AuditionMarkersCsvPath = LogFileNames.GetAuditionMarkersPath(logDir, fname),
 			SilenceDuration = silenceDur,
 		};
@@ -96,28 +96,6 @@ public class MegaSilenceDetectScript
 		}
 	}
 
-	public async Task RUN_Write_AuditionMarkerCSVs_From_SilenceCSVs()
-	{
-		for(int i = 0; i < Infos.Count; i++) {
-			Mp3ToSplitPathsInfo info = Infos[i];
-
-			if(!File.Exists(info.SilenceDetectCsvParsedLogPath))
-				continue;
-
-			string silenceDetCsvLog = File.ReadAllText(info.SilenceDetectCsvParsedLogPath);
-
-			TrackTimeStampsCsvV2 csv2 = new();
-			info.Stamps = csv2.Parse(silenceDetCsvLog);
-
-			AuditionCsv acsv = new();
-			acsv.SetMarkers(info.Stamps, "Ch ", firstDesc: $"From mp3-slap silence csv logs - {csv2.FileName}");
-
-			string audCsv = acsv.WriteCsv(includeHeader: true);
-
-			File.WriteAllText(info.AuditionMarkersCsvPath, audCsv);
-		}
-	}
-
 	public async Task RUN_All()
 	{
 		if(Infos.IsNulle())
@@ -133,36 +111,23 @@ public class MegaSilenceDetectScript
 			if(!args.RunFFScript)
 				continue;
 
-			info.FFSplitOutput = await ProcessHelper.RunFFMpegProcess(info.FFMpegScriptArgsNoLogPath);
+			info.FFSplitOutput = await ProcessHelperX.RunFFMpegProcess(info.FFMpegScriptArgsNoLogPath);
 
 			if(args.WriteFFMpegSilenceLogs)
 				File.WriteAllText(info.SilenceDetectRawLogPath, info.FFSplitOutput);
 
-			ParseStampsAndWrite(info);
+			WriteFFMpegSilDetLogToCsvs ww = new() {
+				Pad = args.Pad,
+				WriteAuditionMarkerCsvs = args.WriteAuditionMarkerCsvs,
+			};
+			await ww.RUN(info);
 		}
 
 		Scripts = sb.ToString();
 
 		_writeFinalCombinedFFMpegShellScriptsToFile(Infos.First().Directory);
 	}
-
-	public void ParseStampsAndWrite(Mp3ToSplitPathsInfo info)
-	{
-		FFSilenceTracksParser split = new(
-			text: info.FFSplitOutput,
-			pad: args.Pad);
-
-		info.Stamps = split.Run();
-		//split.Stamps.SetPads(args.Pad);
-
-		TrackTimeStampsCsvV2 csv2 = new();
-		csv2.InitForWrite(info.FileName, args.Pad, split.Stamps, filePath: info.FilePath);
-
-		string csvContent = csv2.Write();
-
-		File.WriteAllText(info.SilenceDetectCsvParsedLogPath, csvContent);
-	}
-
+	
 	void _startScript()
 	{
 		sb = new();
@@ -180,7 +145,7 @@ public class MegaSilenceDetectScript
 		string script = $"""
 echo "--- i: {i,2} run silence detect on: '{info.FileName}' ---"
 
-echo "log: '{info.SilenceDetectCsvParsedLogPath}"
+echo "log: '{info.SilenceDetectCsvPath}"
 
 sleep 2
 

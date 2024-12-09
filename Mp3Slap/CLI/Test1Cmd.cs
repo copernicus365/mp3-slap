@@ -62,7 +62,7 @@ public class Test1Cmd
 				CreateNoWindow = false,
 			};
 
-			string foutput = await ProcessHelper.RunFFMpegProcess(args);
+			string foutput = await ProcessHelperX.RunFFMpegProcess(args);
 
 				//si.Start_GetString(TimeSpan.FromMilliseconds(50));
 

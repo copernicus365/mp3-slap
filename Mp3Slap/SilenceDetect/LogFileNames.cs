@@ -1,26 +1,64 @@
+using DotNetXtensions;
+
 namespace Mp3Slap.SilenceDetect;
 
 public partial class LogFileNames
 {
+	public const string log_sildet_ffmpeg_ext = "silencedetect.log";
+	public const string log_sildet_csv_ext = "silencedetect-parsed.csv";
+	public const string log_sildet_audcsv_ext = "audition-markers.csv";
+
 	public static string GetLogPath(string logDir, string fileName, bool parsedTxt)
 	{
 		string logPath = parsedTxt
-			? $"{logDir}log#{fileName}#silencedetect-parsed.csv"
-			: $"{logDir}log#{fileName}#silencedetect.log";
+			? $"{logDir}log#{fileName}#{log_sildet_csv_ext}"
+			: $"{logDir}log#{fileName}#{log_sildet_ffmpeg_ext}";
 		return logPath;
 	}
 
 	public static string GetAuditionMarkersPath(string logDir, string fileName)
 	{
-		string logPath = $"{logDir}log#{fileName}#audition-markers.csv";
+		string logPath = $"{logDir}log#{fileName}#{log_sildet_audcsv_ext}";
 		return logPath;
+	}
+
+	public static string GetAuditionMarkersCsvPathFromSilenceCsvPath(string silenceDetectCsvPath)
+	{
+		string p = silenceDetectCsvPath;
+		if(p.EndsWith(log_sildet_csv_ext, StringComparison.OrdinalIgnoreCase)) {
+			return p.CutEnd(log_sildet_csv_ext.Length) + log_sildet_audcsv_ext;
+		}
+		return p + "-" + log_sildet_audcsv_ext;
+	}
+
+	public static string GetSilenceDetCsvPathFromFFMpegLogPath(string fflog, bool forAudMarkers = false)
+	{
+		string p = fflog;
+		string newExt = !forAudMarkers
+			? log_sildet_csv_ext
+			: log_sildet_audcsv_ext;
+		if(p.EndsWith(log_sildet_ffmpeg_ext, StringComparison.OrdinalIgnoreCase)) {
+			return p.CutEnd(log_sildet_ffmpeg_ext.Length) + newExt;
+		}
+		return p + "-" + newExt;
+	}
+
+	public static string GetAuditionMarkersPathFromCsvLog(string csvLogPath)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(csvLogPath);
+
+		if(!csvLogPath.EndsWith(log_sildet_csv_ext))
+			return null;
+
+		string npath = csvLogPath.CutEnd(log_sildet_csv_ext.Length);
+		return npath + log_sildet_audcsv_ext;
 	}
 
 	public static string GetParsedCsvPathFromRaw(string file)
 	{
-		if(!file.EndsWith("silencedetect.log"))
+		if(!file.EndsWith(log_sildet_ffmpeg_ext))
 			return null;
-		string res = file.CutEnd("silencedetect.log".Length) + "silencedetect-parsed.csv";
+		string res = file.CutEnd(log_sildet_ffmpeg_ext.Length) + log_sildet_csv_ext;
 		return res;
 	}
 

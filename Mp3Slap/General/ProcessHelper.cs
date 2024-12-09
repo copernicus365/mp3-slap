@@ -4,20 +4,6 @@ namespace Mp3Slap.General;
 
 public static class ProcessHelper
 {
-
-	public static async Task<string> RunFFMpegProcess(string args)
-	{
-		ProcessStartInfo si = new() {
-			FileName = "ffmpeg",
-			Arguments = args,
-			UseShellExecute = false,
-			CreateNoWindow = false,
-		};
-
-		string output = await si.Start_GetString(TimeSpan.FromMilliseconds(50));
-		return output;
-	}
-
 	public static async Task<string> Start_GetString(
 		this ProcessStartInfo startInfo,
 		TimeSpan delay = default)
