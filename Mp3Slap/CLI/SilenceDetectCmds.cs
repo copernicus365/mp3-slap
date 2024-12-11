@@ -7,11 +7,6 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 
-[Command("silence-detect",
-	Alias = "sd",
-	Description = "Grouping of silence detection related commands")]
-public class SilenceDetectParentCmd { }
-
 public class SilenceDetectBase
 {
 	[Option(

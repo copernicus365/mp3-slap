@@ -43,16 +43,14 @@ public class Program
 	{
 		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and more");
 
-		Command sdPar = r.AddAutoCommand<SilenceDetectParentCmd>();
+		Command sdGroup = r.AddAutoCommand<SilenceDetectGroupCmd>(); // "sd" / "silence-detect"
 
-		Command runffCmd = sdPar.AddAutoCommand<RunFFMpegSilenceDetectCmd>();
+		sdGroup.AddAutoCommand<FFMpegGroupCmd>() // "ff" / "ffmpeg"
+			.Auto<RunFFMpegSilenceDetectCmd>() // "run" / "run-group"
+			.Auto<SilenceDetectFFLogToCsvSingleCmd>(); // "to-csv"
 
-		runffCmd.AddAutoCommand<SilenceDetectFFLogToCsvSingleCmd>();
-
-
-		Command audCmd = sdPar.AddAutoCommand<AuditionMarkerCsvsCmd>();
-
-		audCmd.AddAutoCommand<AuditionMarkerCsvSingleCmd>();
+		sdGroup.AddAutoCommand<AuditionMarkerCsvsCmd>() // "aud-csv" / "audition-marker-csvs"
+			.Auto<AuditionMarkerCsvSingleCmd>(); // 
 
 		r.AddAutoCommand<SetDirectoryCmd>()
 			.AddAutoCommand<PrintCurrDirectoryCmd>();
@@ -104,5 +102,14 @@ public class Program
 		Environment.CurrentDirectory = CurrentDirectory = PathHelper.CleanDirPath(dir);
 		if(print)
 			WriteLine($"Current directory: {CurrentDirectory}");
+	}
+}
+
+public static class AutoBuilderFXADD
+{
+	public static Command Auto<TAuto>(this Command parentCmd) where TAuto : class, new()
+	{
+		var cmd11 = parentCmd.AddAutoCommand<TAuto>();
+		return parentCmd;
 	}
 }

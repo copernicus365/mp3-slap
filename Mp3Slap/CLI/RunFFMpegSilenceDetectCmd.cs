@@ -6,9 +6,9 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 
-[Command("ffmpeg",
-	Alias = "ff",
-	Description = "Mega: runs ffmpeg silencedetect scripts, one per detected input audio file, and then immediately converts that output (internally received) to converted CSV silence detect files, etc")]
+[Command("run-group",
+	Alias = "run",
+	Description = "Runs ffmpeg silencedetect scripts, OR at least generates scripts that call ffmpeg to do the same, one per detected input audio file, converting ff's arcane output to CSV files, etc etc")]
 public class RunFFMpegSilenceDetectCmd : SilenceDetectBase
 {
 	[Option(
