@@ -1,7 +1,5 @@
 using System.Text;
 
-using Mp3Slap.General;
-
 namespace Mp3Slap.SilenceDetect;
 
 public class MegaSilenceDetectScript
@@ -50,11 +48,9 @@ public class MegaSilenceDetectScript
 			FileName = fname,
 			FilePath = path,
 			LogDirectory = logDir,
-			SilenceDetectRawLogPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: false),
-			SilenceDetectCsvPath = LogFileNames.GetLogPath(logDir, fname, parsedTxt: true),
-			AuditionMarkersCsvPath = LogFileNames.GetAuditionMarkersPath(logDir, fname),
 			SilenceDuration = silenceDur,
 		};
+		info.SetLogPaths();
 		info.Init();
 		return info;
 	}
@@ -127,7 +123,7 @@ public class MegaSilenceDetectScript
 
 		_writeFinalCombinedFFMpegShellScriptsToFile(Infos.First().Directory);
 	}
-	
+
 	void _startScript()
 	{
 		sb = new();
@@ -170,7 +166,7 @@ sleep 2
 		string scriptPth = $"{directory}run-ffmpeg-silence-det-script-{_silenceDuration}s.sh";
 
 		if(RemoveRootDirFromScript) {
-			Scripts = Scripts.Replace(directory, "");
+			Scripts = Scripts.Replace(directory, "./");
 		}
 
 		if(args.WriteFFMpegSilenceLogs)

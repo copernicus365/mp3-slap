@@ -6,9 +6,9 @@ public class Mp3ToSplitPathsInfo
 	public string LogDirectory { get; init; }
 	public string FilePath { get; init; }
 	public string FileName { get; init; }
-	public string SilenceDetectRawLogPath { get; init; }
-	public string SilenceDetectCsvPath { get; init; }
-	public string AuditionMarkersCsvPath { get; init; }
+	public string SilenceDetectRawLogPath { get; set; }
+	public string SilenceDetectCsvPath { get; set; }
+	public string AuditionMarkersCsvPath { get; set; }
 
 	public double SilenceDuration { get; init; }
 

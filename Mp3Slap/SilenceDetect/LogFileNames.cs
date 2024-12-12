@@ -1,12 +1,19 @@
-using DotNetXtensions;
-
 namespace Mp3Slap.SilenceDetect;
 
-public partial class LogFileNames
+public static partial class LogFileNames
 {
 	public const string log_sildet_ffmpeg_ext = "silencedetect.log";
 	public const string log_sildet_csv_ext = "silencedetect-parsed.csv";
 	public const string log_sildet_audcsv_ext = "audition-markers.csv";
+
+	public static void SetLogPaths(this Mp3ToSplitPathsInfo info)
+	{
+		string logDir = info.LogDirectory;
+		string fname = info.FileName;
+		info.SilenceDetectRawLogPath = GetLogPath(logDir, fname, parsedTxt: false);
+		info.SilenceDetectCsvPath = GetLogPath(logDir, fname, parsedTxt: true);
+		info.AuditionMarkersCsvPath = GetAuditionMarkersPath(logDir, fname);
+	}
 
 	public static string GetLogPath(string logDir, string fileName, bool parsedTxt)
 	{
