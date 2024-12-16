@@ -10,7 +10,7 @@ namespace Mp3Slap.CLI.SilenceDetect;
 	"csv-logs",
 	Alias = "csvs",
 	Description = "Reprocesses silence detect csv logs[1] and possibly (re)generating Adobe Audition marker csv files ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
-public class ReprocessCsvLogsCmd : SilenceDetectBase
+public class ProcessCsvLogsFoldersCmd : SilenceDetectBase
 {
 	public async Task HandleAsync()
 	{

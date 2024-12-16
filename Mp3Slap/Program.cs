@@ -48,14 +48,14 @@ public class Program
 
 		sdGroup
 			.AddAutoCommand<FullFolderGroupCmd>() // "gr" / "group"
-			.Auto<RunFFMpegSilenceDetectCmd>() // "run-ff" / "run-ff-full"
-			.Auto<ReprocessCsvLogsCmd>() // "csv-logs" / "csvs",
+			.Auto<RunFFMpegSilenceDetectOnFolderCmd>() // "run-ff" / "run-ff-full"
+			.Auto<ProcessCsvLogsFoldersCmd>() // "csv-logs" / "csvs",
 			;
 
 		sdGroup
 			.AddAutoCommand<SDCsvGroupCmd>() // "csv" / "sd-csv"
-			.Auto<SilenceDetectFFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
-			.Auto<ReprocessCsvLogCmd>() // "csv-log" / "single"
+			.Auto<FFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
+			.Auto<ProcessCsvLogCmd>() // "csv-log" / "single"
 			;
 
 		r.AddAutoCommand<SetDirectoryCmd>()

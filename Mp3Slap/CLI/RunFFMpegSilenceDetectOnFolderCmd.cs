@@ -9,7 +9,7 @@ namespace Mp3Slap.CLI.SilenceDetect;
 [Command("run-ff-full",
 	Alias = "run-ff",
 	Description = "Runs ffmpeg silencedetect scripts, OR at least generates scripts that call ffmpeg to do the same, one per detected input audio file, converting ff's arcane output to CSV files, etc etc")]
-public class RunFFMpegSilenceDetectCmd : SilenceDetectBase
+public class RunFFMpegSilenceDetectOnFolderCmd : SilenceDetectBase
 {
 	[Option(
 		"--only-write-ffmpeg-scripts",

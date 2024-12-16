@@ -10,7 +10,7 @@ namespace Mp3Slap.CLI.SilenceDetect;
 	"fflog-to-csv",
 	Alias = "ff-to-csv",
 	Description = "Generates a single silence detections csv file (silencedetect-parsed.csv) from ffmpeg silencedetect log")]
-public class SilenceDetectFFLogToCsvSingleCmd
+public class FFLogToCsvSingleCmd
 {
 	[Argument("sd-ff-log",
 		description: "Source ffmpeg silencedetect log result output")]
