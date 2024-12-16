@@ -7,9 +7,10 @@ using Mp3Slap.SilenceDetect;
 namespace Mp3Slap.CLI.SilenceDetect;
 
 [Command(
-	"single",
-	description: "Generate a single audition markers csv file from a single4 silencedetect-parsed.csv")]
-public class AuditionMarkerCsvSingleCmd
+	"csv-log",
+	Alias = "single",
+	Description = "Reprocesses a single silence detect csv log[1] and possibly (re)generates its Adobe Audition marker csv file ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
+public class ReprocessCsvLogCmd
 {
 	[Argument("csv-log",
 		description: "Path of the silencedetect csv log path (e.g. `log#foo1.mp3#silencedetect-parsed.csv`) to generate an audition markers csv from")]

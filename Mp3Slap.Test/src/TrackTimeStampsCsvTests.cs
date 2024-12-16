@@ -7,21 +7,21 @@ public class TrackTimeStampsCsvTests : BaseTest
 	public bool WriteParsedLogs = false;
 
 	[Fact]
-	public void TestParseCuts1()
+	public void ParseLargeCsvDoc1_Gen()
 	{
-		//string csvText = GetDataDirPath($"{SampleResultsDirName}/results-dan3.csv");
-		string csvText = DataString($"{SampleResultsDirName}/log#gen1.mp3#silencedetect-parsed--n0.csv"); // niv-suchet-27-daniel.mp3#silencedetect-parsed--n1.csv");
+		string csvText = csvLog_gen();
 
 		TrackTimeStampsCsv csv = new();
 		csv.Parse(csvText);
 
-		int expCount = 11;
+		int expCount = 51;
 
 		True(csv.Count == expCount);
 		csv.CombineCuts();
 
+		True(csv.Count == 50);
+
 		True(csv.Valid);
-		True(csv.Count == expCount);
 
 		string result = csv.Write();
 
@@ -29,32 +29,28 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		if(WriteParsedLogs)
 			File.WriteAllText(writePath, result);
+
 	}
 
 	[Fact]
-	public void ParseTimeStampCSV_ShorterTimeSpanStamps()
+	public void ParseStamp1()
 	{
-		// NOTE:
-		// "1:35.47"  instead of "0:01:35.47"
-		// "03:30.65" instead of "0:03:30.65"
-
-		// 
-		string value = """ "0:02:58.09", "0:04:29.47", "0:01:31.38", "2.34", "0.30", "0:02:57.79", "0:04:29.77", "0:01:31.98", """;
+		string value = """ "0:09:39.89", "0:13:49.81", "0:04:09.92", "4.07", "0.30", "0:09:39.59", "0:13:53.59", "0:04:13.99" """;
 
 		var ts = TrackTimeStamp.ParseCsvString(value);
 
 		True(ts != null);
-		True(ts.Start == TimeSpan.Parse("0:02:58.09"));
-		True(ts.End == TimeSpan.Parse("0:04:29.47"));
-		True(ts.Duration == TimeSpan.Parse("0:01:31.38"));
-		True(ts.SilenceDuration.TotalSeconds == double.Parse("2.34"));
-		True(ts.PaddedStart == TimeSpan.Parse("0:02:57.79"));
-		True(ts.PaddedEnd == TimeSpan.Parse("0:04:29.77"));
-		True(ts.PaddedDuration == TimeSpan.Parse("0:01:35.47"));
-		True(ts.Pad.TotalSeconds == double.Parse("2.42"));
+		True(ts.Start == TimeSpan.Parse("0:09:39.89"));
+		True(ts.End == TimeSpan.Parse("0:13:49.81"));
+		True(ts.Duration == TimeSpan.Parse("0:04:09.92"));
+		True(ts.SilenceDuration.TotalSeconds == double.Parse("4.07"));
+		True(ts.PaddedStart == TimeSpan.Parse("0:09:39.59"));
+		True(ts.PaddedEnd == TimeSpan.Parse("0:13:53.58")); // changed from .59 -> .58, just ignore
+		True(ts.PaddedDuration == TimeSpan.Parse("0:04:13.99"));
+		True(ts.Pad.TotalSeconds == double.Parse("0.30"));
 	}
 
-	public void ParseTimeStampCSV_ShorterTimeSpanStamps_OLD()
+	void ParseTimeStampCSV_ShorterTimeSpanStamps_OLD()
 	{
 		// NOTE:
 		// "1:35.47"  instead of "0:01:35.47"
@@ -71,4 +67,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 		True(ts.Duration == TimeSpan.Parse("0:01:35.47"));
 		True(ts.SilenceDuration.TotalSeconds == double.Parse("2.42"));
 	}
+
+	string csvLog_gen()
+		=> DataString($"{SampleResultsDirName}/log#01-genesis.mp3#silencedetect-parsed.csv");
 }

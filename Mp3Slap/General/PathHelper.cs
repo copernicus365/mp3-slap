@@ -1,3 +1,5 @@
+using Mp3Slap.SilenceDetect;
+
 namespace Mp3Slap.General;
 
 public static class PathHelper
@@ -17,8 +19,16 @@ public static class PathHelper
 	public static string CleanToRelative(string dir, string path)
 		=> path.StartsWith(dir) ? path[dir.Length..] : path;
 
-	public static string[] GetFilesFromDirectory(
+	public static string[] GetFilesFromDirectory(SilenceDetectFullFolderArgs args)
+	{
+		string[] paths = GetFilesFromDirectory(
+			args.Directory,
+			searchPattern: args.AudioFilesSearchPattern,
+			includeSubDirectories: args.IncludeSubDirectories);
+		return paths;
+	}
 
+	public static string[] GetFilesFromDirectory(
 		string dir,
 		string searchPattern,
 		bool includeSubDirectories = false)

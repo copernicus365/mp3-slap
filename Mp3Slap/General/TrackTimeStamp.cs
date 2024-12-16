@@ -23,6 +23,9 @@ public class TrackTimeStamp
 		SetPads(TimeSpan.FromSeconds(paddedDuration));
 	}
 
+	/// <summary>
+	/// For FFMpeg's silence detect script that has 3 main args per silence detected, as doubles / decimals.
+	/// </summary>
 	public TrackTimeStamp(double start, double end, double? silenceDuration = null, double pad = 0)
 	{
 		if(start < 0 || end < start || silenceDuration < 0)

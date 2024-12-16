@@ -41,7 +41,7 @@ public class SilenceDetectBase
 		"--search-pattern",
 		"-s",
 		"Wildcard pattern to match audio files within directory.",
-		DefVal = SilenceDetectWriteFFMpegScriptArgs.AudioFilesSearchPatternDef)]
+		DefVal = SilenceDetectArgs.AudioFilesSearchPatternDef)]
 	public string AudioFilesSearchPattern { get; set; }
 
 	[Option(
@@ -58,7 +58,7 @@ public class SilenceDetectBase
 		DefVal = true)]
 	public bool Verbose { get; set; }
 
-	protected bool SetArgs(MegaSilenceDetectArgs args)
+	protected bool SetArgs(SilenceDetectFullFolderArgs args)
 	{
 		if(_parseDurationsError != null || Durations.IsNulle()) {
 			$"Durations invalid: {_parseDurationsError}".Print();

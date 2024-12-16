@@ -3,7 +3,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Test;
 
-public class FFSilenceTracksParserTests : BaseTest
+public class FFSilenceTracksParserTests : FFSilenceDetectBase
 {
 	FFSilenceTracksParser _RunRawLogParseSilences(
 		string log,
@@ -14,7 +14,7 @@ public class FFSilenceTracksParserTests : BaseTest
 
 		FFSilenceTracksParser split = new(log);
 		
-		List<TrackTimeStamp> tracks = split.Run();
+		List<TrackTimeStamp> tracks = split.Parse();
 
 		int tracksCount = tracks.Count;
 
@@ -66,7 +66,7 @@ public class FFSilenceTracksParserTests : BaseTest
 
 	string _ToScriptRude(FFSilenceTracksParser split)
 	{
-		List<TrackTimeStamp> tracks = split.Run();
+		List<TrackTimeStamp> tracks = split.Parse();
 
 		string result = tracks.JoinToString(v => $"  {v.ToCsvString2()},", "\n");
 		//$"  ('{v.Start}', '{v.End}', '{v.Duration}')", "\n");
@@ -96,7 +96,7 @@ for i in range(len(list)):
 
 	string _ToScriptRude2(FFSilenceTracksParser split, string srcMp3, string destMp3Templ)
 	{
-		List<TrackTimeStamp> tracks = split.Run();
+		List<TrackTimeStamp> tracks = split.Parse();
 
 		string result = tracks.JoinToString(v => $"  {v.ToCsvString2()},", "\n");
 		//$"  ('{v.Start}', '{v.End}', '{v.Duration}')", "\n");
@@ -128,12 +128,6 @@ for i in range(len(list)):
 """;
 		return script;
 	}
-
-	static string _getSampleFFMpegSilenceLogPATH(string fname)
-		=> $"sample-ffmpeg-silence-logs/{fname}";
-
-	string _GetFFSilencesRawLog(string fname)
-		=> DataString(_getSampleFFMpegSilenceLogPATH(fname));
 
 
 	//[Fact]

@@ -7,8 +7,9 @@ using Mp3Slap.SilenceDetect;
 namespace Mp3Slap.CLI.SilenceDetect;
 
 [Command(
-	"to-csv",
-	description: "Generate a single silence detections csv file (silencedetect-parsed.csv) from ffmpeg silencedetect log")]
+	"fflog-to-csv",
+	Alias = "ff-to-csv",
+	Description = "Generate a single silence detections csv file (silencedetect-parsed.csv) from ffmpeg silencedetect log")]
 public class SilenceDetectFFLogToCsvSingleCmd
 {
 	[Argument("sd-ff-log",
@@ -41,21 +42,8 @@ public class SilenceDetectFFLogToCsvSingleCmd
 		}
 
 		string srcPath = Src.FullName;
-		string dest = SaveCsvPath
-			?? LogFileNames.GetSilenceDetCsvPathFromFFMpegLogPath(srcPath);
+		string dest = SaveCsvPath ?? LogFileNames.GetSilenceDetCsvPathFromFFMpegLogPath(srcPath);
 		string audMarkersPath = LogFileNames.GetSilenceDetCsvPathFromFFMpegLogPath(srcPath, forAudMarkers: true);
-
-		if(!AllowOverwrite && File.Exists(dest)) {
-			"Save path exists and overwrite not allowed".Print();
-			return;
-		}
-
-		string logCont = File.ReadAllText(srcPath);
-
-		if(logCont.IsNulle() || logCont.Length > 100_000) {
-			"Invalid content".Print();
-			return;
-		}
 
 		WriteFFMpegSilDetLogToCsvs ww = new() {
 			Pad = Pad,
@@ -65,7 +53,8 @@ public class SilenceDetectFFLogToCsvSingleCmd
 			ffLogPath: srcPath,
 			csvPath: dest,
 			audMarkersPath: audMarkersPath,
-			ffLogContent: logCont,
-			audioFilePath: null);
+			ffLogContent: null,
+			audioFilePath: null,
+			allowOverwriteCsv: AllowOverwrite);
 	}
 }

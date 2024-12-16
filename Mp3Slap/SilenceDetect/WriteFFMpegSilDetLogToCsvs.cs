@@ -8,13 +8,13 @@ public class WriteFFMpegSilDetLogToCsvs
 
 
 	FFSilenceTracksParser split;
-	TrackTimeStampsCsvV2 csv2;
+	TrackTimeStampsCsv csv2;
 	WriteAuditionMarkerCSVs wcsv;
 
 
-	public async Task RUN(Mp3ToSplitPathsInfo info)
+	public async Task<SResult> RUN(Mp3ToSplitPathsInfo info)
 	{
-		await RUN(
+		var res = await RUN(
 			ffLogPath: info.SilenceDetectRawLogPath,
 			csvPath: info.SilenceDetectCsvPath,
 			audMarkersPath: info.AuditionMarkersCsvPath,
@@ -22,22 +22,34 @@ public class WriteFFMpegSilDetLogToCsvs
 			audioFilePath: info.FilePath);
 
 		info.Stamps = split.Stamps;
+		return res;
 	}
 
-	public async Task RUN(
+	public async Task<SResult> RUN(
 		string ffLogPath,
 		string csvPath,
 		string audMarkersPath = null,
 		string ffLogContent = null,
-		string audioFilePath = null)
+		string audioFilePath = null,
+		bool allowOverwriteCsv = true)
 	{
-		ffLogContent ??= File.ReadAllText(ffLogPath);
+		if(!allowOverwriteCsv && File.Exists(csvPath))
+			return new SResult(false, "Save path exists and overwrite not allowed");
+
+		if(ffLogContent.IsNulle()) {
+			ffLogContent = File.ReadAllText(ffLogPath);
+
+			if(ffLogContent.NotInRange(400, 100_000))
+				return new SResult(false, "Source doesn't exist or invalid length");
+		}
 
 		split = new(
 			text: ffLogContent,
 			pad: Pad);
 
-		var stamps = split.Run();
+		split.Parse(setMeta: true);
+
+		FFAudioMeta meta = split.Meta;
 		//split.Stamps.SetPads(args.Pad);
 
 		csv2 = new();
@@ -51,5 +63,7 @@ public class WriteFFMpegSilDetLogToCsvs
 			wcsv = new();
 			await wcsv.RUN(audMarkersPath, csvContent);
 		}
+
+		return new SResult(true);
 	}
 }

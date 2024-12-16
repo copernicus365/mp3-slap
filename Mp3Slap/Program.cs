@@ -43,21 +43,23 @@ public class Program
 	{
 		RootCommand r = new("mp3 SLAP! Helper lib to ffmpeg and more");
 
-		Command sdGroup = r.AddAutoCommand<SilenceDetectGroupCmd>(); // "sd" / "silence-detect"
+		Command sdGroup = r
+			.AddAutoCommand<SilenceDetectGroupCmd>(); // "sd" / "silence-detect"
 
-		sdGroup.AddAutoCommand<FFMpegGroupCmd>() // "ff" / "ffmpeg"
-			.Auto<RunFFMpegSilenceDetectCmd>() // "run" / "run-group"
-			.Auto<SilenceDetectFFLogToCsvSingleCmd>(); // "to-csv"
+		sdGroup
+			.AddAutoCommand<FullFolderGroupCmd>() // "gr" / "group"
+			.Auto<RunFFMpegSilenceDetectCmd>() // "run-ff" / "run-ff-full"
+			.Auto<ReprocessCsvLogsCmd>() // "csv-logs" / "csvs",
+			;
 
-		sdGroup.AddAutoCommand<AuditionMarkerCsvsCmd>() // "aud-csv" / "audition-marker-csvs"
-			.Auto<AuditionMarkerCsvSingleCmd>(); // 
+		sdGroup
+			.AddAutoCommand<SDCsvGroupCmd>() // "csv" / "sd-csv"
+			.Auto<SilenceDetectFFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
+			.Auto<ReprocessCsvLogCmd>() // "csv-log" / "single"
+			;
 
 		r.AddAutoCommand<SetDirectoryCmd>()
 			.AddAutoCommand<PrintCurrDirectoryCmd>();
-
-		r.AddAutoCommand<WriteSplitScriptCmd>();
-
-		r.AddAutoCommand<Test1Cmd>();
 
 		return r;
 	}
@@ -82,7 +84,7 @@ public class Program
 
 	static bool TrySetRootDirFromStartupDebugTxt(ref string dir)
 	{
-		string path = ProjectPath.ProjPath("ignore/startup-debug-path.txt");
+		string path = ProjectPath.BaseDirectoryPath("ignore/startup.txt");
 		if(File.Exists(path)) {
 			string content = File.ReadAllLines(path)
 				.Select(ln => ln.NullIfEmptyTrimmed())

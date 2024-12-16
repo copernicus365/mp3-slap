@@ -37,8 +37,10 @@ public class WriteAuditionMarkerCSVs
 		string savePath,
 		string silenceDetCsvLog)
 	{
-		TrackTimeStampsCsvV2 csv2 = new();
+		TrackTimeStampsCsv csv2 = new();
 		List<TrackTimeStamp> stamps = csv2.Parse(silenceDetCsvLog);
+
+		csv2.CombineCuts();
 
 		AuditionCsv acsv = new();
 		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csv2.FileName}");
@@ -54,6 +56,6 @@ public class WriteAuditionMarkerCSVs
 
 }
 
-public record StampsCsvGroup(List<TrackTimeStamp> stamps, TrackTimeStampsCsvV2 csv, AuditionCsv acsv);
+public record StampsCsvGroup(List<TrackTimeStamp> stamps, TrackTimeStampsCsv csv, AuditionCsv acsv);
 
 public record SrcDestPaths(string SrcPath, string DestPath);

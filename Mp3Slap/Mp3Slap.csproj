@@ -24,9 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ignore\startup-debug-path.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="ignore\startup.txt" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <!--<ItemGroup>

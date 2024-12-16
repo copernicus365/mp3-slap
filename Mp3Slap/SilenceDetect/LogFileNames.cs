@@ -81,34 +81,33 @@ public static partial class LogFileNames
 		return val;
 	}
 
-
-	public static TrackTimeStampsCsv GetSilenceLogPathsEtc(string rawFFSilenceLogPath, string srcDir = null)
-	{
-		rawFFSilenceLogPath = PathHelper.CleanPath(rawFFSilenceLogPath);
-
-		string rFileName = Path.GetFileName(rawFFSilenceLogPath);
-
-		string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(rawFFSilenceLogPath));
-
-		if(srcDir != null)
-			srcDir = PathHelper.CleanDirPath(srcDir);
-		else
-			srcDir = PathHelper.CleanDirPath(Path.GetDirectoryName(dir.CutEnd(1)));
-
-		string fileName = GetFileNameMinusLogNaming(rFileName);
-
-		TrackTimeStampsCsv csv = new() {
-			Name = fileName,
-			FileName = fileName,
-			SrcDir = srcDir,
-			SrcPath = srcDir + fileName,
-			LogPath = rawFFSilenceLogPath,
-			CsvLogPath = GetLogPath(dir, fileName, parsedTxt: true),
-		};
-		return csv;
-	}
-
 	[GeneratedRegex("""#(.*)#""")]
 	private static partial Regex Rx1();
-
 }
+
+//public static TrackTimeStampsCsv GetSilenceLogPathsEtc(string rawFFSilenceLogPath, string srcDir = null)
+//{
+//	rawFFSilenceLogPath = PathHelper.CleanPath(rawFFSilenceLogPath);
+
+//	string rFileName = Path.GetFileName(rawFFSilenceLogPath);
+
+//	string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(rawFFSilenceLogPath));
+
+//	if(srcDir != null)
+//		srcDir = PathHelper.CleanDirPath(srcDir);
+//	else
+//		srcDir = PathHelper.CleanDirPath(Path.GetDirectoryName(dir.CutEnd(1)));
+
+//	string fileName = GetFileNameMinusLogNaming(rFileName);
+
+//	TrackTimeStampsCsv csv = new() {
+//		Name = fileName,
+//		FileName = fileName,
+//		SrcDir = srcDir,
+//		SrcPath = srcDir + fileName,
+//		LogPath = rawFFSilenceLogPath,
+//		CsvLogPath = GetLogPath(dir, fileName, parsedTxt: true),
+//	};
+//	return csv;
+//}
+

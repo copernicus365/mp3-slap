@@ -2,26 +2,22 @@ using System.Text;
 
 namespace Mp3Slap.SilenceDetect;
 
-public class MegaSilenceDetectScript
+public class SilenceDetectFullFolderScript
 {
-	readonly MegaSilenceDetectArgs args;
+	readonly SilenceDetectFullFolderArgs args;
 	readonly double _silenceDuration;
 
-	public string Dir => args.Directory;
-	public bool RemoveRootDirFromScript => args.WriteRelativePaths;
-	public bool VerboseScript => args.Verbose;
+	public bool Verbose => args.Verbose;
 
 	public string LogFolderName { get; private set; }
 
 
-	public MegaSilenceDetectScript(MegaSilenceDetectArgs args, double silenceDuration)
+	public SilenceDetectFullFolderScript(SilenceDetectFullFolderArgs args, double silenceDuration)
 	{
 		this.args = args;
 		_silenceDuration = silenceDuration;
 		LogFolderName = args.GetLogFolderName(_silenceDuration, fullPath: false);
 	}
-
-	public bool WriteCsvs { get; set; }
 
 	public string[] Paths { get; private set; }
 
@@ -31,7 +27,7 @@ public class MegaSilenceDetectScript
 	public void Init(string[] files)
 	{
 		Paths = files.Select(f => PathHelper.CleanPath(f)).ToArray();
-		RelPaths = Paths.Select(f => PathHelper.CleanToRelative(Dir, f)).ToArray();
+		RelPaths = Paths.Select(f => PathHelper.CleanToRelative(args.Directory, f)).ToArray();
 	}
 
 	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName, double silenceDur)
@@ -69,10 +65,7 @@ public class MegaSilenceDetectScript
 	{
 		Infos = [];
 
-		string[] paths = PathHelper.GetFilesFromDirectory(
-			Dir,
-			searchPattern: args.AudioFilesSearchPattern,
-			includeSubDirectories: args.IncludeSubDirectories);
+		string[] paths = PathHelper.GetFilesFromDirectory(args);
 
 		if(paths.IsNulle()) {
 			$"No files found".Print();
@@ -149,7 +142,7 @@ sleep 2
 """;
 		script = script.Trim('"'); // ?! can't get """ type string to not put "quotes"!
 
-		if(VerboseScript) {
+		if(Verbose) {
 			sb
 				.AppendLine(script)
 				.AppendLine();
@@ -165,7 +158,7 @@ sleep 2
 	{
 		string scriptPth = $"{directory}run-ffmpeg-silence-det-script-{_silenceDuration}s.sh";
 
-		if(RemoveRootDirFromScript) {
+		if(args.WriteRelativePaths) {
 			Scripts = Scripts.Replace(directory, "./");
 		}
 
@@ -174,16 +167,18 @@ sleep 2
 	}
 
 
-	public static async Task<MegaSilenceDetectScript[]> RunManyDurations(MegaSilenceDetectArgs args, Func<MegaSilenceDetectScript, Task> run)
+	public static async Task<SilenceDetectFullFolderScript[]> RunManyDurations(
+		SilenceDetectFullFolderArgs args,
+		Func<SilenceDetectFullFolderScript, Task> run)
 	{
 		double[] durations = args.SilenceDurations;
 
-		MegaSilenceDetectScript[] scripts = new MegaSilenceDetectScript[durations.Length];
+		SilenceDetectFullFolderScript[] scripts = new SilenceDetectFullFolderScript[durations.Length];
 
 		for(int i = 0; i < durations.Length; i++) {
 			double silenceDur = durations[i];
 
-			MegaSilenceDetectScript script = scripts[i] = new(args, silenceDur);
+			SilenceDetectFullFolderScript script = scripts[i] = new(args, silenceDur);
 
 			script.SetInfos();
 
@@ -193,5 +188,4 @@ sleep 2
 		}
 		return scripts;
 	}
-
 }

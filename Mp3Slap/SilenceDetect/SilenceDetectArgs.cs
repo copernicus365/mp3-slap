@@ -1,6 +1,6 @@
 namespace Mp3Slap.SilenceDetect;
 
-public class MegaSilenceDetectArgs : SilenceDetectArgs
+public class SilenceDetectFullFolderArgs : SilenceDetectArgs
 {
 	/// <summary>
 	/// Scripts to run ffmpeg, make them have relative paths
@@ -8,7 +8,6 @@ public class MegaSilenceDetectArgs : SilenceDetectArgs
 	public bool WriteRelativePaths { get; set; }
 
 	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
-	public const string AudioFilesSearchPatternDef = "*.mp3";
 
 	public bool IncludeSubDirectories { get; set; } = false;
 
@@ -21,35 +20,35 @@ public class MegaSilenceDetectArgs : SilenceDetectArgs
 	public bool WriteAuditionMarkerCsvs { get; set; } = true;
 }
 
-public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
-{
-	/// <summary>
-	/// Scripts to run ffmpeg, make them have relative paths
-	/// </summary>
-	public bool WriteRelativePaths { get; set; }
+//public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
+//{
+//	/// <summary>
+//	/// Scripts to run ffmpeg, make them have relative paths
+//	/// </summary>
+//	public bool WriteRelativePaths { get; set; }
 
-	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
+//	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
 
-	public bool IncludeSubDirectories { get; set; } = false;
+//	public bool IncludeSubDirectories { get; set; } = false;
 
-	public const string AudioFilesSearchPatternDef = "*.mp3";
-}
+//	public const string AudioFilesSearchPatternDef = "*.mp3";
+//}
 
-public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
-{
-	public double Pad { get; set; }
-}
+//public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
+//{
+//	public double Pad { get; set; }
+//}
 
-public class WriteSplitScriptArgs
-{
-	public string RemovePrefix { get; set; } // "NIV-Suchet-01-
+//public class WriteSplitScriptArgs
+//{
+//	public string RemovePrefix { get; set; } // "NIV-Suchet-01-
 
-	public string SrcFile { get; set; } //src="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/NIV-Suchet-01-Genesis.mp3"
+//	public string SrcFile { get; set; } //src="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/NIV-Suchet-01-Genesis.mp3"
 
-	public string CSVStamps { get; set; } //log="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/logs-3.5/log#NIV-Suchet-01-Genesis.mp3#silencedetect.log"
+//	public string CSVStamps { get; set; } //log="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/logs-3.5/log#NIV-Suchet-01-Genesis.mp3#silencedetect.log"
 
-	public string ExtrDir { get; set; } // test
-}
+//	public string ExtrDir { get; set; } // test
+//}
 
 public class SilenceDetectArgs
 {
@@ -62,6 +61,8 @@ public class SilenceDetectArgs
 	public const string DefaultLogFolder = "logs"; // $"logs-{DurationFolderID}";
 
 	public const string DurationFolderID = "{duration}";
+
+	public const string AudioFilesSearchPatternDef = "*.mp3";
 
 	public double[] SilenceDurations { get => silenceDurations; set => silenceDurations = value; }
 	double[] silenceDurations;

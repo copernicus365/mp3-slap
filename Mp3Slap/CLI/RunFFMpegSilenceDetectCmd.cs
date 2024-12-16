@@ -6,8 +6,8 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.CLI.SilenceDetect;
 
-[Command("run-group",
-	Alias = "run",
+[Command("run-ff-full",
+	Alias = "run-ff",
 	Description = "Runs ffmpeg silencedetect scripts, OR at least generates scripts that call ffmpeg to do the same, one per detected input audio file, converting ff's arcane output to CSV files, etc etc")]
 public class RunFFMpegSilenceDetectCmd : SilenceDetectBase
 {
@@ -41,7 +41,7 @@ public class RunFFMpegSilenceDetectCmd : SilenceDetectBase
 
 	public async Task HandleAsync()
 	{
-		MegaSilenceDetectArgs args = new() {
+		SilenceDetectFullFolderArgs args = new() {
 			RunFFScript = !OnlyWriteFFMpegScripts,
 			WriteFFMpegSilenceLogs = WriteFFMpegSilenceLogs,
 			WriteRelativePaths = WriteRelativePaths,
@@ -51,7 +51,7 @@ public class RunFFMpegSilenceDetectCmd : SilenceDetectBase
 		if(!SetArgs(args))
 			return;
 
-		MegaSilenceDetectScript[] res = await MegaSilenceDetectScript.RunManyDurations(
+		SilenceDetectFullFolderScript[] res = await SilenceDetectFullFolderScript.RunManyDurations(
 			args,
 			async script => await script.RUN_All());
 	}

@@ -1,36 +1,42 @@
 using System.Text;
 using System.Xml.Linq;
 
+using Mp3Slap.SilenceDetect;
+
 namespace Mp3Slap.General;
 
 public class TrackTimeStampsCsv
 {
-	public string Name { get; set; }
-
 	public string FileName { get; set; }
 
 	public int Count => Stamps?.Count ?? 0;
 
 	public double Pad { get; set; }
 
-	public string SrcDir { get; set; }
-
-	public string SrcPath { get; set; }
-
-	public string LogPath { get; set; }
-
-	public string CsvLogPath { get; set; }
+	public string FilePath { get; set; }
 
 	public List<TrackTimeStamp> Stamps { get; set; }
 
 	public bool Valid { get; set; }
 
-	public void Reset()
+	public void InitForWrite(
+		string fileName,
+		double pad,
+		List<TrackTimeStamp> stamps,
+		FFAudioMeta meta = null,
+		string filePath = null)
 	{
-		Name = SrcPath = LogPath = null;
-		Pad = 0;
-		Valid = false;
-		Stamps = [];
+		Pad = pad;
+		Stamps = stamps;
+
+		if(fileName.IsNullOrHasNone() && filePath.NotNulle()) {
+			FileName = Path.GetFileName(filePath);
+			FilePath = filePath; // Path.GetFullPath(filePath);
+		}
+		else {
+			FileName = fileName ?? "";
+			FilePath = filePath ?? Path.GetFileName(FileName);
+		}
 	}
 
 	public string Write()
@@ -42,7 +48,7 @@ public class TrackTimeStampsCsv
 
 		for(int i = 0; i < Stamps.Count; i++) {
 			TrackTimeStamp st = Stamps[i];
-			string res = st.ToCsvString2(); // pad: Pad);
+			string res = st.ToCsvString2();
 			sb.AppendLine(res);
 		}
 		sb.AppendLine();
@@ -55,11 +61,10 @@ public class TrackTimeStampsCsv
 	{
 		// # <info name="dan" path="NIV-Suchet-27-Daniel.mp3" fflog="logs/NIV-Suchet-27-Daniel.mp3-silence-detect-parsed.txt" />
 		string x = new XElement("info",
-			new XAttribute("name", Name ?? ""),
-			new XAttribute("pad", Pad),
+			new XAttribute("fileName", FileName ?? ""),
 			new XAttribute("count", Count),
-			new XAttribute("src", SrcPath ?? ""),
-			new XAttribute("log", LogPath ?? ""))
+			new XAttribute("pad", Pad),
+			new XAttribute("filePath", FilePath ?? ""))
 			.ToString(SaveOptions.DisableFormatting);
 		return x;
 	}
@@ -74,25 +79,24 @@ public class TrackTimeStampsCsv
 		}
 		catch { return; }
 
-		Name = x.AttributeN("name").ValueN().NullIfEmptyTrimmed();
-		SrcPath = x.AttributeN("src").ValueN().NullIfEmptyTrimmed();
-		LogPath = x.AttributeN("log").ValueN().NullIfEmptyTrimmed();
+		FileName = x.AttributeN("fileName").ValueN().NullIfEmptyTrimmed();
+		FilePath = x.AttributeN("filePath").ValueN().NullIfEmptyTrimmed();
 		Pad = x.AttributeN("pad").ValueN().NullIfEmptyTrimmed().ToDoubleN() ?? 0;
 	}
 
-	public void Parse(string text)
+	public List<TrackTimeStamp> Parse(string text)
 	{
-		Reset();
-
 		string[] lines = text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 		if(lines.IsNulle())
-			return;
+			return null;
 
 		string fline = lines[0];
 		if(fline[0] == '#' && fline.Contains("<info")) {
 			fline = fline[1..];
 			SetHeaderValsFromXml(fline);
 		}
+
+		Stamps ??= new(lines.Length);
 
 		for(int i = 0; i < lines.Length; i++) {
 			string ln = lines[i];
@@ -107,6 +111,7 @@ public class TrackTimeStampsCsv
 		}
 
 		Valid = Stamps.Count > 0;
+		return Stamps;
 	}
 
 	public void CombineCuts()
