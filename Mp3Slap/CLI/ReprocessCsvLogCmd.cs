@@ -9,7 +9,7 @@ namespace Mp3Slap.CLI.SilenceDetect;
 [Command(
 	"csv-log",
 	Alias = "single",
-	Description = "Reprocesses a single silence detect csv log[1] and possibly (re)generates its Adobe Audition marker csv file ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
+	Description = "Processes a single silence detect csv log[1] and possibly (re)generates its Adobe Audition marker csv file ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
 public class ReprocessCsvLogCmd
 {
 	[Argument("csv-log",
