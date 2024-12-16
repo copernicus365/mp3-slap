@@ -28,6 +28,12 @@ public class ProcessCsvLogCmd
 		DefVal = true)]
 	public bool AllowOverwrite { get; set; }
 
+	[Option("--resave-csv-log",
+		alias: "-resave",
+		description: "True to have or allow input csv log to be resaved (always, or if cuts were fixed)",
+		DefVal = true)]
+	public bool ResaveCsvLog { get; set; }
+
 	public async Task HandleAsync()
 	{
 		if(!CsvLog.Exists) {
@@ -35,26 +41,29 @@ public class ProcessCsvLogCmd
 			return;
 		}
 
-		string srcPath = CsvLog.FullName;
-		string dest = SaveAuditionCsvPath
-			?? LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcPath);
+		string srcCsvLogPath = CsvLog.FullName;
+		string destAudCsvPath = SaveAuditionCsvPath
+			?? LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
 
-		if(!AllowOverwrite && File.Exists(dest)) {
+		if(!AllowOverwrite && File.Exists(destAudCsvPath)) {
 			"Save path exists and overwrite not allowed".Print();
 			return;
 		}
 
-		string csvCont = File.ReadAllText(srcPath);
+		string csvCont = File.ReadAllText(srcCsvLogPath);
 
 		if(csvCont.IsNulle() || csvCont.Length > 50_000) {
 			"Invalid content".Print();
 			return;
 		}
 
-		WriteAuditionMarkerCSVs wcsv = new();
-		StampsCsvGroup g = await wcsv.RUN(dest, csvCont);
-
-		//g.stamps
+		WriteAuditionMarkerCSVs wcsv = new() {
+			ResaveCsvLogOnChange = ResaveCsvLog,
+		};
+		StampsCsvGroup g = await wcsv.RUN(
+			destAudCsvPath,
+			silenceDetCsvLog: csvCont,
+			silenceDetCsvLogPath: srcCsvLogPath);
 	}
 }
 

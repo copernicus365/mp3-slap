@@ -5,7 +5,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.General;
 
-public class TrackTimeStampsCsv
+public class SDTimeStampsCsv
 {
 	public string FileName { get; set; }
 
@@ -20,10 +20,18 @@ public class TrackTimeStampsCsv
 	public bool Valid { get; set; }
 
 	public void InitForWrite(
-		string fileName,
+		double pad,
+		List<TrackTimeStamp> stamps)
+	{
+		Pad = pad;
+		Stamps = stamps;
+	}
+
+	public void InitForWrite(
 		double pad,
 		List<TrackTimeStamp> stamps,
 		FFAudioMeta meta = null,
+		string fileName = null,
 		string filePath = null)
 	{
 		Pad = pad;
@@ -39,7 +47,7 @@ public class TrackTimeStampsCsv
 		}
 	}
 
-	public string Write()
+	public string WriteToString()
 	{
 		StringBuilder sb = new();
 

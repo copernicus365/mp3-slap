@@ -8,7 +8,8 @@ public class WriteFFMpegSilDetLogToCsvs
 
 
 	FFSilenceTracksParser split;
-	TrackTimeStampsCsv csv2;
+
+	SDTimeStampsCsv csvLg;
 	WriteAuditionMarkerCSVs wcsv;
 
 
@@ -52,10 +53,11 @@ public class WriteFFMpegSilDetLogToCsvs
 		FFAudioMeta meta = split.Meta;
 		//split.Stamps.SetPads(args.Pad);
 
-		csv2 = new();
-		csv2.InitForWrite(null, Pad, split.Stamps, filePath: audioFilePath);
+		csvLg = new(); //SDTimeStampsCsv
+		csvLg.InitForWrite(Pad, split.Stamps, meta: meta, filePath: audioFilePath);
 
-		string csvContent = csv2.Write();
+
+		string csvContent = csvLg.WriteToString();
 
 		File.WriteAllText(csvPath, csvContent);
 
@@ -63,7 +65,6 @@ public class WriteFFMpegSilDetLogToCsvs
 			wcsv = new();
 			await wcsv.RUN(audMarkersPath, csvContent);
 		}
-
 		return new SResult(true);
 	}
 }

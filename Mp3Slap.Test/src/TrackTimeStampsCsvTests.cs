@@ -11,7 +11,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string csvText = csvLog_gen();
 
-		TrackTimeStampsCsv csv = new();
+		SDTimeStampsCsv csv = new();
 		csv.Parse(csvText);
 
 		int expCount = 51;
@@ -23,7 +23,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		True(csv.Valid);
 
-		string result = csv.Write();
+		string result = csv.WriteToString();
 
 		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
 

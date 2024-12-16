@@ -2,6 +2,8 @@ namespace Mp3Slap.SilenceDetect;
 
 public class WriteAuditionMarkerCSVs
 {
+	public bool ResaveCsvLogOnChange { get; set; } = true;
+
 	public List<StampsCsvGroup> Items = [];
 
 	public string ChapterNamePrefix { get; set; } = "Ch ";
@@ -28,34 +30,40 @@ public class WriteAuditionMarkerCSVs
 		Mp3ToSplitPathsInfo info,
 		string silenceDetCsvLog)
 	{
-		StampsCsvGroup x = await RUN(info.AuditionMarkersCsvPath, silenceDetCsvLog);
+		StampsCsvGroup x = await RUN(info.AuditionMarkersCsvPath, silenceDetCsvLog, info.SilenceDetectCsvPath);
 		info.Stamps = x.stamps;
 		return x;
 	}
 
 	public async Task<StampsCsvGroup> RUN(
 		string savePath,
-		string silenceDetCsvLog)
+		string silenceDetCsvLog,
+		string silenceDetCsvLogPath = null)
 	{
-		TrackTimeStampsCsv csv2 = new();
-		List<TrackTimeStamp> stamps = csv2.Parse(silenceDetCsvLog);
+		SDTimeStampsCsv csvLg = new();
+		List<TrackTimeStamp> stamps = csvLg.Parse(silenceDetCsvLog);
 
-		csv2.CombineCuts();
+		csvLg.CombineCuts();
+
+		if(ResaveCsvLogOnChange && silenceDetCsvLogPath != null) {
+			silenceDetCsvLog = csvLg.WriteToString();
+			await File.WriteAllTextAsync(silenceDetCsvLogPath, silenceDetCsvLog);
+		}
 
 		AuditionCsv acsv = new();
-		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csv2.FileName}");
+		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csvLg.FileName}");
 
 		string audCsv = acsv.WriteCsv(includeHeader: true);
 
 		await File.WriteAllTextAsync(savePath, audCsv);
 
-		StampsCsvGroup x = new (stamps, csv2, acsv);
+		StampsCsvGroup x = new (stamps, csvLg, acsv);
 		Items.Add(x);
 		return x;
 	}
 
 }
 
-public record StampsCsvGroup(List<TrackTimeStamp> stamps, TrackTimeStampsCsv csv, AuditionCsv acsv);
+public record StampsCsvGroup(List<TrackTimeStamp> stamps, SDTimeStampsCsv csv, AuditionCsv acsv);
 
 public record SrcDestPaths(string SrcPath, string DestPath);
