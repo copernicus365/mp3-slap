@@ -6,44 +6,48 @@ public class ProcessSilDetCSV
 
 	public bool SaveAuditionCsv { get; set; } = true;
 
+	public bool NoErrorOnCsvNotExist { get; set; }
+
 	public List<SDStampsCsvProcessResult> Items = [];
 
 	public string ChapterNamePrefix { get; set; } = "Ch ";
+
+
 
 	public async Task RUN(List<Mp3ToSplitPathsInfo> infos)
 	{
 		if(infos.IsNulle()) return;
 
+		NoErrorOnCsvNotExist = true;
+
 		for(int i = 0; i < infos.Count; i++) {
 			Mp3ToSplitPathsInfo info = infos[i];
-
-			if(!File.Exists(info.SilenceDetectCsvPath))
-				continue;
-
-			string silenceDetCsvLog = File.ReadAllText(info.SilenceDetectCsvPath);
-			if(silenceDetCsvLog.IsNulle())
-				continue;
-
-			await RUN(info, silenceDetCsvLog);
+			ProcessSilDetCSVArgs args = new(info.SilenceDetectCsvPath, info.AuditionMarkersCsvPath);
+			await RUN(args);
 		}
 	}
 
-	public async Task<SDStampsCsvProcessResult> RUN(
-		Mp3ToSplitPathsInfo info,
-		string silenceDetCsvLog)
+	public async Task<SDStampsCsvProcessResult> RUN(ProcessSilDetCSVArgs args)
 	{
-		SDStampsCsvProcessResult x = await RUN(info.AuditionMarkersCsvPath, silenceDetCsvLog, info.SilenceDetectCsvPath);
-		info.Stamps = x.stamps;
-		return x;
-	}
+		string csvLog = args.csvLog.NullIfEmptyTrimmed();
+		string logPath = args.csvLogPath;
 
-	public async Task<SDStampsCsvProcessResult> RUN(
-		string savePath,
-		string silenceDetCsvLog,
-		string silenceDetCsvLogPath = null)
-	{
-		SDTimeStampsCsv csvLg = new();
-		List<TrackTimeStamp> stamps = csvLg.Parse(silenceDetCsvLog);
+		if(csvLog == null) {
+			if(!File.Exists(logPath)) {
+				if(NoErrorOnCsvNotExist)
+					return null;
+				throw new FileNotFoundException("", logPath);
+			}
+			csvLog = File.ReadAllText(logPath);
+		}
+
+		if(csvLog.NotInRange(10, 50_000)) {
+			"Invalid content".Print();
+			return null;
+		}
+
+		SilDetTimeStampsCSV csvLg = new();
+		List<TrackTimeStamp> stamps = csvLg.Parse(csvLog);
 
 		int origCnt = stamps.Count;
 
@@ -52,9 +56,9 @@ public class ProcessSilDetCSV
 		stamps = csvLg.Stamps;
 		int finCnt = stamps.Count;
 
-		if(ResaveCsvLogOnChange && silenceDetCsvLogPath != null) {
-			silenceDetCsvLog = csvLg.WriteToString();
-			await File.WriteAllTextAsync(silenceDetCsvLogPath, silenceDetCsvLog);
+		if(ResaveCsvLogOnChange && logPath != null) {
+			csvLog = csvLg.WriteToString();
+			await File.WriteAllTextAsync(logPath, csvLog);
 		}
 
 		AuditionCsv acsv = new();
@@ -63,10 +67,10 @@ public class ProcessSilDetCSV
 		string audCsv = acsv.WriteCsv(includeHeader: true);
 
 		if(SaveAuditionCsv) {
-			await File.WriteAllTextAsync(savePath, audCsv);
+			await File.WriteAllTextAsync(args.audMarkersCsvPath, audCsv);
 		}
 
-		SDStampsCsvProcessResult x = new(stamps, csvLg, acsv, silenceDetCsvLog, audCsv);
+		SDStampsCsvProcessResult x = new(stamps, csvLg, acsv, csvLog, audCsv);
 		Items.Add(x);
 		return x;
 	}
@@ -75,9 +79,12 @@ public class ProcessSilDetCSV
 
 public record SDStampsCsvProcessResult(
 	List<TrackTimeStamp> stamps,
-	SDTimeStampsCsv csv,
+	SilDetTimeStampsCSV csv,
 	AuditionCsv acsv,
-	string csvLongString = null,
-	string audMarkersCsvString = null);
+	string csvLog = null,
+	string audMarkersCsv = null);
 
-public record SrcDestPaths(string SrcPath, string DestPath);
+public record ProcessSilDetCSVArgs(
+	string csvLogPath,
+	string audMarkersCsvPath,
+	string csvLog = null);

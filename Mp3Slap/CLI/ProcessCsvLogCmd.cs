@@ -30,40 +30,12 @@ public class ProcessCsvLogCmd
 		}
 
 		string srcCsvLogPath = CsvLog.FullName;
-		string destAudCsvPath = //SaveAuditionCsvPath ??
-			LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
-
-		//if(!AllowOverwrite && File.Exists(destAudCsvPath)) {
-		//	"Save path exists and overwrite not allowed".Print();
-		//	return;
-		//}
-
-		string csvCont = File.ReadAllText(srcCsvLogPath);
-
-		if(csvCont.IsNulle() || csvCont.Length > 50_000) {
-			"Invalid content".Print();
-			return;
-		}
+		string destAudCsvPath = LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
 		 
 		ProcessSilDetCSV wcsv = new() {
 			ResaveCsvLogOnChange = ResaveCsvLog,
 		};
-		SDStampsCsvProcessResult g = await wcsv.RUN(
-			destAudCsvPath,
-			silenceDetCsvLog: csvCont,
-			silenceDetCsvLogPath: srcCsvLogPath);
+		ProcessSilDetCSVArgs args = new(srcCsvLogPath, destAudCsvPath);
+		SDStampsCsvProcessResult g = await wcsv.RUN(args);
 	}
 }
-
-// FOR NOW: Let's simplify...
-//[Option("--save-aud-csv-path",
-//	alias: "-to",
-//	description: "Path if default not to be used",
-//	Required = false)]
-//public string SaveAuditionCsvPath { get; set; }
-
-//[Option("--overwrite",
-//	alias: "-ov",
-//	description: "Allow overwrite of destination path",
-//	DefVal = true)]
-//public bool AllowOverwrite { get; set; }

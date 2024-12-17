@@ -10,6 +10,14 @@ namespace Mp3Slap.CLI.SilenceDetect;
 public class SilenceDetectBase
 {
 	[Option(
+		"--directory",
+		"-d",
+		"Root directory to work and search from. Otherwise CD / current directory used",
+		Required = false)]
+	public DirectoryInfo RootDir { get; set; }
+
+
+	[Option(
 		"--logs-folder-name",
 		"-logname",
 		"Name of the folder in which the scripts will be written to. Will have the duration appended to it",
@@ -34,7 +42,7 @@ public class SilenceDetectBase
 	[Option(
 		"--pad",
 		description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.",
-		DefVal = FFSilenceTracksParser.PadDefault)]
+		DefVal = FFSilenceDetToTimeStampsParser.PadDefault)]
 	public double Pad { get; set; }
 
 	[Option(
@@ -65,7 +73,16 @@ public class SilenceDetectBase
 			return false;
 		}
 
-		args.Directory = Program.CurrentDirectory;
+		string dirPath = RootDir == null
+			? Program.CurrentDirectory
+			: PathHelper.CleanDirPath(RootDir.FullName);
+
+		if(!Directory.Exists(dirPath)) {
+			$"Directory doesn't exist".Print();
+			return false;
+		}
+
+		args.Directory = dirPath;
 		args.SilenceDurations = Durations;
 		args.LogFolder = LogFolderName;
 		args.AudioFilesSearchPattern = AudioFilesSearchPattern;

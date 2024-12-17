@@ -5,14 +5,14 @@ namespace Test;
 
 public class FFSilenceTracksParserTests : FFSilenceDetectBase
 {
-	FFSilenceTracksParser _RunRawLogParseSilences(
+	FFSilenceDetToTimeStampsParser _RunRawLogParseSilences(
 		string log,
 		int expectedCount = -1,
 		(int min, int max)? expectedCountRange = null)
 	{
 		True(log != null);
 
-		FFSilenceTracksParser split = new(log);
+		FFSilenceDetToTimeStampsParser split = new(log);
 		
 		List<TrackTimeStamp> tracks = split.Parse();
 
@@ -32,7 +32,7 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 	{
 		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect.log");
 
-		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
+		FFSilenceDetToTimeStampsParser split = _RunRawLogParseSilences(log, expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
 
 		True(split.Stamps.Count == 49);
 	}
@@ -43,7 +43,7 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 	{
 		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect-OLD.log");
 
-		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCount: 51);
+		FFSilenceDetToTimeStampsParser split = _RunRawLogParseSilences(log, expectedCount: 51);
 	}
 
 	[Fact]
@@ -51,7 +51,7 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 	{
 		string log = _GetFFSilencesRawLog("log#niv-suchet-27-daniel.mp3#silencedetect.log");
 
-		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCount: 17);
+		FFSilenceDetToTimeStampsParser split = _RunRawLogParseSilences(log, expectedCount: 17);
 	}
 
 	[Fact]
@@ -59,12 +59,12 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 	{
 		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect.log");
 
-		FFSilenceTracksParser split = _RunRawLogParseSilences(log, expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
+		FFSilenceDetToTimeStampsParser split = _RunRawLogParseSilences(log, expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
 
 		string script = _ToScriptRude2(split, "gen.mp3", "gen-{i}.mp3");
 	}
 
-	string _ToScriptRude(FFSilenceTracksParser split)
+	string _ToScriptRude(FFSilenceDetToTimeStampsParser split)
 	{
 		List<TrackTimeStamp> tracks = split.Parse();
 
@@ -94,7 +94,7 @@ for i in range(len(list)):
 		return script;
 	}
 
-	string _ToScriptRude2(FFSilenceTracksParser split, string srcMp3, string destMp3Templ)
+	string _ToScriptRude2(FFSilenceDetToTimeStampsParser split, string srcMp3, string destMp3Templ)
 	{
 		List<TrackTimeStamp> tracks = split.Parse();
 

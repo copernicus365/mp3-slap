@@ -2,39 +2,37 @@ namespace Mp3Slap.SilenceDetect;
 
 public class WriteFFMpegSilDetLogToCsvs
 {
+	FFSilenceDetToTimeStampsParser ffToTracksParser;
+	SilDetTimeStampsCSV csvWriter;
+	ProcessSilDetCSV procSDCsv;
+
 	public double Pad { get; init; }
 
 	public bool WriteAuditionMarkerCsvs { get; init; }
-
-
-	FFSilenceTracksParser split;
-
-	SDTimeStampsCsv csvLg;
-	ProcessSilDetCSV wcsv;
 
 
 	public async Task<SResult> RUN(Mp3ToSplitPathsInfo info)
 	{
 		var res = await RUN(
 			ffLogPath: info.SilenceDetectRawLogPath,
-			csvPath: info.SilenceDetectCsvPath,
-			audMarkersPath: info.AuditionMarkersCsvPath,
+			csvLogPath: info.SilenceDetectCsvPath,
+			audMarkersCsvPath: info.AuditionMarkersCsvPath,
 			ffLogContent: info.FFSplitOutput,
 			audioFilePath: info.FilePath);
 
-		info.Stamps = split.Stamps;
+		info.Stamps = ffToTracksParser.Stamps;
 		return res;
 	}
 
 	public async Task<SResult> RUN(
 		string ffLogPath,
-		string csvPath,
-		string audMarkersPath = null,
+		string csvLogPath,
+		string audMarkersCsvPath = null,
 		string ffLogContent = null,
 		string audioFilePath = null,
 		bool allowOverwriteCsv = true)
 	{
-		if(!allowOverwriteCsv && File.Exists(csvPath))
+		if(!allowOverwriteCsv && File.Exists(csvLogPath))
 			return new SResult(false, "Save path exists and overwrite not allowed");
 
 		if(ffLogContent.IsNulle()) {
@@ -44,29 +42,27 @@ public class WriteFFMpegSilDetLogToCsvs
 				return new SResult(false, "Source doesn't exist or invalid length");
 		}
 
-		split = new(
-			text: ffLogContent,
-			pad: Pad);
+		ffToTracksParser = new(text: ffLogContent, pad: Pad);
 
-		split.Parse(setMeta: true);
+		ffToTracksParser.Parse(setMeta: true);
 
-		FFAudioMeta meta = split.Meta;
+		FFAudioMeta meta = ffToTracksParser.Meta;
 		//split.Stamps.SetPads(args.Pad);
 
-		csvLg = new(); //SDTimeStampsCsv
-		csvLg.InitForWrite(Pad, split.Stamps, meta: meta, filePath: audioFilePath);
+		csvWriter = new(); //SDTimeStampsCsv
+		csvWriter.InitForWrite(Pad, ffToTracksParser.Stamps, meta: meta, filePath: audioFilePath);
 
+		string csvContent = csvWriter.WriteToString();
 
-		string csvContent = csvLg.WriteToString();
-
-		File.WriteAllText(csvPath, csvContent);
+		File.WriteAllText(csvLogPath, csvContent);
 
 		if(WriteAuditionMarkerCsvs) {
-			wcsv = new() {
-				ResaveCsvLogOnChange = true,
+			procSDCsv = new() {
+				ResaveCsvLogOnChange = false, // we JUST saved it couple lines above
 				SaveAuditionCsv = true
 			};
-			await wcsv.RUN(audMarkersPath, csvContent);
+			ProcessSilDetCSVArgs args = new (csvLogPath, audMarkersCsvPath, csvContent);
+			await procSDCsv.RUN(args);
 		}
 		return new SResult(true);
 	}

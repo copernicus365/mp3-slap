@@ -11,7 +11,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string csvText = csvLog_gen_subs();
 
-		SDTimeStampsCsv csv = new();
+		SilDetTimeStampsCSV csv = new();
 		csv.Parse(csvText);
 
 		int expCount = 54;
@@ -37,7 +37,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string csvText = csvLog_gen();
 
-		SDTimeStampsCsv csv = new();
+		SilDetTimeStampsCSV csv = new();
 		csv.Parse(csvText);
 
 		int expCount = 51;

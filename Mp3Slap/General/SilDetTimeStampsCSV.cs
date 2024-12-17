@@ -5,7 +5,10 @@ using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.General;
 
-public class SDTimeStampsCsv
+/// <summary>
+/// Writes and parses silence detect list to / from CSVs.
+/// </summary>
+public class SilDetTimeStampsCSV
 {
 	public string FileName { get; set; }
 

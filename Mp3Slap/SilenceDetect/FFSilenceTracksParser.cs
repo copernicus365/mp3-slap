@@ -1,6 +1,6 @@
 namespace Mp3Slap.SilenceDetect;
 
-public partial class FFSilenceTracksParser(string text, double pad = FFSilenceTracksParser.PadDefault)
+public partial class FFSilenceDetToTimeStampsParser(string text, double pad = FFSilenceDetToTimeStampsParser.PadDefault)
 {
 	readonly string text = text.NullIfEmptyTrimmed();
 
