@@ -10,7 +10,7 @@ public class WriteFFMpegSilDetLogToCsvs
 	FFSilenceTracksParser split;
 
 	SDTimeStampsCsv csvLg;
-	WriteAuditionMarkerCSVs wcsv;
+	ProcessSilDetCSV wcsv;
 
 
 	public async Task<SResult> RUN(Mp3ToSplitPathsInfo info)
@@ -62,7 +62,10 @@ public class WriteFFMpegSilDetLogToCsvs
 		File.WriteAllText(csvPath, csvContent);
 
 		if(WriteAuditionMarkerCsvs) {
-			wcsv = new();
+			wcsv = new() {
+				ResaveCsvLogOnChange = true,
+				SaveAuditionCsv = true
+			};
 			await wcsv.RUN(audMarkersPath, csvContent);
 		}
 		return new SResult(true);

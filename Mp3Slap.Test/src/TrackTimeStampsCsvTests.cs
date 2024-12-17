@@ -7,6 +7,32 @@ public class TrackTimeStampsCsvTests : BaseTest
 	public bool WriteParsedLogs = false;
 
 	[Fact]
+	public void ParseLargeCsv_WithSubs_Gen()
+	{
+		string csvText = csvLog_gen_subs();
+
+		SDTimeStampsCsv csv = new();
+		csv.Parse(csvText);
+
+		int expCount = 54;
+
+		True(csv.Count == expCount);
+		csv.CombineCuts();
+
+		True(csv.Count == 50);
+
+		True(csv.Valid);
+
+		string result = csv.WriteToString();
+
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
+
+		if(WriteParsedLogs)
+			File.WriteAllText(writePath, result);
+
+	}
+
+	[Fact]
 	public void ParseLargeCsvDoc1_Gen()
 	{
 		string csvText = csvLog_gen();
@@ -70,4 +96,8 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 	string csvLog_gen()
 		=> DataString($"{SampleResultsDirName}/log#01-genesis.mp3#silencedetect-parsed.csv");
+
+	string csvLog_gen_subs()
+		=> DataString($"{SampleResultsDirName}/log#01-genesis-3.1-with-subs.mp3#silencedetect-parsed.csv");
+
 }

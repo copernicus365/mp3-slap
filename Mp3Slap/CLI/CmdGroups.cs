@@ -1,3 +1,5 @@
+using System.CommandLine;
+
 using CommandLine.EasyBuilder.Auto;
 
 namespace Mp3Slap.CLI.SilenceDetect;

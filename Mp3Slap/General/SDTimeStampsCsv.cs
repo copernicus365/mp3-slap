@@ -56,7 +56,7 @@ public class SDTimeStampsCsv
 
 		for(int i = 0; i < Stamps.Count; i++) {
 			TrackTimeStamp st = Stamps[i];
-			string res = st.ToCsvString2();
+			string res = st.ToCsvString();
 			sb.AppendLine(res);
 		}
 		sb.AppendLine();
@@ -148,10 +148,12 @@ public class SDTimeStampsCsv
 			if(!hasPrevNegatives)
 				continue;
 
-			int countNegs = negIndexSince - i;
-			negIndexSince = 0;
+			TrackTimeStamp lastCutSt = stamps[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
 
-			st.CombineFollowingCuts(stamps.AsSpan().Slice(i + 1, countNegs));
+			TrackTimeStamp cStamp = st.CombineCutsFromLastToNew(lastCutSt);
+			stamps[i] = cStamp;
+
+			negIndexSince = 0;
 		}
 
 		Stamps = stamps.Where(st => !st.IsCut).ToList();

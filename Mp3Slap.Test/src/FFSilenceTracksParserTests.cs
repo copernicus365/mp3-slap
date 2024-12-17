@@ -68,7 +68,7 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 	{
 		List<TrackTimeStamp> tracks = split.Parse();
 
-		string result = tracks.JoinToString(v => $"  {v.ToCsvString2()},", "\n");
+		string result = tracks.JoinToString(v => $"  {v.ToCsvString()},", "\n");
 		//$"  ('{v.Start}', '{v.End}', '{v.Duration}')", "\n");
 
 		// var json = $$"""
@@ -98,7 +98,7 @@ for i in range(len(list)):
 	{
 		List<TrackTimeStamp> tracks = split.Parse();
 
-		string result = tracks.JoinToString(v => $"  {v.ToCsvString2()},", "\n");
+		string result = tracks.JoinToString(v => $"  {v.ToCsvString()},", "\n");
 		//$"  ('{v.Start}', '{v.End}', '{v.Duration}')", "\n");
 
 		List<string> vals = new(tracks.Count);

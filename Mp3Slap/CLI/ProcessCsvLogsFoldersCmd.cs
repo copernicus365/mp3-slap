@@ -23,7 +23,7 @@ public class ProcessCsvLogsFoldersCmd : SilenceDetectBase
 		SilenceDetectFullFolderScript[] res = await SilenceDetectFullFolderScript.RunManyDurations(
 			args,
 			async script => {
-				WriteAuditionMarkerCSVs wcsv = new();
+				ProcessSilDetCSV wcsv = new();
 				await wcsv.RUN(script.Infos);
 			});
 	}

@@ -7,30 +7,18 @@ using Mp3Slap.SilenceDetect;
 namespace Mp3Slap.CLI.SilenceDetect;
 
 [Command(
-	"csv-log",
-	Alias = "single",
-	Description = "Processes a single silence detect csv log[1] and possibly (re)generates its Adobe Audition marker csv file ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
+	"csv",
+	Alias = "process-single-sd-csv",
+	Description = "For processing a single silence detect csv. Handles removing cuts (soon: + adds), (re)generating Audition marker csv from it, etc ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
 public class ProcessCsvLogCmd
 {
-	[Argument("csv-log",
-		description: "Path of the silencedetect csv log path (e.g. `log#foo1.mp3#silencedetect-parsed.csv`) to generate an audition markers csv from")]
+	[Argument("sd-csv-path",
+		description: "Path of the silencedetect csv. Note that when auto-generated, path ends with: `...#silencedetect-parsed.csv`)")]
 	public FileInfo CsvLog { get; set; }
 
-	[Option("--save-aud-csv-path",
-		alias: "-to",
-		description: "Path if default not to be used",
-		Required = false)]
-	public string SaveAuditionCsvPath { get; set; }
-
-	[Option("--overwrite",
-		alias: "-ov",
-		description: "Allow overwrite of destination path",
-		DefVal = true)]
-	public bool AllowOverwrite { get; set; }
-
-	[Option("--resave-csv-log",
+	[Option("--resave-csv",
 		alias: "-resave",
-		description: "True to have or allow input csv log to be resaved (always, or if cuts were fixed)",
+		description: "True to have (or allow) input csv to be resaved. If false, note that processed cuts or adds won't be saved",
 		DefVal = true)]
 	public bool ResaveCsvLog { get; set; }
 
@@ -42,13 +30,13 @@ public class ProcessCsvLogCmd
 		}
 
 		string srcCsvLogPath = CsvLog.FullName;
-		string destAudCsvPath = SaveAuditionCsvPath
-			?? LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
+		string destAudCsvPath = //SaveAuditionCsvPath ??
+			LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
 
-		if(!AllowOverwrite && File.Exists(destAudCsvPath)) {
-			"Save path exists and overwrite not allowed".Print();
-			return;
-		}
+		//if(!AllowOverwrite && File.Exists(destAudCsvPath)) {
+		//	"Save path exists and overwrite not allowed".Print();
+		//	return;
+		//}
 
 		string csvCont = File.ReadAllText(srcCsvLogPath);
 
@@ -56,15 +44,26 @@ public class ProcessCsvLogCmd
 			"Invalid content".Print();
 			return;
 		}
-
-		WriteAuditionMarkerCSVs wcsv = new() {
+		 
+		ProcessSilDetCSV wcsv = new() {
 			ResaveCsvLogOnChange = ResaveCsvLog,
 		};
-		StampsCsvGroup g = await wcsv.RUN(
+		SDStampsCsvProcessResult g = await wcsv.RUN(
 			destAudCsvPath,
 			silenceDetCsvLog: csvCont,
 			silenceDetCsvLogPath: srcCsvLogPath);
 	}
 }
 
+// FOR NOW: Let's simplify...
+//[Option("--save-aud-csv-path",
+//	alias: "-to",
+//	description: "Path if default not to be used",
+//	Required = false)]
+//public string SaveAuditionCsvPath { get; set; }
 
+//[Option("--overwrite",
+//	alias: "-ov",
+//	description: "Allow overwrite of destination path",
+//	DefVal = true)]
+//public bool AllowOverwrite { get; set; }

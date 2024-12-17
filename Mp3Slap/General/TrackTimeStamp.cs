@@ -4,6 +4,30 @@ namespace Mp3Slap.General;
 
 public class TrackTimeStamp
 {
+	/// <summary>
+	/// For FFMpeg's silence detect script that has 3 main args per silence detected, as doubles / decimals.
+	/// </summary>
+	public TrackTimeStamp(double start, double end, double? silenceDuration = null, double pad = 0)
+		: this(
+			  start: TimeSpan.FromSeconds(start),
+			  end: TimeSpan.FromSeconds(end),
+			  silenceDuration: silenceDuration == null ? null : TimeSpan.FromSeconds(silenceDuration.Value),
+			  pad: TimeSpan.FromSeconds(pad))
+	{ }
+
+	public TrackTimeStamp(TimeSpan start, TimeSpan end, TimeSpan? silenceDuration = null, TimeSpan pad = default)
+	{
+		if(start < TimeSpan.Zero || end < start || silenceDuration < TimeSpan.Zero)
+			throw new ArgumentOutOfRangeException();
+
+		Start = start;
+		End = end;
+		Duration = End - Start;
+		SilenceDuration = silenceDuration ?? TimeSpan.Zero;
+
+		SetPads(pad: pad);
+	}
+
 	public TrackTimeStamp(TimeSpan start, TimeSpan end, TimeSpan duration, double silenceDuration, double paddedDuration)
 	{
 		if(start < TimeSpan.Zero || end < start)
@@ -21,22 +45,6 @@ public class TrackTimeStamp
 		SilenceDuration = TimeSpan.FromSeconds(silenceDuration);
 
 		SetPads(TimeSpan.FromSeconds(paddedDuration));
-	}
-
-	/// <summary>
-	/// For FFMpeg's silence detect script that has 3 main args per silence detected, as doubles / decimals.
-	/// </summary>
-	public TrackTimeStamp(double start, double end, double? silenceDuration = null, double pad = 0)
-	{
-		if(start < 0 || end < start || silenceDuration < 0)
-			throw new ArgumentOutOfRangeException();
-
-		Start = TimeSpan.FromSeconds(start);
-		End = TimeSpan.FromSeconds(end);
-		Duration = End - Start;
-		SilenceDuration = TimeSpan.FromSeconds(silenceDuration ?? 0);
-
-		SetPads(TimeSpan.FromSeconds(pad));
 	}
 
 	public TimeSpan Start { get; private set; }
@@ -87,22 +95,17 @@ public class TrackTimeStamp
 
 	public const string TSFrmt = @"h\:mm\:ss\.ff";
 
-	public override string ToString() => ToCsvString2(); // pad: 0);
+	public override string ToString() => ToCsvString();
 
 	/// <summary>
 	/// Used for our unique parse and write formats, so do not
 	/// alter w/out breaking change consideration.
 	/// </summary>
-	public string ToCsvString(double pad)
-		=> $"{add(Start, -pad).ToString(TSFrmt)}, {add(End, pad).ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}";
+	public string ToCsvString()
+		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, {Pad.TotalSeconds:0.00}, {PaddedStart.ToString(TSFrmt)}, {PaddedEnd.ToString(TSFrmt)}, {PaddedDuration.ToString(TSFrmt)}, ";
 
-	public string ToCsvString2()
-		=> $"\"{Start.ToString(TSFrmt)}\", \"{End.ToString(TSFrmt)}\", \"{Duration.ToString(TSFrmt)}\", \"{SilenceDuration.TotalSeconds:0.00}\", \"{Pad.TotalSeconds:0.00}\", \"{PaddedStart.ToString(TSFrmt)}\", \"{PaddedEnd.ToString(TSFrmt)}\", \"{PaddedDuration.ToString(TSFrmt)}\", ";
-
-	//{Duration.ToTotalMinutesString2()}
-
-	TimeSpan add(TimeSpan ts, double pad)
-		=> ts.Add(TimeSpan.FromSeconds(pad)).Max(TimeSpan.Zero);
+	//public string ToCsvString2()
+	//	=> $"\"{Start.ToString(TSFrmt)}\", \"{End.ToString(TSFrmt)}\", \"{Duration.ToString(TSFrmt)}\", \"{SilenceDuration.TotalSeconds:0.00}\", \"{Pad.TotalSeconds:0.00}\", \"{PaddedStart.ToString(TSFrmt)}\", \"{PaddedEnd.ToString(TSFrmt)}\", \"{PaddedDuration.ToString(TSFrmt)}\", ";
 
 
 	public static TrackTimeStamp ParseCsvString(string line)
@@ -184,19 +187,28 @@ public class TrackTimeStamp
 		return false;
 	}
 
-	public void CombineFollowingCuts(Span<TrackTimeStamp> arr)
+	public TrackTimeStamp CombineCutsFromLastToNew(TrackTimeStamp last)
+	{
+		TrackTimeStamp cStamp = new(Start, last.End, silenceDuration: last.SilenceDuration, Pad);
+		return cStamp;
+	}
+
+	public TrackTimeStamp CombineFollowingCuts(Span<TrackTimeStamp> arr)
 	{
 		if(arr.Length < 1)
-			return;
+			throw new ArgumentNullException(nameof(arr));
 
-		TrackTimeStamp last = arr[arr.Length - 1];
+		TrackTimeStamp last = arr[^1]; // arr[arr.Length - 1];
 
-		End = last.End;
-		SilenceDuration = last.SilenceDuration;
+		//End = last.End;
+		//SilenceDuration = last.SilenceDuration;
 
-		for(int i = 0; i < arr.Length; i++) {
-			Duration += arr[i].Duration;
-		}
+		//for(int i = 0; i < arr.Length; i++) {
+		//	Duration += arr[i].Duration;
+		//}
+
+		TrackTimeStamp cStamp = new(Start, last.End, silenceDuration: last.SilenceDuration, Pad);
+		return cStamp;
 	}
 }
 
