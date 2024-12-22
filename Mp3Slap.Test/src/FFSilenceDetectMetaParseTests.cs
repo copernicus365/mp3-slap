@@ -7,7 +7,7 @@ public class FFSilenceDetectMetaParseTests : FFSilenceDetectBase
 	[Fact]
 	public void Test1()
 	{
-		string log = _GetFFSilencesRawLog("log#niv-suchet-01-genesis.mp3#silencedetect.log");
+		string log = GetSampleFFSilLog("log#niv-suchet-01-genesis.mp3#silencedetect.log");
 
 		FFSilenceDetectMetaParse mp = new();
 		True(mp.Parse(log));

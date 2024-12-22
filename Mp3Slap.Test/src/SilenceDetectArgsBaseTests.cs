@@ -5,74 +5,78 @@ namespace Test;
 public class SilenceDetectArgsBaseTests : BaseTest
 {
 	[Fact]
-	public void Standard_NotRootedLogFolder()
+	public void Standard_NotRootedLogFolder_RoundDur2Dec()
 	{
-		SilenceDetectArgs d1 = new() {
+		SilenceDetectArgs args = new() {
 			Directory = "C:\\Temp\\test1",
-			LogFolder = "logs1-{duration}s",
+			LogFolder = "logs1",
+			SilenceDurations = [3.1]
 		};
 
-		d1.INIT();
+		True(args.INIT().Success);
 
 		double dur = 3.237;
 
-		string folderPathL = d1.GetLogFolderName(dur, fullPath: false);
-		string folderPathF = d1.GetLogFolderName(dur, fullPath: true);
+		string folderPathL = args.GetLogFolderName(dur, fullPath: false);
+		string folderPathF = args.GetLogFolderName(dur, fullPath: true);
 
-		True(d1.Directory == "C:/Temp/test1/");
-		True(folderPathL == "logs1-3.24s/");
-		True(folderPathF == "C:/Temp/test1/logs1-3.24s/");
+		True(args.Directory == "C:/Temp/test1/");
+		True(folderPathL == "logs1-3.24/");
+		True(folderPathF == "C:/Temp/test1/logs1-3.24/");
 	}
 
 	[Fact]
 	public void ResolveLogPathRelativeNav()
 	{
-		SilenceDetectArgs d1 = new() {
+		SilenceDetectArgs args = new() {
 			Directory = "C:\\Temp\\test1",
-			LogFolder = "..\\logs1-{duration}s",
+			LogFolder = "..\\logs1",
+			SilenceDurations = [ 3.1 ]
 		};
 
-		d1.INIT();
+		True(args.INIT().Success);
 
 		double dur = 3.2;
 
-		string folderPathL = d1.GetLogFolderName(dur, fullPath: false);
-		string folderPathF = d1.GetLogFolderName(dur, fullPath: true);
+		string folderPathL = args.GetLogFolderName(dur, fullPath: false);
+		string folderPathF = args.GetLogFolderName(dur, fullPath: true);
 
-		True(d1.Directory == "C:/Temp/test1/");
-		True(folderPathL == "../logs1-3.2s/");
-		True(folderPathF == "C:/Temp/logs1-3.2s/");
+		True(args.Directory == "C:/Temp/test1/");
+		True(folderPathL == "../logs1-3.2/");
+		True(folderPathF == "C:/Temp/logs1-3.2/");
 	}
 
 	[Fact]
 	public void RootedLogFolder1()
 	{
-		SilenceDetectArgs d1 = new() {
+		SilenceDetectArgs args = new() {
 			Directory = "C:\\Temp\\test1",
-			LogFolder = "\\hi1\\logs1-{duration}s",
+			LogFolder = "\\hi1\\logs1",
+			SilenceDurations = [3.1]
 		};
 
-		d1.INIT();
+		True(args.INIT().Success);
 
 		double dur = 3;
 
-		string folderPathL = d1.GetLogFolderName(dur, fullPath: false);
-		string folderPathF = d1.GetLogFolderName(dur, fullPath: true);
+		string folderPathL = args.GetLogFolderName(dur, fullPath: false);
+		string folderPathF = args.GetLogFolderName(dur, fullPath: true);
 
-		True(d1.Directory == "C:/Temp/test1/");
-		True(folderPathF == "/hi1/logs1-3s/");
+		True(args.Directory == "C:/Temp/test1/");
+		True(folderPathF == "/hi1/logs1-3/");
 		True(folderPathF == folderPathL);
 	}
 
 	[Fact]
 	public void Error_DirectoryNotAbsolute()
 	{
-		SilenceDetectArgs d1 = new() {
+		SilenceDetectArgs args = new() {
 			Directory = "Temp\\test1",
-			LogFolder = "\\hi1\\logs1-{duration}s",
+			LogFolder = "\\hi1\\logs1",
+			SilenceDurations = [3.1]
 		};
 
-		SResult res = d1.INIT();
+		SResult res = args.INIT();
 		False(res.Success);
 		True(res.Message.ContainsIgnoreCase("not rooted"));
 	}
@@ -80,22 +84,22 @@ public class SilenceDetectArgsBaseTests : BaseTest
 	[Fact]
 	public void FixDirectoryNav()
 	{
-		SilenceDetectArgs d1 = new() {
+		SilenceDetectArgs args = new() {
 			Directory = "C:\\Temp\\test1\\..\\",
-			LogFolder = "hi1\\logs1-{duration}s",
+			LogFolder = "hi1\\logs1",
 			SilenceDurations = [2]
 		};
 
-		SResult res = d1.INIT();
+		SResult res = args.INIT();
 		True(res.Success);
 
 		double dur = 3;
 
-		string folderPathL = d1.GetLogFolderName(dur, fullPath: false);
-		string folderPathF = d1.GetLogFolderName(dur, fullPath: true);
+		string folderPathL = args.GetLogFolderName(dur, fullPath: false);
+		string folderPathF = args.GetLogFolderName(dur, fullPath: true);
 
-		True(d1.Directory == "C:/Temp/");
-		True(folderPathF == "C:/Temp/hi1/logs1-3s/");
-		True(folderPathL == "hi1/logs1-3s/");
+		True(args.Directory == "C:/Temp/");
+		True(folderPathF == "C:/Temp/hi1/logs1-3/");
+		True(folderPathL == "hi1/logs1-3/");
 	}
 }

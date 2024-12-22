@@ -20,36 +20,6 @@ public class SilenceDetectFullFolderArgs : SilenceDetectArgs
 	public bool WriteAuditionMarkerCsvs { get; set; } = true;
 }
 
-//public class SilenceDetectWriteFFMpegScriptArgs : SilenceDetectArgs
-//{
-//	/// <summary>
-//	/// Scripts to run ffmpeg, make them have relative paths
-//	/// </summary>
-//	public bool WriteRelativePaths { get; set; }
-
-//	public string AudioFilesSearchPattern { get; set; } = AudioFilesSearchPatternDef;
-
-//	public bool IncludeSubDirectories { get; set; } = false;
-
-//	public const string AudioFilesSearchPatternDef = "*.mp3";
-//}
-
-//public class ConvertFFMpegSilenceLogsToCSVArgs : SilenceDetectArgs
-//{
-//	public double Pad { get; set; }
-//}
-
-//public class WriteSplitScriptArgs
-//{
-//	public string RemovePrefix { get; set; } // "NIV-Suchet-01-
-
-//	public string SrcFile { get; set; } //src="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/NIV-Suchet-01-Genesis.mp3"
-
-//	public string CSVStamps { get; set; } //log="C:/Dropbox/Music/Bible/Suchet-NIV-1Album/logs-3.5/log#NIV-Suchet-01-Genesis.mp3#silencedetect.log"
-
-//	public string ExtrDir { get; set; } // test
-//}
-
 public class SilenceDetectArgs
 {
 	public string Directory { get; set; }
@@ -58,9 +28,7 @@ public class SilenceDetectArgs
 
 	public string LogFolderFullPath { get; set; }
 
-	public const string DefaultLogFolder = "logs"; // $"logs-{DurationFolderID}";
-
-	public const string DurationFolderID = "{duration}";
+	public const string DefaultLogFolder = "logs";
 
 	public const string AudioFilesSearchPatternDef = "*.mp3";
 
@@ -111,5 +79,4 @@ public class SilenceDetectArgs
 
 	public string GetLogFolderName(double dur, bool fullPath = false)
 		=> (fullPath ? LogFolderFullPath.CutEnd(1) : LogFolder.CutEnd(1)) + $"-{dur.Round(2)}/";
-		//=> (fullPath ? LogFolderFullPath : LogFolder).Replace(DurationFolderID, dur.Round(2).ToString());
 }

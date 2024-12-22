@@ -9,6 +9,8 @@ public class SilDetectWriteFFScript
 
 	public string Scripts { get; private set; }
 
+	public string EchoFirstLine { get; private set; }
+
 	public string SetScripts()
 		=> Scripts = SB.ToString();
 
@@ -45,8 +47,10 @@ public class SilDetectWriteFFScript
 		bool verbose,
 		int index = 0)
 	{
+		EchoFirstLine = $"i: {index,2} run silence detect on: '{info.AudioFileName}'";
+
 		string script = $"""
-echo "--- i: {index,2} run silence detect on: '{info.AudioFileName}' ---"
+echo "--- {EchoFirstLine} ---"
 
 echo "log: '{info.SilenceDetectCsvPath}"
 

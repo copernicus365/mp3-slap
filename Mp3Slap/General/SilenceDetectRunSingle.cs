@@ -13,6 +13,9 @@ public class SilenceDetectRunSingle(
 	{
 		writeScript.AddScipt(Script, info, args.Verbose, index);
 
+		if(args.Verbose)
+			writeScript.EchoFirstLine.Print();
+
 		if(!args.RunFFScript)
 			return;
 

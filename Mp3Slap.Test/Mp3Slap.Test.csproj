@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="data\sample-ffmpeg-silence-logs\old-log-vs-new.txt" />
+    <None Remove="data\ffsil-logs\old-log-vs-new.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,7 +55,6 @@
 
   <ItemGroup>
     <Folder Include="data\csv-parsed-logs\write-temp\" />
-    <Folder Include="data\logs\" />
   </ItemGroup>
 
 </Project>
