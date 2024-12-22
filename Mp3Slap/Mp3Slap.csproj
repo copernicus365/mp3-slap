@@ -24,11 +24,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ignore\startup.txt" CopyToOutputDirectory="Always" />
+    <!-- in `ignore` so not copied to source control. but `Link` allows us to dump `ignore` otherwise -->
+    <Content
+      Include="ignore\startup.txt"
+      Link="startup.txt"
+      CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <!--<ItemGroup>
+  <!-- Directly use CommandLine.EasyBuilder. Mp3Slap was first use case lead us to develope EasyBuilder :) -->
+  <!--
+  <ItemGroup>
     <ProjectReference Include="..\..\CommandLine.EasyBuilder\CommandLine.EasyBuilder\CommandLine.EasyBuilder.csproj" />
-  </ItemGroup>-->
+  </ItemGroup>
+  -->
 
 </Project>

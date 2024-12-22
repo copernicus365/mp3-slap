@@ -13,25 +13,25 @@ public class Program
 	{
 		INIT();
 
-		RootCommand rootCommand = BuildCLI.BuildApp();
+		RootCommand rootCmd = BuildCLI.BuildApp();
 
 		if(args.NotNulle())
-			rootCommand.Invoke(args);
+			rootCmd.Invoke(args);
 		else
-			rootCommand.Invoke("-h");
+			rootCmd.Invoke("-h");
 
 		while(true) {
 			Write("\nInput: ");
 			string arg = ReadLine();
 
 			int res = arg == null
-				? await rootCommand.InvokeAsync(args)
-				: await rootCommand.InvokeAsync(arg);
+				? await rootCmd.InvokeAsync(args)
+				: await rootCmd.InvokeAsync(arg);
 		}
 	}
 
 	public static bool IsDebug;
-
+	public static bool UseStartupOnlyForDebug = false;
 
 	public static string CurrentDirectory;
 
@@ -46,7 +46,9 @@ public class Program
 
 		string dir = Environment.CurrentDirectory;
 
-		bool setFromStartupDebugTxt = IsDebug && TrySetRootDirFromStartupDebugTxt(ref dir);
+		bool useStartupConfig =
+			(IsDebug || !UseStartupOnlyForDebug) &&
+			TrySetRootDirFromStartupDebugTxt(ref dir);
 
 		SetCurrDir(dir, print: true);
 	}
