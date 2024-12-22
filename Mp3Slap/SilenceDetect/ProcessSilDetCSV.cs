@@ -2,11 +2,18 @@ namespace Mp3Slap.SilenceDetect;
 
 public class ProcessSilDetCSV
 {
-	public bool ResaveCsvLogOnChange { get; set; } = true;
+	public bool SaveCsvLog { get; set; } = true;
+
+	public bool SaveCsvLogOnlyOnChange { get; set; }
 
 	public bool SaveAuditionCsv { get; set; } = true;
 
 	public bool NoErrorOnCsvNotExist { get; set; }
+
+	public bool IgnoreAllWOutAddsOrPluses { get; set; }
+
+	public bool HadAddsOrPluses { get; private set; }
+
 
 	public List<SDStampsCsvProcessResult> Items = [];
 
@@ -30,15 +37,15 @@ public class ProcessSilDetCSV
 	public async Task<SDStampsCsvProcessResult> RUN(ProcessSilDetCSVArgs args)
 	{
 		string csvLog = args.csvLog.NullIfEmptyTrimmed();
-		string logPath = args.csvLogPath;
+		string csvLogPath = args.csvLogPath;
 
 		if(csvLog == null) {
-			if(!File.Exists(logPath)) {
+			if(!File.Exists(csvLogPath)) {
 				if(NoErrorOnCsvNotExist)
 					return null;
-				throw new FileNotFoundException("", logPath);
+				throw new FileNotFoundException("", csvLogPath);
 			}
-			csvLog = File.ReadAllText(logPath);
+			csvLog = File.ReadAllText(csvLogPath);
 		}
 
 		if(csvLog.NotInRange(10, 50_000)) {
@@ -51,14 +58,17 @@ public class ProcessSilDetCSV
 
 		int origCnt = stamps.Count;
 
-		csvLg.CombineCuts();
+		HadAddsOrPluses = csvLg.CombineCuts();
+
+		if(!HadAddsOrPluses && IgnoreAllWOutAddsOrPluses)
+			return null;
 
 		stamps = csvLg.Stamps;
 		int finCnt = stamps.Count;
 
-		if(ResaveCsvLogOnChange && logPath != null) {
+		if(SaveCsvLog && csvLogPath != null && (HadAddsOrPluses || !SaveCsvLogOnlyOnChange)) {
 			csvLog = csvLg.WriteToString();
-			await File.WriteAllTextAsync(logPath, csvLog);
+			await File.WriteAllTextAsync(csvLogPath, csvLog);
 		}
 
 		AuditionCsv acsv = new();

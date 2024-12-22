@@ -53,6 +53,6 @@ public class RunFFMpegSilenceDetectOnFolderCmd : SilenceDetectBase
 
 		SilenceDetectFullFolderScript[] res = await SilenceDetectFullFolderScript.RunManyDurations(
 			args,
-			async script => await script.RUN_All());
+			async script => await script.RUN_ALL());
 	}
 }

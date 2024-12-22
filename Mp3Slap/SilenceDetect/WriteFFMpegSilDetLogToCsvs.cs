@@ -11,16 +11,16 @@ public class WriteFFMpegSilDetLogToCsvs
 	public bool WriteAuditionMarkerCsvs { get; init; }
 
 
-	public async Task<SResult> RUN(Mp3ToSplitPathsInfo info)
+	public async Task<SResult> RUN(Mp3ToSplitPathsInfo info, string ffSplitOutput)
 	{
 		var res = await RUN(
 			ffLogPath: info.SilenceDetectRawLogPath,
 			csvLogPath: info.SilenceDetectCsvPath,
 			audMarkersCsvPath: info.AuditionMarkersCsvPath,
-			ffLogContent: info.FFSplitOutput,
-			audioFilePath: info.FilePath);
+			ffLogContent: ffSplitOutput,
+			audioFilePath: info.AudioFilePath);
 
-		info.Stamps = ffToTracksParser.Stamps;
+		//info.Stamps = ffToTracksParser.Stamps;
 		return res;
 	}
 
@@ -58,7 +58,7 @@ public class WriteFFMpegSilDetLogToCsvs
 
 		if(WriteAuditionMarkerCsvs) {
 			procSDCsv = new() {
-				ResaveCsvLogOnChange = false, // we JUST saved it couple lines above
+				SaveCsvLog = false, // we JUST saved it couple lines above
 				SaveAuditionCsv = true
 			};
 			ProcessSilDetCSVArgs args = new (csvLogPath, audMarkersCsvPath, csvContent);

@@ -17,7 +17,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 		int expCount = 54;
 
 		True(csv.Count == expCount);
-		csv.CombineCuts();
+		True(csv.CombineCuts());
 
 		True(csv.Count == 50);
 
@@ -43,7 +43,8 @@ public class TrackTimeStampsCsvTests : BaseTest
 		int expCount = 51;
 
 		True(csv.Count == expCount);
-		csv.CombineCuts();
+
+		True(csv.CombineCuts());
 
 		True(csv.Count == 50);
 

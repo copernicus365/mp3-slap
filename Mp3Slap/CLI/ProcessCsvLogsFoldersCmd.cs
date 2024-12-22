@@ -12,6 +12,13 @@ namespace Mp3Slap.CLI.SilenceDetect;
 	Description = "Reprocesses silence detect csv logs[1] and possibly (re)generating Adobe Audition marker csv files ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
 public class ProcessCsvLogsFoldersCmd : SilenceDetectBase
 {
+	[Option("--adds-subs-only",
+		alias: "-addsub",
+		description: "True to immediately ignore any instances where no substractions or adds were found without the source silence-detect csvs.",
+		DefVal = false)]
+	public bool IgnoreAllWOutAddsOrPluses { get; set; }
+
+
 	public async Task HandleAsync()
 	{
 		SilenceDetectFullFolderArgs args = new() {
@@ -23,7 +30,9 @@ public class ProcessCsvLogsFoldersCmd : SilenceDetectBase
 		SilenceDetectFullFolderScript[] res = await SilenceDetectFullFolderScript.RunManyDurations(
 			args,
 			async script => {
-				ProcessSilDetCSV p = new();
+				ProcessSilDetCSV p = new() {
+					IgnoreAllWOutAddsOrPluses = IgnoreAllWOutAddsOrPluses, 
+				};
 				await p.RUN(script.Infos);
 			});
 	}

@@ -125,12 +125,15 @@ public class SilDetTimeStampsCSV
 		return Stamps;
 	}
 
-	public void CombineCuts()
+	public bool CombineCuts()
 	{
 		var stamps = Stamps.ToArray();
 
 		if(stamps.IsNulle())
-			return;
+			return false;
+
+		if(stamps.None(s => s.IsCut))
+			return false;
 
 		if(stamps[0].IsCut)
 			stamps[0].IsCut = false; // can't be valid i any case, but logic below depends on this
@@ -160,5 +163,7 @@ public class SilDetTimeStampsCSV
 		}
 
 		Stamps = stamps.Where(st => !st.IsCut).ToList();
+
+		return true; // even if somehow count is same (?), fact is some WERE marked as Cut
 	}
 }

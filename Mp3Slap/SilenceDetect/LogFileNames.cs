@@ -9,7 +9,7 @@ public static partial class LogFileNames
 	public static void SetLogPaths(this Mp3ToSplitPathsInfo info)
 	{
 		string logDir = info.LogDirectory;
-		string fname = info.FileName;
+		string fname = info.AudioFileName;
 		info.SilenceDetectRawLogPath = GetLogPath(logDir, fname, parsedTxt: false);
 		info.SilenceDetectCsvPath = GetLogPath(logDir, fname, parsedTxt: true);
 		info.AuditionMarkersCsvPath = GetAuditionMarkersPath(logDir, fname);

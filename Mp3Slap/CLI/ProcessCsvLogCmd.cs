@@ -19,8 +19,8 @@ public class ProcessCsvLogCmd
 	[Option("--resave-csv",
 		alias: "-resave",
 		description: "True to have (or allow) input csv to be resaved. If false, note that processed cuts or adds won't be saved",
-		DefVal = true)]
-	public bool ResaveCsvLog { get; set; }
+		DefVal = null)]
+	public bool? ResaveCsvLog { get; set; }
 
 	public async Task HandleAsync()
 	{
@@ -31,9 +31,10 @@ public class ProcessCsvLogCmd
 
 		string srcCsvLogPath = CsvLog.FullName;
 		string destAudCsvPath = LogFileNames.GetAuditionMarkersCsvPathFromSilenceCsvPath(srcCsvLogPath);
-		 
+
 		ProcessSilDetCSV wcsv = new() {
-			ResaveCsvLogOnChange = ResaveCsvLog,
+			SaveCsvLog = ResaveCsvLog ?? true,
+			SaveCsvLogOnlyOnChange = ResaveCsvLog == null,
 		};
 		ProcessSilDetCSVArgs args = new(srcCsvLogPath, destAudCsvPath);
 		SDStampsCsvProcessResult g = await wcsv.RUN(args);

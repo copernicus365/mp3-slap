@@ -1,35 +1,58 @@
-using System.Text;
-
 namespace Mp3Slap.SilenceDetect;
 
-public class SilenceDetectFullFolderScript
+/// <summary>
+/// Silence detect script stuff for an entire folder, but only for ONE duration.
+/// </summary>
+public class SilenceDetectFullFolderScript(SilenceDetectFullFolderArgs args, double silenceDuration)
 {
-	readonly SilenceDetectFullFolderArgs args;
-	readonly double _silenceDuration;
+	public string LogFolderName { get; } = args.GetLogFolderName(silenceDuration, fullPath: false);
 
 	public bool Verbose => args.Verbose;
 
-	public string LogFolderName { get; private set; }
-
-
-	public SilenceDetectFullFolderScript(SilenceDetectFullFolderArgs args, double silenceDuration)
-	{
-		this.args = args;
-		_silenceDuration = silenceDuration;
-		LogFolderName = args.GetLogFolderName(_silenceDuration, fullPath: false);
-	}
+	// ---
 
 	public string[] Paths { get; private set; }
 
 	public string[] RelPaths { get; private set; }
 
+	// ---
 
-	public void Init(string[] files)
+	public List<Mp3ToSplitPathsInfo> Infos;
+
+
+	/// <summary>
+	/// Inits <see cref="Infos"/> and other path related stuff. RUNNING THIS
+	/// sets the key stuff that makes this type, meaning <see cref="RUN_ALL"/>
+	/// do not have to be run for this to be, critically, used by other types. 
+	/// </summary>
+	public void INIT()
 	{
-		Paths = files.Select(f => PathHelper.CleanPath(f)).ToArray();
+		Infos = [];
+
+		string[] audioFilePaths = PathHelper.GetFilesFromDirectory(args);
+
+		if(audioFilePaths.IsNulle()) {
+			$"No files found".Print();
+			return;
+		}
+
+		Paths = audioFilePaths.Select(f => PathHelper.CleanPath(f)).ToArray();
 		RelPaths = Paths.Select(f => PathHelper.CleanToRelative(args.Directory, f)).ToArray();
+
+		for(int i = 0; i < Paths.Length; i++) {
+			string audioFullP = Paths[i];
+
+			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(audioFullP, LogFolderName, silenceDuration);
+			Infos.Add(info);
+
+			if(i == 0 && !Directory.Exists(info.LogDirectory))
+				Directory.CreateDirectory(info.LogDirectory);
+		}
 	}
 
+	/// <summary>
+	/// Called by <see cref="INIT"/> above, but as static might be used elsewhere
+	/// </summary>
 	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName, double silenceDur)
 	{
 		path = PathHelper.CleanPath(path);
@@ -41,131 +64,36 @@ public class SilenceDetectFullFolderScript
 
 		Mp3ToSplitPathsInfo info = new() {
 			Directory = dir,
-			FileName = fname,
-			FilePath = path,
+			AudioFileName = fname,
+			AudioFilePath = path,
 			LogDirectory = logDir,
 			SilenceDuration = silenceDur,
 		};
 		info.SetLogPaths();
-		info.Init();
 		return info;
 	}
 
 
-	public string Scripts { get; private set; }
-
-
-	public List<Mp3ToSplitPathsInfo> Infos;
-
-
-
-	StringBuilder sb;
-
-	public void SetInfos()
-	{
-		Infos = [];
-
-		string[] paths = PathHelper.GetFilesFromDirectory(args);
-
-		if(paths.IsNulle()) {
-			$"No files found".Print();
-			return;
-		}
-
-		Init(paths);
-
-		for(int i = 0; i < Paths.Length; i++) {
-			string audioFullP = Paths[i];
-
-			Mp3ToSplitPathsInfo info = GetMp3ToSplitPathsInfo(audioFullP, LogFolderName, _silenceDuration);
-			Infos.Add(info);
-
-			if(i == 0 && !Directory.Exists(info.LogDirectory))
-				Directory.CreateDirectory(info.LogDirectory);
-		}
-	}
-
-	public async Task RUN_All()
+	public async Task RUN_ALL()
 	{
 		if(Infos.IsNulle())
 			return;
 
-		_startScript();
+		SilDetectWriteFFScript writeScript = new();
+		writeScript.StartScript();
 
 		for(int i = 0; i < Infos.Count; i++) {
 			Mp3ToSplitPathsInfo info = Infos[i];
-
-			_addScipt(i, info);
-
-			if(!args.RunFFScript)
-				continue;
-
-			info.FFSplitOutput = await ProcessHelperX.RunFFMpegProcess(info.FFMpegScriptArgsNoLogPath);
-
-			if(args.WriteFFMpegSilenceLogs)
-				File.WriteAllText(info.SilenceDetectRawLogPath, info.FFSplitOutput);
-
-			WriteFFMpegSilDetLogToCsvs ww = new() {
-				Pad = args.Pad,
-				WriteAuditionMarkerCsvs = args.WriteAuditionMarkerCsvs,
-			};
-			await ww.RUN(info);
+			SilenceDetectRunSingle single = new(info, args, writeScript, i);
+			await single.RUN();
 		}
 
-		Scripts = sb.ToString();
+		Mp3ToSplitPathsInfo inf = Infos.First();
 
-		_writeFinalCombinedFFMpegShellScriptsToFile(Infos.First().Directory);
+		string scriptPth = $"{inf.LogDirectory}run-ffmpeg-silence-det-script.sh"; //-{_silenceDuration}s.sh";
+
+		writeScript.WriteFinalCombinedFFMpegShellScriptsToFile(inf, scriptPth, args.WriteRelativePaths, args.WriteFFMpegSilenceLogs);
 	}
-
-	void _startScript()
-	{
-		sb = new();
-		sb
-			.AppendLine("#!/bin/sh")
-			.AppendLine()
-			.AppendLine("echo \"+++FFMpeg Silence Detect Script +++\"")
-			.AppendLine();
-	}
-
-	void _addScipt(
-		int i,
-		Mp3ToSplitPathsInfo info)
-	{
-		string script = $"""
-echo "--- i: {i,2} run silence detect on: '{info.FileName}' ---"
-
-echo "log: '{info.SilenceDetectCsvPath}"
-
-sleep 2
-
-{info.FFMpegScript}
-""";
-		script = script.Trim('"'); // ?! can't get """ type string to not put "quotes"!
-
-		if(Verbose) {
-			sb
-				.AppendLine(script)
-				.AppendLine();
-		}
-		else {
-			sb
-				.AppendLine(info.GetFFMpegScript(withLogPaths: true))
-				.AppendLine();
-		}
-	}
-
-	void _writeFinalCombinedFFMpegShellScriptsToFile(string directory)
-	{
-		string scriptPth = $"{directory}run-ffmpeg-silence-det-script-{_silenceDuration}s.sh";
-
-		if(args.WriteRelativePaths) {
-			Scripts = Scripts.Replace(directory, "./");
-		}
-
-		if(args.WriteFFMpegSilenceLogs)
-			File.WriteAllText(scriptPth, Scripts);
-	}
-
 
 	public static async Task<SilenceDetectFullFolderScript[]> RunManyDurations(
 		SilenceDetectFullFolderArgs args,
@@ -180,11 +108,9 @@ sleep 2
 
 			SilenceDetectFullFolderScript script = scripts[i] = new(args, silenceDur);
 
-			script.SetInfos();
+			script.INIT();
 
 			await run(script);
-
-			string scr = script.Scripts;
 		}
 		return scripts;
 	}
