@@ -39,7 +39,7 @@ public class SilenceDetectRunSingle(
 		SilDetTimeStampsMeta meta = ww.CSV.Meta;
 
 		if(verbose)
-			$"- count: {meta.count} | total-dur: {meta.duration}".Print();
+			$"- count: {meta.count} | total-dur: {meta.meta.duration}\n".Print();
 
 	}
 }
