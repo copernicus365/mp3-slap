@@ -62,7 +62,7 @@ for i in range(len(list)):
 			TrackTimeStamp t = tracks[i];
 			string dest = destMp3Templ.Replace("{i}", i.ToString("00"));
 
-			string scr = $"ffmpeg -ss '{t.Start.TotalSeconds}' -i \'{srcMp3}\' -vcodec copy -acodec copy -to '{t.End.TotalSeconds}' {dest}";
+			string scr = $"ffmpeg -ss '{t.SoundStart.TotalSeconds}' -i \'{srcMp3}\' -vcodec copy -acodec copy -to '{t.SoundEnd.TotalSeconds}' {dest}";
 			vals.Add(scr);
 		}
 

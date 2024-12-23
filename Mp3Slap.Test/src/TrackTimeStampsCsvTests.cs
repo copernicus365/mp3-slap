@@ -67,13 +67,13 @@ public class TrackTimeStampsCsvTests : BaseTest
 		var ts = TrackTimeStamp.ParseCsvString(value);
 
 		True(ts != null);
-		True(ts.Start == TimeSpan.Parse("0:09:39.89"));
-		True(ts.End == TimeSpan.Parse("0:13:49.81"));
-		True(ts.Duration == TimeSpan.Parse("0:04:09.92"));
+		True(ts.SoundStart == TimeSpan.Parse("0:09:39.89"));
+		True(ts.SoundEnd == TimeSpan.Parse("0:13:49.81"));
+		True(ts.SoundDuration == TimeSpan.Parse("0:04:09.92"));
 		True(ts.SilenceDuration.TotalSeconds == double.Parse("4.07"));
-		True(ts.PaddedStart == TimeSpan.Parse("0:09:39.59"));
-		True(ts.PaddedEnd == TimeSpan.Parse("0:13:53.58")); // changed from .59 -> .58, just ignore
-		True(ts.PaddedDuration == TimeSpan.Parse("0:04:13.99"));
+		True(ts.Start == TimeSpan.Parse("0:09:39.59"));
+		True(ts.End == TimeSpan.Parse("0:13:53.58")); // changed from .59 -> .58, just ignore
+		True(ts.Duration == TimeSpan.Parse("0:04:13.99"));
 		True(ts.Pad.TotalSeconds == double.Parse("0.30"));
 	}
 
@@ -89,9 +89,9 @@ public class TrackTimeStampsCsvTests : BaseTest
 		var ts = TrackTimeStamp.ParseCsvString(value);
 
 		True(ts != null);
-		True(ts.Start == TimeSpan.Parse("0:03:30.65"));
-		True(ts.End == TimeSpan.Parse("0:05:06.12"));
-		True(ts.Duration == TimeSpan.Parse("0:01:35.47"));
+		True(ts.SoundStart == TimeSpan.Parse("0:03:30.65"));
+		True(ts.SoundEnd == TimeSpan.Parse("0:05:06.12"));
+		True(ts.SoundDuration == TimeSpan.Parse("0:01:35.47"));
 		True(ts.SilenceDuration.TotalSeconds == double.Parse("2.42"));
 	}
 

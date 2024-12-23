@@ -75,7 +75,7 @@ public class AuditionMarker
 	public const string TSFrmt = @"h\:mm\:ss\.fff";
 
 	public static AuditionMarker ToMarker(TrackTimeStamp stamp, string name, string desc = null)
-		=> new(name, stamp.PaddedStart, stamp.PaddedDuration, desc);
+		=> new(name, stamp.Start, stamp.Duration, desc);
 }
 
 public enum AuditionMarkerType : byte

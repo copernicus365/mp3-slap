@@ -1,8 +1,12 @@
 namespace Mp3Slap.SilenceDetect;
 
-public partial class FFSDLogToTimeStampsParser(string text, double pad = FFSDLogToTimeStampsParser.PadDefault)
+
+/// <summary>
+/// Parses FF silence detect raw log to timestamps etc.
+/// </summary>
+public partial class FFSDLogToTimeStampsParser(string log, double pad = FFSDLogToTimeStampsParser.PadDefault)
 {
-	readonly string text = text.NullIfEmptyTrimmed();
+	readonly string log = log.NullIfEmptyTrimmed();
 
 	public const double PadDefault = 0.3;
 
@@ -13,20 +17,20 @@ public partial class FFSDLogToTimeStampsParser(string text, double pad = FFSDLog
 	public void SetMeta()
 	{
 		FFSilenceDetectMetaParse mp = new();
-		mp.Parse(text);
+		mp.Parse(log);
 		Meta = mp.Meta;
 	}
 
 	public List<TrackTimeStamp> Parse(bool setMeta = true)
 	{
-		if(text.IsNullOrEmpty())
+		if(log.IsNullOrEmpty())
 			return null;
 
 		if(setMeta)
 			SetMeta();
 
 		Regex removeFrameLines = new("""\nframe=*""");
-		string cText = removeFrameLines.Replace(text, v => "");
+		string cText = removeFrameLines.Replace(log, v => "");
 
 		Regex rx = RxGetLog();
 
@@ -54,7 +58,7 @@ public partial class FFSDLogToTimeStampsParser(string text, double pad = FFSDLog
 			TrackTimeStamp stamp = new(lastEnd, start, silenceDur, pad: pad);
 			lastEnd = end;
 
-			if(stamp == null || stamp.Duration <= TimeSpan.Zero)
+			if(stamp == null || stamp.SoundDuration <= TimeSpan.Zero)
 				continue;
 
 			Stamps.Add(stamp);
@@ -64,7 +68,7 @@ public partial class FFSDLogToTimeStampsParser(string text, double pad = FFSDLog
 			double endDur = Meta.duration.TotalSeconds;
 
 			double sil = endDur - lastEnd;
-			Stamps.Add(new TrackTimeStamp(lastEnd, endDur, 0, pad: pad));
+			Stamps.Add(new TrackTimeStamp(lastEnd, endDur, silenceDuration: 0, pad: pad));
 		}
 		else {
 			double endDur = 0.001;

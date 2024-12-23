@@ -33,7 +33,7 @@ public class WriteFFMpegSilDetLogToCsvs
 				return new SResult(false, "Source doesn't exist or invalid length");
 		}
 
-		Parser = new(text: ffSDLogContent, pad: Pad);
+		Parser = new(log: ffSDLogContent, pad: Pad);
 
 		Parser.Parse(setMeta: true);
 
