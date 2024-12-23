@@ -23,6 +23,13 @@ public class SilDetTimeStampsCSV
 		Meta = meta with { count = stamps.Count };
 	}
 
+	public void FixMetaCountIfNeeded()
+	{
+		var meta = Meta?.meta;
+		if(Meta != null && Meta.count != Count)
+			Meta = Meta with { count = Count };
+	}
+
 	public void InitForWrite(
 		List<TrackTimeStamp> stamps,
 		double duration,
@@ -54,7 +61,7 @@ public class SilDetTimeStampsCSV
 	{
 		StringBuilder sb = new();
 
-		string x = GetHeaderJSON(); // GetHeaderXml();
+		string x = GetHeaderJSON();
 		sb.AppendLine($"# {x}");
 
 		for(int i = 0; i < Stamps.Count; i++) {
@@ -74,7 +81,7 @@ public class SilDetTimeStampsCSV
 	void SetMetaHeaderFromJSON(string txt)
 		=> Meta = txt.DeserializeJson<SilDetTimeStampsMeta>();
 
-	public List<TrackTimeStamp> Parse(string text)
+	public List<TrackTimeStamp> Parse(string text, bool fixMetaCountToNew = true)
 	{
 		string[] lines = text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 		if(lines.IsNulle())
@@ -99,6 +106,9 @@ public class SilDetTimeStampsCSV
 
 			Stamps.Add(stamp);
 		}
+
+		if(fixMetaCountToNew)
+			FixMetaCountIfNeeded();
 
 		return Stamps;
 	}
@@ -141,6 +151,8 @@ public class SilDetTimeStampsCSV
 		}
 
 		Stamps = stamps.Where(st => !st.IsCut).ToList();
+
+		FixMetaCountIfNeeded();
 
 		return true; // even if somehow count is same (?), fact is some WERE marked as Cut
 	}

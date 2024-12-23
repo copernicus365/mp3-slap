@@ -21,7 +21,8 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		True(csv.Stamps.Count > 0);
 
-		True(csv.Count == 50);
+		expCount = 50;
+		True(csv.Count == expCount && csv.Meta.count == expCount);
 
 		string result = csv.WriteToString();
 
@@ -29,7 +30,6 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		if(WriteParsedLogs)
 			File.WriteAllText(writePath, result);
-
 	}
 
 	[Fact]
@@ -48,7 +48,8 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		True(csv.Stamps.Count > 0);
 
-		True(csv.Count == 50);
+		expCount = 50;
+		True(csv.Count == expCount && csv.Meta.count == expCount);
 
 		string result = csv.WriteToString();
 
@@ -56,7 +57,6 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		if(WriteParsedLogs)
 			File.WriteAllText(writePath, result);
-
 	}
 
 	[Fact]
