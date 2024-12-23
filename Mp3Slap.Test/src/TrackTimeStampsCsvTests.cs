@@ -19,9 +19,9 @@ public class TrackTimeStampsCsvTests : BaseTest
 		True(csv.Count == expCount);
 		True(csv.CombineCuts());
 
-		True(csv.Count == 50);
+		True(csv.Stamps.Count > 0);
 
-		True(csv.Valid);
+		True(csv.Count == 50);
 
 		string result = csv.WriteToString();
 
@@ -46,9 +46,9 @@ public class TrackTimeStampsCsvTests : BaseTest
 
 		True(csv.CombineCuts());
 
-		True(csv.Count == 50);
+		True(csv.Stamps.Count > 0);
 
-		True(csv.Valid);
+		True(csv.Count == 50);
 
 		string result = csv.WriteToString();
 

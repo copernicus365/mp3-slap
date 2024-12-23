@@ -3,7 +3,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Test;
 
-public class FFSilenceTracksParserTests : FFSilenceDetectBase
+public class FFSDLogToTimeStampsParserTests : FFSilenceDetectBase
 {
 	[Fact]
 	public void GenLog()
@@ -19,21 +19,21 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 
 	void _RunParse_BasicCount_Test(string logName, int expectedCount)
 	{
-		FFSilenceDetToTimeStampsParser split = ParseFFSDLog(
+		FFSDLogToTimeStampsParser split = ParseFFSDLog(
 			GetSampleFFSilLog(logName),
 			expectedCount: expectedCount);
 	}
 
-	public FFSilenceDetToTimeStampsParser ParseFFSDLog(
+	public FFSDLogToTimeStampsParser ParseFFSDLog(
 		string log,
 		int expectedCount = -1,
 		(int min, int max)? expectedCountRange = null)
 	{
 		True(log != null);
-		// ParseFFSDLog
-		FFSilenceDetToTimeStampsParser split = new(log);
+		
+		FFSDLogToTimeStampsParser parser = new(log);
 
-		List<TrackTimeStamp> tracks = split.Parse();
+		List<TrackTimeStamp> tracks = parser.Parse();
 
 		int tracksCount = tracks.Count;
 
@@ -42,6 +42,6 @@ public class FFSilenceTracksParserTests : FFSilenceDetectBase
 		else if(expectedCountRange != null)
 			True(tracks.Count.InRange(expectedCountRange.Value.min, expectedCountRange.Value.max));
 
-		return split;
+		return parser;
 	}
 }

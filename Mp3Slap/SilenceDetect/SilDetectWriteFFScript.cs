@@ -3,6 +3,9 @@ using System.Text;
 
 namespace Mp3Slap.SilenceDetect;
 
+/// <summary>
+/// A SINGLE silence detect script, ie on a singular audio file, etc.
+/// </summary>
 public class SilDetectWriteFFScript
 {
 	public StringBuilder SB { get; private set; } = new();
@@ -52,7 +55,7 @@ public class SilDetectWriteFFScript
 		string script = $"""
 echo "--- {EchoFirstLine} ---"
 
-echo "log: '{info.SilenceDetectCsvPath}"
+echo "log: '{info.SDTimeStampsCSVPath}"
 
 sleep 2
 

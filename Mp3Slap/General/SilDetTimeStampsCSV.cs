@@ -1,5 +1,4 @@
 using System.Text;
-using System.Xml.Linq;
 
 using Mp3Slap.SilenceDetect;
 
@@ -10,51 +9,52 @@ namespace Mp3Slap.General;
 /// </summary>
 public class SilDetTimeStampsCSV
 {
-	public string FileName { get; set; }
-
 	public int Count => Stamps?.Count ?? 0;
 
-	public double Pad { get; set; }
-
-	public string FilePath { get; set; }
+	public SilDetTimeStampsMeta Meta { get; set; }
 
 	public List<TrackTimeStamp> Stamps { get; set; }
 
-	public bool Valid { get; set; }
-
 	public void InitForWrite(
-		double pad,
-		List<TrackTimeStamp> stamps)
+		List<TrackTimeStamp> stamps,
+		SilDetTimeStampsMeta meta)
 	{
-		Pad = pad;
 		Stamps = stamps;
+		Meta = meta with { count = stamps.Count };
 	}
 
 	public void InitForWrite(
-		double pad,
 		List<TrackTimeStamp> stamps,
-		FFAudioMeta meta = null,
-		string fileName = null,
-		string filePath = null)
+		double duration,
+		double pad,
+		string fileName,
+		string filePath,
+		FFAudioMeta meta = null)
 	{
-		Pad = pad;
 		Stamps = stamps;
 
 		if(fileName.IsNullOrHasNone() && filePath.NotNulle()) {
-			FileName = Path.GetFileName(filePath);
-			FilePath = filePath; // Path.GetFullPath(filePath);
+			fileName = Path.GetFileName(filePath);
 		}
 		else {
-			FileName = fileName ?? "";
-			FilePath = filePath ?? Path.GetFileName(FileName);
+			fileName ??= "";
+			filePath ??= Path.GetFileName(fileName);
 		}
+
+		Meta = new SilDetTimeStampsMeta(
+			count: Stamps.Count,
+			duration: duration,
+			pad: pad,
+			fileName: fileName,
+			filePath: filePath,
+			meta: meta);
 	}
 
 	public string WriteToString()
 	{
 		StringBuilder sb = new();
 
-		string x = GetHeaderXml();
+		string x = GetHeaderJSON(); // GetHeaderXml();
 		sb.AppendLine($"# {x}");
 
 		for(int i = 0; i < Stamps.Count; i++) {
@@ -68,32 +68,11 @@ public class SilDetTimeStampsCSV
 		return rep;
 	}
 
-	string GetHeaderXml()
-	{
-		// # <info name="dan" path="NIV-Suchet-27-Daniel.mp3" fflog="logs/NIV-Suchet-27-Daniel.mp3-silence-detect-parsed.txt" />
-		string x = new XElement("info",
-			new XAttribute("fileName", FileName ?? ""),
-			new XAttribute("count", Count),
-			new XAttribute("pad", Pad),
-			new XAttribute("filePath", FilePath ?? ""))
-			.ToString(SaveOptions.DisableFormatting);
-		return x;
-	}
+	string GetHeaderJSON()
+		=> Meta.ToJson(includeDefaults: false, indent: false, camelCase: true);
 
-	void SetHeaderValsFromXml(string txt)
-	{
-		XElement x;
-		try {
-			x = XElement.Parse(txt);
-			if(x == null || x.Name != "info")
-				return;
-		}
-		catch { return; }
-
-		FileName = x.AttributeN("fileName").ValueN().NullIfEmptyTrimmed();
-		FilePath = x.AttributeN("filePath").ValueN().NullIfEmptyTrimmed();
-		Pad = x.AttributeN("pad").ValueN().NullIfEmptyTrimmed().ToDoubleN() ?? 0;
-	}
+	void SetMetaHeaderFromJSON(string txt)
+		=> Meta = txt.DeserializeJson<SilDetTimeStampsMeta>();
 
 	public List<TrackTimeStamp> Parse(string text)
 	{
@@ -102,9 +81,9 @@ public class SilDetTimeStampsCSV
 			return null;
 
 		string fline = lines[0];
-		if(fline[0] == '#' && fline.Contains("<info")) {
+		if(fline[0] == '#' && fline.Contains('{')) {
 			fline = fline[1..];
-			SetHeaderValsFromXml(fline);
+			SetMetaHeaderFromJSON(fline);
 		}
 
 		Stamps ??= new(lines.Length);
@@ -121,7 +100,6 @@ public class SilDetTimeStampsCSV
 			Stamps.Add(stamp);
 		}
 
-		Valid = Stamps.Count > 0;
 		return Stamps;
 	}
 

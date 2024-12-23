@@ -11,19 +11,17 @@ public class SilDetScripts
 	public string GetFFMpegScript(bool withLogPaths) => "ffmpeg " + (withLogPaths ? FFMpegScriptArgs : FFMpegScriptArgsNoLogPath);
 
 	public SilDetScripts Init(Mp3ToSplitPathsInfo info, double SilenceDuration)
-		=> Init(info.AudioFilePath, info.SilenceDetectRawLogPath, SilenceDuration);
-
-	public SilDetScripts Init(string audioFilePath, string silenceDetectRawLogPath, double silenceDuration)
 	{
-		FFMpegScriptArgs = SetFFMpegDetectSilenceScript(true);
-		FFMpegScriptArgsNoLogPath = SetFFMpegDetectSilenceScript(false);
+		FFMpegScriptArgs = setFFMpegDetectSilenceScript(true);
+		FFMpegScriptArgsNoLogPath = setFFMpegDetectSilenceScript(false);
 		return this;
-		string SetFFMpegDetectSilenceScript(bool writeToLog)
+
+		string setFFMpegDetectSilenceScript(bool writeToLog)
 		{
-			string silStr = silenceDuration.ToString("0.##");
-			string val = $"""-nostats -i "{audioFilePath}" -af silencedetect=noise=-30dB:d={silStr} -f null -""";
+			string silStr = SilenceDuration.ToString("0.##");
+			string val = $"""-nostats -i "{info.AudioFilePath}" -af silencedetect=noise=-30dB:d={silStr} -f null -""";
 			if(writeToLog)
-				val += $""" 2> "{silenceDetectRawLogPath}" """;
+				val += $""" 2> "{info.FFSDLogPath}" """;
 			return val;
 		}
 	}

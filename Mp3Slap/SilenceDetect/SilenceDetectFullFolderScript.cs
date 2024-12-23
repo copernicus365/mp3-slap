@@ -53,19 +53,19 @@ public class SilenceDetectFullFolderScript(SilenceDetectFullFolderArgs args, dou
 	/// <summary>
 	/// Called by <see cref="INIT"/> above, but as static might be used elsewhere
 	/// </summary>
-	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string path, string logDirName, double silenceDur)
+	public static Mp3ToSplitPathsInfo GetMp3ToSplitPathsInfo(string audioPath, string logDirName, double silenceDur)
 	{
-		path = PathHelper.CleanPath(path);
-		string fname = Path.GetFileName(path).NullIfEmptyTrimmed();
+		audioPath = PathHelper.CleanPath(audioPath);
+		string fname = Path.GetFileName(audioPath).NullIfEmptyTrimmed();
 		if(fname == null) return default;
 
-		string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(path).NullIfEmptyTrimmed());
+		string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(audioPath).NullIfEmptyTrimmed());
 		string logDir = $"{dir}{logDirName}";
 
 		Mp3ToSplitPathsInfo info = new() {
 			Directory = dir,
 			AudioFileName = fname,
-			AudioFilePath = path,
+			AudioFilePath = audioPath,
 			LogDirectory = logDir,
 			SilenceDuration = silenceDur,
 		};

@@ -29,7 +29,7 @@ public class ProcessSilDetCSV
 
 		for(int i = 0; i < infos.Count; i++) {
 			Mp3ToSplitPathsInfo info = infos[i];
-			ProcessSilDetCSVArgs args = new(info.SilenceDetectCsvPath, info.AuditionMarkersCsvPath);
+			ProcessSilDetCSVArgs args = new(info.SDTimeStampsCSVPath, info.AudMarkersCSVPath);
 			await RUN(args);
 		}
 	}
@@ -72,7 +72,7 @@ public class ProcessSilDetCSV
 		}
 
 		AuditionCsv acsv = new();
-		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csvLg.FileName}");
+		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csvLg.Meta.fileName}");
 
 		string audCsv = acsv.WriteCsv(includeHeader: true);
 

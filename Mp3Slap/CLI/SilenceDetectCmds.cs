@@ -42,7 +42,7 @@ public class SilenceDetectBase
 	[Option(
 		"--pad",
 		description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.",
-		DefVal = FFSilenceDetToTimeStampsParser.PadDefault)]
+		DefVal = FFSDLogToTimeStampsParser.PadDefault)]
 	public double Pad { get; set; }
 
 	[Option(

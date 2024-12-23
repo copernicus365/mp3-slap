@@ -2,7 +2,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Test;
 
-public class SilenceDetectArgsBaseTests : BaseTest
+public class SilenceDetectArgsTests : BaseTest
 {
 	[Fact]
 	public void Standard_NotRootedLogFolder_RoundDur2Dec()

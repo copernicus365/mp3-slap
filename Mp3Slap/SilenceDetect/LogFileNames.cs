@@ -1,5 +1,9 @@
 namespace Mp3Slap.SilenceDetect;
 
+/// <summary>
+/// Class dedicated establishing the app's convention based naming of
+/// logs and directories and so forth.
+/// </summary>
 public static partial class LogFileNames
 {
 	public const string log_sildet_ffmpeg_ext = "silencedetect.log";
@@ -10,9 +14,9 @@ public static partial class LogFileNames
 	{
 		string logDir = info.LogDirectory;
 		string fname = info.AudioFileName;
-		info.SilenceDetectRawLogPath = GetLogPath(logDir, fname, parsedTxt: false);
-		info.SilenceDetectCsvPath = GetLogPath(logDir, fname, parsedTxt: true);
-		info.AuditionMarkersCsvPath = GetAuditionMarkersPath(logDir, fname);
+		info.FFSDLogPath = GetLogPath(logDir, fname, parsedTxt: false);
+		info.SDTimeStampsCSVPath = GetLogPath(logDir, fname, parsedTxt: true);
+		info.AudMarkersCSVPath = GetAuditionMarkersPath(logDir, fname);
 	}
 
 	public static string GetLogPath(string logDir, string fileName, bool parsedTxt)
@@ -84,30 +88,3 @@ public static partial class LogFileNames
 	[GeneratedRegex("""#(.*)#""")]
 	private static partial Regex Rx1();
 }
-
-//public static TrackTimeStampsCsv GetSilenceLogPathsEtc(string rawFFSilenceLogPath, string srcDir = null)
-//{
-//	rawFFSilenceLogPath = PathHelper.CleanPath(rawFFSilenceLogPath);
-
-//	string rFileName = Path.GetFileName(rawFFSilenceLogPath);
-
-//	string dir = PathHelper.CleanDirPath(Path.GetDirectoryName(rawFFSilenceLogPath));
-
-//	if(srcDir != null)
-//		srcDir = PathHelper.CleanDirPath(srcDir);
-//	else
-//		srcDir = PathHelper.CleanDirPath(Path.GetDirectoryName(dir.CutEnd(1)));
-
-//	string fileName = GetFileNameMinusLogNaming(rFileName);
-
-//	TrackTimeStampsCsv csv = new() {
-//		Name = fileName,
-//		FileName = fileName,
-//		SrcDir = srcDir,
-//		SrcPath = srcDir + fileName,
-//		LogPath = rawFFSilenceLogPath,
-//		CsvLogPath = GetLogPath(dir, fileName, parsedTxt: true),
-//	};
-//	return csv;
-//}
-

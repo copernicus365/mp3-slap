@@ -9,11 +9,16 @@ public class SilenceDetectRunSingle(
 	public readonly SilDetScripts Script
 		= new SilDetScripts().Init(info, info.SilenceDuration);
 
+	bool verbose => args.Verbose;
+
 	public async Task RUN()
 	{
-		writeScript.AddScipt(Script, info, args.Verbose, index);
+		if(index == 0)
+			$"-- {(args.RunFFScript ? "RUN" : "Calculate")} Silence Detect - dur: {info.SilenceDuration}".Print();
 
-		if(args.Verbose)
+		writeScript.AddScipt(Script, info, verbose, index);
+
+		if(verbose)
 			writeScript.EchoFirstLine.Print();
 
 		if(!args.RunFFScript)
@@ -22,7 +27,7 @@ public class SilenceDetectRunSingle(
 		string ffSplitOutput = await ProcessHelperX.RunFFMpegProcess(Script.FFMpegScriptArgsNoLogPath);
 
 		if(args.WriteFFMpegSilenceLogs)
-			File.WriteAllText(info.SilenceDetectRawLogPath, ffSplitOutput);
+			File.WriteAllText(info.FFSDLogPath, ffSplitOutput);
 
 		WriteFFMpegSilDetLogToCsvs ww = new() {
 			Pad = args.Pad,
@@ -30,5 +35,11 @@ public class SilenceDetectRunSingle(
 		};
 
 		await ww.RUN(info, ffSplitOutput);
+
+		SilDetTimeStampsMeta meta = ww.CSV.Meta;
+
+		if(verbose)
+			$"- count: {meta.count} | total-dur: {meta.duration}".Print();
+
 	}
 }
