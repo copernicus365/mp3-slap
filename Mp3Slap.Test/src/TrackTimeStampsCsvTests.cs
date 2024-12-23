@@ -64,17 +64,17 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string value = """ "0:09:39.89", "0:13:49.81", "0:04:09.92", "4.07", "0.30", "0:09:39.59", "0:13:53.59", "0:04:13.99" """;
 
-		var ts = TrackTimeStamp.ParseCsvString(value);
+		var ts = SilDetTimeStampsCSV.ParseCsvString_OLD(value);
 
 		True(ts != null);
-		True(ts.SoundStart == TimeSpan.Parse("0:09:39.89"));
-		True(ts.SoundEnd == TimeSpan.Parse("0:13:49.81"));
-		True(ts.SoundDuration == TimeSpan.Parse("0:04:09.92"));
-		True(ts.SilenceDuration.TotalSeconds == double.Parse("4.07"));
 		True(ts.Start == TimeSpan.Parse("0:09:39.59"));
+		True(ts.SoundStart == TimeSpan.Parse("0:09:39.89"));
 		True(ts.End == TimeSpan.Parse("0:13:53.58")); // changed from .59 -> .58, just ignore
+		True(ts.SoundEnd == TimeSpan.Parse("0:13:49.81"));
 		True(ts.Duration == TimeSpan.Parse("0:04:13.99"));
+		True(ts.SoundDuration == TimeSpan.Parse("0:04:09.92"));
 		True(ts.Pad.TotalSeconds == double.Parse("0.30"));
+		True(ts.SilenceDuration.TotalSeconds == double.Parse("4.07"));
 	}
 
 	void ParseTimeStampCSV_ShorterTimeSpanStamps_OLD()
@@ -86,7 +86,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 		//"0:02:58.09", "0:04:29.47", "0:01:31.38", "2.34", "0.30", "0:02:57.79", "0:04:29.77", "0:01:31.98", 
 		string value = """ "03:30.65", "0:05:06.12", "1:35.47", "2.42" """;
 
-		var ts = TrackTimeStamp.ParseCsvString(value);
+		var ts = SilDetTimeStampsCSV.ParseCsvString_OLD(value);
 
 		True(ts != null);
 		True(ts.SoundStart == TimeSpan.Parse("0:03:30.65"));

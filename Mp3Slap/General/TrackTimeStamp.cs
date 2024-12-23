@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Mp3Slap.General;
 
 public class TrackTimeStamp
@@ -31,7 +29,7 @@ public class TrackTimeStamp
 		SetSoundStartEndPads(pad: pad);
 	}
 
-	public TrackTimeStamp(TimeSpan startSound, TimeSpan endSound, TimeSpan duration, double silenceDuration, double pad)
+	public TrackTimeStamp(TimeSpan startSound, TimeSpan endSound, TimeSpan soundDuration, double silenceDuration, double pad)
 	{
 		if(startSound < TimeSpan.Zero || endSound < startSound)
 			throw new ArgumentOutOfRangeException();
@@ -39,11 +37,11 @@ public class TrackTimeStamp
 		SoundStart = startSound;
 		SoundEnd = endSound;
 
-		ArgumentOutOfRangeException.ThrowIfLessThan(duration, TimeSpan.Zero);
-		if(duration == TimeSpan.Zero)
-			duration = SoundEnd - startSound; // old note, maybe not relevant now: // do not calculate! start/end could be padded results
+		ArgumentOutOfRangeException.ThrowIfLessThan(soundDuration, TimeSpan.Zero);
+		if(soundDuration == TimeSpan.Zero)
+			soundDuration = SoundEnd - startSound; // old note, maybe not relevant now: // do not calculate! start/end could be padded results
 
-		SoundDuration = duration;
+		SoundDuration = soundDuration;
 
 		SilenceDuration = TimeSpan.FromSeconds(silenceDuration);
 
@@ -57,7 +55,7 @@ public class TrackTimeStamp
 			throw new ArgumentOutOfRangeException();
 
 		Start = start;
-		End  = end;
+		End = end;
 		Duration = End - Start;
 		//SilenceDuration = silenceDuration ?? TimeSpan.Zero;
 
@@ -115,92 +113,19 @@ public class TrackTimeStamp
 
 	public override string ToString() => ToCsvString();
 
-	/// <summary>
-	/// Used for our unique parse and write formats, so do not
-	/// alter w/out breaking change consideration.
-	/// </summary>
 	public string ToCsvString()
+		=> USENEWCSV ? ToCsvStringNEW() : ToCsvStringOLD();
+
+	public static bool USENEWCSV = true;
+
+	public string ToCsvStringShort()
+		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, ";
+
+	public string ToCsvStringNEW()
+		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, {Pad.TotalSeconds:0.00}, {SoundStart.ToString(TSFrmt)}, {SoundEnd.ToString(TSFrmt)}, {SoundDuration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, ";
+
+	public string ToCsvStringOLD()
 		=> $"{SoundStart.ToString(TSFrmt)}, {SoundEnd.ToString(TSFrmt)}, {SoundDuration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, {Pad.TotalSeconds:0.00}, {Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, ";
-
-
-	public static TrackTimeStamp ParseCsvString(string line)
-	{
-		line = line.NullIfEmptyTrimmed();
-		if(line == null || line.Length < 8) return null;
-
-		bool isCut = line[0] == '-';
-		if(isCut)
-			line = line[1..].NullIfEmptyTrimmed();
-
-		string[] arr = line
-			.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-			.Select(v => v?.Trim('"').NullIfEmptyTrimmed())
-			.ToArray();
-
-		if(arr.Length != 8)
-			return null;
-
-		TimeSpan start = default;
-		TimeSpan end = default;
-		TimeSpan dur = default;
-		double silence = default;
-		double pad = default;
-		TimeSpan pdstart = default;
-		TimeSpan pdend = default;
-		TimeSpan pddur = default;
-
-		for(int i = 0; i < arr.Length; i++) {
-			string val = arr[i];
-			if(val == null)
-				return null;
-
-			if(i == 3) {
-				silence = val.ToDouble(-2);
-				if(silence < -1)
-					return null;
-				continue;
-			}
-			else if(i == 4) {
-				pad = val.ToDouble(-2);
-				continue;
-			}
-
-			if(!TryParseTSLenient(val, out TimeSpan ts))
-				return null;
-			//if(!TimeSpan.TryParse(val, out TimeSpan ts))
-			//	return null;
-
-			switch(i) {
-				case 0: start = ts; break;
-				case 1: end = ts; break;
-				case 2: dur = ts; break;
-				case 5: pdstart = ts; break;
-				case 6: pdend = ts; break;
-				case 7: pddur = ts; break;
-				default: return null;
-			}
-		}
-
-		if(start < TimeSpan.Zero || end < start)
-			return null;
-
-		TrackTimeStamp stamp = new(start, end, dur, silence, pad) { IsCut = isCut };
-		return stamp;
-	}
-
-	public static bool TryParseTSLenient([NotNullWhen(true)] string s, out TimeSpan result)
-	{
-		if(TimeSpan.TryParse(s, null, out result))
-			return true;
-
-		if(s.Count(c => c == ':') == 1) {
-			s = "0:" + s;
-			if(TimeSpan.TryParse(s, null, out result))
-				return true;
-		}
-
-		return false;
-	}
 
 	public TrackTimeStamp CombineCutsFromLastToNew(TrackTimeStamp last)
 	{
