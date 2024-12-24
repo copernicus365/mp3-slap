@@ -53,7 +53,7 @@ public class ProcessSilDetCSV
 			return null;
 		}
 
-		SilDetTimeStampsCSV csvLg = new();
+		SilDetTimeStampsCSVWriter csvLg = new();
 		List<TrackTimeStamp> stamps = csvLg.Parse(csvLog);
 
 		int origCnt = stamps.Count;
@@ -89,7 +89,7 @@ public class ProcessSilDetCSV
 
 public record SDStampsCsvProcessResult(
 	List<TrackTimeStamp> stamps,
-	SilDetTimeStampsCSV csv,
+	SilDetTimeStampsCSVWriter csv,
 	AuditionCsv acsv,
 	string csvLog = null,
 	string audMarkersCsv = null);

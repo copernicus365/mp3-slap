@@ -8,11 +8,14 @@ public class AuditionCsv
 
 	public List<AuditionMarker> Markers { get; set; } = [];
 
-	public void SetMarkers(IList<TrackTimeStamp> stamps, string namePrefix, string firstDesc = null)
+	public static string DefChapterNamePrefix { get; set; } = "Ch ";
+
+	public void SetMarkers(IList<TrackTimeStamp> stamps, string namePrefix = null, string firstDesc = null)
 	{
 		if(stamps.IsNulle())
 			return;
 
+		namePrefix ??= DefChapterNamePrefix;
 		string nfrmt = stamps.Count.DigitsCountFrmt();
 
 		Markers = stamps

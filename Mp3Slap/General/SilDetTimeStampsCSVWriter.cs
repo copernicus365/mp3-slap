@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 using Mp3Slap.SilenceDetect;
@@ -8,13 +9,32 @@ namespace Mp3Slap.General;
 /// <summary>
 /// Writes and parses silence detect list to / from CSVs.
 /// </summary>
-public class SilDetTimeStampsCSV
+public class SilDetTimeStampsCSVWriter
 {
 	public int Count => Stamps?.Count ?? 0;
 
 	public SilDetTimeStampsMeta Meta { get; set; }
 
 	public List<TrackTimeStamp> Stamps { get; set; }
+
+	public void InitForWrite(
+		double pad,
+		double sdDuration,
+		List<TrackTimeStamp> stamps,
+		FFAudioMeta ffmeta,
+		string filePath = null)
+	{
+		Stamps = stamps;
+
+		string fileName = filePath.IsNulle() ? null : Path.GetFileName(filePath);
+		Meta = new SilDetTimeStampsMeta(
+			count: Count,
+			sdDuration: 0,
+			pad: pad,
+			fileName,
+			filePath,
+			ffmeta);
+	}
 
 	public void InitForWrite(
 		List<TrackTimeStamp> stamps,
@@ -26,44 +46,22 @@ public class SilDetTimeStampsCSV
 
 	public void FixMetaCountIfNeeded()
 	{
-		var meta = Meta?.meta;
+		FFAudioMeta meta = Meta?.meta;
 		if(Meta != null && Meta.count != Count)
 			Meta = Meta with { count = Count };
 	}
 
-	public void InitForWrite(
-		List<TrackTimeStamp> stamps,
-		double duration,
-		double pad,
-		string fileName,
-		string filePath,
-		FFAudioMeta meta = null)
-	{
-		Stamps = stamps;
 
-		if(fileName.IsNullOrHasNone() && filePath.NotNulle()) {
-			fileName = Path.GetFileName(filePath);
-		}
-		else {
-			fileName ??= "";
-			filePath ??= Path.GetFileName(fileName);
-		}
-
-		Meta = new SilDetTimeStampsMeta(
-			count: Stamps.Count,
-			duration: duration,
-			pad: pad,
-			fileName: fileName,
-			filePath: filePath,
-			meta: meta);
-	}
-
-	public string WriteToString()
+	public string WriteToString(
+		bool includeCSVHeader = true)
 	{
 		StringBuilder sb = new();
 
-		string x = GetHeaderJSON();
-		sb.AppendLine($"# {x}");
+		string json = GetHeaderJSON();
+		sb.AppendLine($"# {json}");
+
+		if(includeCSVHeader)
+			sb.AppendLine(TrackTimeStamp.CSVHeader);
 
 		for(int i = 0; i < Stamps.Count; i++) {
 			TrackTimeStamp st = Stamps[i];
@@ -85,45 +83,11 @@ public class SilDetTimeStampsCSV
 
 	public bool CombineCuts()
 	{
-		var stamps = Stamps.ToArray();
-
-		if(stamps.IsNulle())
-			return false;
-
-		if(stamps.None(s => s.IsCut))
-			return false;
-
-		if(stamps[0].IsCut)
-			stamps[0].IsCut = false; // can't be valid i any case, but logic below depends on this
-
-		int negIndexSince = 0;
-
-		for(int i = stamps.Length - 1; i >= 0; i--) {
-			TrackTimeStamp st = stamps[i];
-
-			bool hasPrevNegatives = negIndexSince > 0;
-
-			if(st.IsCut) {
-				if(!hasPrevNegatives)
-					negIndexSince = i;
-				continue;
-			}
-
-			if(!hasPrevNegatives)
-				continue;
-
-			TrackTimeStamp lastCutSt = stamps[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
-
-			TrackTimeStamp cStamp = st.CombineCutsFromLastToNew(lastCutSt);
-			stamps[i] = cStamp;
-
-			negIndexSince = 0;
-		}
-
-		Stamps = stamps.Where(st => !st.IsCut).ToList();
+		List<TrackTimeStamp> _stamps = Stamps;
+		SilDetTimeStampsCSVParser.CombineCuts(ref _stamps);
+		Stamps = _stamps;
 
 		FixMetaCountIfNeeded();
-
 		return true; // even if somehow count is same (?), fact is some WERE marked as Cut
 	}
 
@@ -149,7 +113,7 @@ public class SilDetTimeStampsCSV
 			if(ln[0] == '#')
 				continue;
 
-			TrackTimeStamp stamp = ParseCsvString_OLD(ln);
+			TrackTimeStamp stamp = ParseCsvString(ln);
 			if(stamp == null)
 				continue;
 

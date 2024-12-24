@@ -53,8 +53,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="data\csv-parsed-logs\write-temp\" />
-  </ItemGroup>
-
 </Project>

@@ -63,12 +63,15 @@ public class TrackTimeStamp
 	}
 
 
+	public const string CSVHeader = "Start,End,Duration,Pad,SoundStart,SoundEnd,SoundDuration,SilenceDuration,";
 
 	public TimeSpan Start { get; private set; }
 
 	public TimeSpan End { get; private set; }
 
 	public TimeSpan Duration { get; private set; }
+
+	public TimeSpan Pad { get; private set; }
 
 	public TimeSpan SoundStart { get; private set; }
 
@@ -77,8 +80,6 @@ public class TrackTimeStamp
 	public TimeSpan SoundDuration;
 
 	public TimeSpan SilenceDuration { get; private set; }
-
-	public TimeSpan Pad { get; private set; }
 
 	public bool IsCut { get; set; }
 

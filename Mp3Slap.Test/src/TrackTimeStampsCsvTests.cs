@@ -11,18 +11,19 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string csvText = csvLog_gen_subs();
 
-		SilDetTimeStampsCSV csv = new();
-		csv.Parse(csvText);
+		SilDetTimeStampsCSVParser cparser = new();
+		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
 
 		int expCount = 54;
 
-		True(csv.Count == expCount);
-		True(csv.CombineCuts());
+		True(cparser.Count == expCount);
 
-		True(csv.Stamps.Count > 0);
+		True(cparser.CombineCuts());
 
 		expCount = 50;
-		True(csv.Count == expCount && csv.Meta.count == expCount);
+		True(cparser.Count == expCount && cparser.Meta.count == expCount);
+
+		SilDetTimeStampsCSVWriter csv = cparser.ToCsv();
 
 		string result = csv.WriteToString();
 
@@ -37,7 +38,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string csvText = csvLog_gen();
 
-		SilDetTimeStampsCSV csv = new();
+		SilDetTimeStampsCSVWriter csv = new();
 		csv.Parse(csvText);
 
 		int expCount = 51;
@@ -64,7 +65,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 	{
 		string value = """ "0:09:39.89", "0:13:49.81", "0:04:09.92", "4.07", "0.30", "0:09:39.59", "0:13:53.59", "0:04:13.99" """;
 
-		var ts = SilDetTimeStampsCSV.ParseCsvString_OLD(value);
+		var ts = SilDetTimeStampsCSVWriter.ParseCsvString_OLD(value);
 
 		True(ts != null);
 		True(ts.Start == TimeSpan.Parse("0:09:39.59"));
@@ -86,7 +87,7 @@ public class TrackTimeStampsCsvTests : BaseTest
 		//"0:02:58.09", "0:04:29.47", "0:01:31.38", "2.34", "0.30", "0:02:57.79", "0:04:29.77", "0:01:31.98", 
 		string value = """ "03:30.65", "0:05:06.12", "1:35.47", "2.42" """;
 
-		var ts = SilDetTimeStampsCSV.ParseCsvString_OLD(value);
+		var ts = SilDetTimeStampsCSVWriter.ParseCsvString_OLD(value);
 
 		True(ts != null);
 		True(ts.SoundStart == TimeSpan.Parse("0:03:30.65"));

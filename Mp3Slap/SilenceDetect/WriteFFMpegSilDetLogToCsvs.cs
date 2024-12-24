@@ -4,7 +4,7 @@ public class WriteFFMpegSilDetLogToCsvs
 {
 	FFSDLogToTimeStampsParser Parser;
 	ProcessSilDetCSV procSDCsv;
-	public SilDetTimeStampsCSV CSV { get; private set; }
+	public SilDetTimeStampsCSVWriter CSV { get; private set; }
 
 	public double Pad { get; init; }
 
@@ -41,31 +41,24 @@ public class WriteFFMpegSilDetLogToCsvs
 
 		CSV = new();
 		CSV.InitForWrite(
-			Parser.Stamps,
-			duration: info.SilenceDuration,
 			pad: Pad,
-			fileName: null,
-			filePath: info.AudioFilePath,
-			meta: Parser.Meta);
-
-		//csvWriter.InitForWrite(
-		//	Pad,
-		//	ffToTracksParser.Stamps,
-		//	meta: ffToTracksParser.Meta,
-		//	filePath: audioFilePath);
+			sdDuration: info.SilenceDuration,
+			stamps: Parser.Stamps,
+			ffmeta: Parser.Meta,
+			filePath: info.AudioFilePath);
 
 		string csvContent = CSV.WriteToString();
 
 		File.WriteAllText(info.SDTimeStampsCSVPath, csvContent);
 
 		if(WriteAuditionMarkerCsvs) {
-			procSDCsv = new() {
-				SaveCsvLog = false, // we JUST saved it couple lines above
-				SaveAuditionCsv = true
-			};
 
-			ProcessSilDetCSVArgs args = new(info.SDTimeStampsCSVPath, info.AudMarkersCSVPath, csvContent);
-			await procSDCsv.RUN(args);
+			AuditionCsv acsv = new();
+			acsv.SetMarkers(Parser.Stamps, null, firstDesc: $"From mp3-slap silence csv logs - {CSV.Meta.fileName}");
+
+			string audCsv = acsv.WriteCsv(includeHeader: true);
+
+			await File.WriteAllTextAsync(info.AudMarkersCSVPath, audCsv);
 		}
 		return new SResult(true);
 	}

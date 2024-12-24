@@ -15,7 +15,9 @@ public class SilDetTimeStampsCSVParser
 
 	public SilDetTimeStampsMeta Meta { get; set; }
 
-	public List<TrackTimeStamp> Stamps { get; set; }
+	public List<TrackTimeStamp> Stamps { get => _stamps; set => _stamps = value; }
+
+	List<TrackTimeStamp> _stamps;
 
 	public void FixMetaCountIfNeeded()
 	{
@@ -26,7 +28,7 @@ public class SilDetTimeStampsCSVParser
 
 	string[] lines;
 
-	public List<TrackTimeStamp> Parse(string text, bool fixMetaCountToNew = true)
+	public List<TrackTimeStamp> Parse(string text, bool combineCuts = true, bool fixMetaCountToNew = true)
 	{
 		lines = text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 		if(lines.IsNulle())
@@ -52,10 +54,23 @@ public class SilDetTimeStampsCSVParser
 			Stamps.Add(stamp);
 		}
 
-		//if(fixMetaCountToNew)
-		//	FixMetaCountIfNeeded();
+		if(combineCuts) {
+			CombineCuts();
+
+			if(fixMetaCountToNew)
+				FixMetaCountIfNeeded();
+		}
 
 		return Stamps;
+	}
+
+	public SilDetTimeStampsCSVWriter ToCsv()
+	{
+		SilDetTimeStampsCSVWriter csv = new() {
+			Stamps = Stamps,
+			Meta = Meta,
+		};
+		return csv;
 	}
 
 	void SetMetaHeaderFromJSON(string txt)
@@ -79,7 +94,7 @@ public class SilDetTimeStampsCSVParser
 			return null;
 
 		TTimeStamp st = new();
-	
+
 		for(int i = 0; i < arr.Length; i++) {
 			string val = arr[i];
 			if(val == null)
@@ -132,6 +147,49 @@ public class SilDetTimeStampsCSVParser
 
 		return false;
 	}
+
+	public bool CombineCuts() => CombineCuts(ref _stamps);
+
+	public static bool CombineCuts(ref List<TrackTimeStamp> stamps)
+	{
+		if(stamps.IsNulle() || stamps.None(s => s.IsCut))
+			return false;
+
+		TrackTimeStamp[] arr = [.. stamps];
+
+		if(arr[0].IsCut)
+			arr[0].IsCut = false; // can't be valid i any case, but logic below depends on this
+
+		int negIndexSince = 0;
+
+		for(int i = arr.Length - 1; i >= 0; i--) {
+			TrackTimeStamp st = arr[i];
+
+			bool hasPrevNegatives = negIndexSince > 0;
+
+			if(st.IsCut) {
+				if(!hasPrevNegatives)
+					negIndexSince = i;
+				continue;
+			}
+
+			if(!hasPrevNegatives)
+				continue;
+
+			TrackTimeStamp lastCutSt = arr[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
+
+			TrackTimeStamp cStamp = st.CombineCutsFromLastToNew(lastCutSt);
+			arr[i] = cStamp;
+
+			negIndexSince = 0;
+		}
+
+		stamps = arr.Where(st => !st.IsCut).ToList();
+		return true; // even if somehow count is same (?), fact is some WERE marked as Cut
+
+		//FixMetaCountIfNeeded();
+	}
+
 }
 
 public class TTimeStamp

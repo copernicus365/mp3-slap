@@ -4,7 +4,7 @@ namespace Mp3Slap.General;
 
 public record SilDetTimeStampsMeta(
 	int count,
-	double duration,
+	double sdDuration,
 	double pad,
 	string fileName,
 	string filePath,
