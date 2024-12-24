@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 
 using Mp3Slap.SilenceDetect;
@@ -44,10 +45,20 @@ public class SilDetTimeStampsCSVParser
 
 		for(int i = 0; i < lines.Length; i++) {
 			string ln = lines[i];
-			if(ln[0] == '#')
+			if(ln.IsNulle())
 				continue;
 
-			TrackTimeStamp stamp = ParseCsvString(ln);
+			if(ln[0] == '#') // skip first line header meta JSON if there
+				continue;
+
+			if(i < 5 && ln.StartsWith("Start")) // skip CSV header if there
+				continue;
+
+			TTimeStamp stampNw = new();
+			if(!stampNw.Parse(ln))
+				continue;
+
+			TrackTimeStamp stamp = stampNw.ToTrackTimeStamp(); //null; // ParseCsvString(ln);
 			if(stamp == null)
 				continue;
 
@@ -90,8 +101,13 @@ public class SilDetTimeStampsCSVParser
 			.Select(v => v?.Trim('"').NullIfEmptyTrimmed())
 			.ToArray();
 
-		if(arr.Length != 8)
+		if(arr.Length != 8) {
+			// CURRENT! But soon, allow:
+			// len=1 (simple start time on each line potentially, let end time be set by next line)
+			// len=2 (same as above but just start and end time ... OR ... 2 where start + dur double ??)
+			// Maybe others...
 			return null;
+		}
 
 		TTimeStamp st = new();
 
@@ -100,13 +116,13 @@ public class SilDetTimeStampsCSVParser
 			if(val == null)
 				return null;
 
-			if(i == 3) {
+			if(i == 7) {
 				st.SilenceDuration = val.ToDouble(-2);
 				if(st.SilenceDuration < -1)
 					return null;
 				continue;
 			}
-			else if(i == 4) {
+			else if(i == 3) {
 				st.Pad = val.ToDouble(-2);
 				continue;
 			}
@@ -117,12 +133,12 @@ public class SilDetTimeStampsCSVParser
 			//	return null;
 
 			switch(i) {
-				case 0: st.SoundStart = ts; break;
-				case 1: st.SoundEnd = ts; break;
-				case 2: st.SoundDuration = ts; break;
-				case 5: st.Start = ts; break;
-				case 6: st.End = ts; break;
-				case 7: st.Duration = ts; break;
+				case 0: st.Start = ts; break;
+				case 1: st.End = ts; break;
+				case 2: st.Duration = ts; break;
+				case 4: st.SoundStart = ts; break;
+				case 5: st.SoundEnd = ts; break;
+				case 6: st.SoundDuration = ts; break;
 				default: return null;
 			}
 		}
@@ -310,4 +326,8 @@ public class TTimeStamp
 		return false;
 	}
 
+	public TrackTimeStamp ToTrackTimeStamp()
+	{
+		throw new NotImplementedException();
+	}
 }
