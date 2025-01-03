@@ -1,14 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization.Formatters;
-using System.Text;
-
-using Mp3Slap.SilenceDetect;
 
 namespace Mp3Slap.General;
 
 /// <summary>
 /// PARSES CSV silence detect file. Just for parsing, not writing.
-/// That's very good because parsing allows tons of extra cases, SUBTRACTIONS or ADDS, etc.
+/// It's really good to have a separate PARSER, because parsing / reading allows tons of
+/// extra scenarios, like SUBTRACTIONS or ADDS, etc.
 /// </summary>
 public class SilDetTimeStampsCSVParser
 {
@@ -19,6 +16,7 @@ public class SilDetTimeStampsCSVParser
 	public List<TrackTimeStamp> Stamps { get => _stamps; set => _stamps = value; }
 
 	List<TrackTimeStamp> _stamps;
+	List<TTimeStamp> _tstamps;
 
 	public void FixMetaCountIfNeeded()
 	{
@@ -41,7 +39,7 @@ public class SilDetTimeStampsCSVParser
 			SetMetaHeaderFromJSON(fline);
 		}
 
-		Stamps ??= new(lines.Length);
+		_tstamps ??= new(lines.Length);
 
 		for(int i = 0; i < lines.Length; i++) {
 			string ln = lines[i];
@@ -58,7 +56,13 @@ public class SilDetTimeStampsCSVParser
 			if(!stampNw.Parse(ln))
 				continue;
 
-			TrackTimeStamp stamp = stampNw.ToTrackTimeStamp(); //null; // ParseCsvString(ln);
+			_tstamps.Add(stampNw);
+		}
+
+		for(int i = 0; i < _tstamps.Count; i++) {
+			TTimeStamp itm = _tstamps[i];
+
+			TrackTimeStamp stamp = itm.ToTrackTimeStamp(); //null; // ParseCsvString(ln);
 			if(stamp == null)
 				continue;
 
@@ -231,7 +235,8 @@ public class TTimeStamp
 			return false;
 
 		IsCut = line[0] == '-';
-		if(IsCut)
+		IsAdd = line[0] == '+';
+		if(IsCut || IsAdd)
 			line = line[1..].NullIfEmptyTrimmed();
 
 		arr = line

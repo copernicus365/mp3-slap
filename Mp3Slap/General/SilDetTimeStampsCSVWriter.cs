@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 using Mp3Slap.SilenceDetect;
