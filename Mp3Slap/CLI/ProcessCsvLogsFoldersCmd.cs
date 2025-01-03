@@ -7,8 +7,8 @@ using Mp3Slap.SilenceDetect;
 namespace Mp3Slap.CLI.SilenceDetect;
 
 [Command(
-	"csv-logs",
-	Alias = "csvs",
+	"csvs",
+	Alias = "process-sd-csv-group",
 	Description = "Reprocesses silence detect csv logs[1] and possibly (re)generating Adobe Audition marker csv files ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
 public class ProcessCsvLogsFoldersCmd : SilenceDetectBase
 {

@@ -28,7 +28,7 @@ public class SilenceDetectBase
 	[Option(
 		"--silence-durations",
 		"-dur",
-		"Minimum duration of silence to detect, in seconds, comma separated",
+		"Minimum duration(s) of silence to detect, in seconds, comma separated",
 		Required = true)]
 	public string DurationsStr {
 		get => Durations?.JoinToString(",");
@@ -41,7 +41,7 @@ public class SilenceDetectBase
 
 	[Option(
 		"--pad",
-		description: "Amount to pad beginning of audio with in seconds. The ffmpeg silence detection gives start times precisely when the silence ends / sound begins, but typically you would't want the start of the track to begin without some padding. At the same time most of the long silence occurs at the end of a track.",
+		description: "Amount to pad beginning of audio with in seconds. In addition to start/end of sound times, our CSV logs give *calculated* track start / end times that will use this value. If 0, all the silence gap between tracks will be at the END of the track in those calculated times, etc.",
 		DefVal = FFSDLogToTimeStampsParser.PadDefault)]
 	public double Pad { get; set; }
 

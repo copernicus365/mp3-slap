@@ -7,9 +7,9 @@ using Mp3Slap.SilenceDetect;
 namespace Mp3Slap.CLI.SilenceDetect;
 
 [Command(
-	"csv",
-	Alias = "process-single-sd-csv",
-	Description = "For processing a single silence detect csv. Handles removing cuts (soon: + adds), (re)generating Audition marker csv from it, etc ([1] e.g. `log#foo1.mp3#silencedetect-parsed.csv`).")]
+	"process-single-sd-csv", //"csv",
+	Alias = "single",
+	Description = "For processing a single silence detect csv - by default named like: `log#abc.mp3#silencedetect-parsed.csv`. Handles removing cuts (soon: + adds), (re)generating Audition marker csv from it, etc.")]
 public class ProcessCsvLogCmd
 {
 	[Argument("sd-csv-path",
