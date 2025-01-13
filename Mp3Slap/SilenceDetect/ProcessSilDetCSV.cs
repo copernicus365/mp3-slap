@@ -53,26 +53,28 @@ public class ProcessSilDetCSV
 			return null;
 		}
 
-		SilDetTimeStampsCSVWriter csvLg = new();
-		List<TrackTimeStamp> stamps = csvLg.Parse(csvLog);
+		SilDetTimeStampsCSVParser cparser = new();
+		SilDetTimeStampsCSVWriter writer = new();
+
+		List<TrackTimeStamp> stamps = cparser.Parse(csvLog);
 
 		int origCnt = stamps.Count;
 
-		HadAddsOrPluses = csvLg.CombineCuts();
+		HadAddsOrPluses = cparser.CombineCuts();
 
 		if(!HadAddsOrPluses && IgnoreAllWOutAddsOrPluses)
 			return null;
 
-		stamps = csvLg.Stamps;
+		stamps = cparser.Stamps;
 		int finCnt = stamps.Count;
 
 		if(SaveCsvLog && csvLogPath != null && (HadAddsOrPluses || !SaveCsvLogOnlyOnChange)) {
-			csvLog = csvLg.WriteToString();
+			csvLog = writer.WriteToString();
 			await File.WriteAllTextAsync(csvLogPath, csvLog);
 		}
 
 		AuditionCsv acsv = new();
-		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {csvLg.Meta.fileName}");
+		acsv.SetMarkers(stamps, ChapterNamePrefix, firstDesc: $"From mp3-slap silence csv logs - {cparser.Meta.fileName}");
 
 		string audCsv = acsv.WriteCsv(includeHeader: true);
 
@@ -80,7 +82,7 @@ public class ProcessSilDetCSV
 			await File.WriteAllTextAsync(args.audMarkersCsvPath, audCsv);
 		}
 
-		SDStampsCsvProcessResult x = new(stamps, csvLg, acsv, csvLog, audCsv);
+		SDStampsCsvProcessResult x = new(stamps, writer, acsv, csvLog, audCsv);
 		Items.Add(x);
 		return x;
 	}
