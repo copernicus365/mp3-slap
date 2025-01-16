@@ -7,6 +7,15 @@ public class TrackTimeStampsCsvTests : BaseTest
 	public bool WriteParsedLogs = false;
 
 	[Fact]
+	public void PARSE1()
+	{
+		string csvText = csvLog_gen_subs();
+
+		SilDetTimeStampsCSVParser cparser = new();
+		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
+	}
+
+	[Fact]
 	public void ParseLargeCsv_WithSubs_Gen()
 	{
 		string csvText = csvLog_gen_subs();
