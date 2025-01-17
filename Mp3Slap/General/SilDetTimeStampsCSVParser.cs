@@ -74,17 +74,19 @@ public class SilDetTimeStampsCSVParser
 
 		int lastI = _tstamps.Count - 1;
 
+		Stamps = new List<TrackTimeStamp>(_tstamps.Count);
+
 		for(int i = 0; i < _tstamps.Count; i++) {
 			TTimeStamp itm = _tstamps[i];
 
-			bool fail = itm.Init(
+			bool pass = itm.Init(
 				prev: i < 1 ? null : _tstamps[i - 1],
 				next: i == lastI ? null : _tstamps[i + 1],
 				totalDuration: Meta?.meta?.duration ?? TimeSpan.Zero,
 				padDef: padDef,
 				out TrackTimeStamp stamp);
 
-			if(fail) {
+			if(!pass) {
 				string err = $"Fail to parse stamp: {itm.ErrorMsg}".Print();
 				throw new Exception(err);
 			}

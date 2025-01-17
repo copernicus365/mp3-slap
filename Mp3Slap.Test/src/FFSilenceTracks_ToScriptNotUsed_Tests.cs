@@ -7,7 +7,7 @@ namespace Test;
 /// Keep... but not used, ideas (like python script instead of stupid shell?)
 /// a mess tho
 /// </summary>
-public class FFSilenceTracks_ToScriptNotUsed_Tests : FFSilenceDetectBase
+public class FFSilenceTracks_ToScriptNotUsed_Tests : SilenceDetectBase
 {
 	[Fact]
 	public void TestWriteSplitScript()

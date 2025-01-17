@@ -17,6 +17,16 @@ public class TrackTimeStamp
 			  pad: TimeSpan.FromSeconds(pad))
 	{ }
 
+	/// <summary>
+	/// For easy testing purposes...
+	/// </summary>
+	/// <param name="arr"></param>
+	public TrackTimeStamp(params string[] arr)
+		: this(ts(arr[0]), ts(arr[1]), TimeSpan.FromSeconds(arr[2].ToDouble()), TimeSpan.FromSeconds(0.3))
+	{ }
+
+	static TimeSpan ts(string v) => TimeSpan.Parse(v);
+
 	/// <summary>Ibid.</summary>
 	public TrackTimeStamp(TimeSpan startSound, TimeSpan endSound, TimeSpan? silenceDuration = null, TimeSpan pad = default)
 	{

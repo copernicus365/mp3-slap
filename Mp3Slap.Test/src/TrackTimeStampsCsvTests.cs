@@ -2,9 +2,18 @@ using Mp3Slap.General;
 
 namespace Test;
 
-public class TrackTimeStampsCsvTests : BaseTest
+public class TrackTimeStampsCsvTests : SilenceDetectBase
 {
 	public bool WriteParsedLogs = false;
+
+	[Fact]
+	public void PARSE_Short()
+	{
+		string csvText = csvLog_gen_short();
+
+		SilDetTimeStampsCSVParser cparser = new();
+		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
+	}
 
 	[Fact]
 	public void PARSE1()
@@ -111,10 +120,5 @@ public class TrackTimeStampsCsvTests : BaseTest
 		True(ts.SilenceDuration == double.Parse("2.42"));
 	}
 
-	string csvLog_gen()
-		=> DataString($"{SampleResultsDirName}/log#01-genesis.mp3#silencedetect-parsed.csv");
-
-	string csvLog_gen_subs()
-		=> DataString($"{SampleResultsDirName}/log#01-genesis-3.1-with-subs.mp3#silencedetect-parsed.csv");
 
 }

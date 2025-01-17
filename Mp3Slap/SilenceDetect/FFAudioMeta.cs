@@ -15,9 +15,8 @@ public record FFAudioMeta(
 	double start,
 	string bitrate)
 {
+	public FFAudioMeta()
+		: this(null, null, null, null, null, null, default, null, null, null, default, default, null) { }
 	public FFAudioMeta(TimeSpan duration, double start = 0)
-		: this(null, null, null, null, null, null, default, null, null, null, duration, start, null)
-	{
-
-	}
+		: this(null, null, null, null, null, null, default, null, null, null, duration, start, null) { }
 }

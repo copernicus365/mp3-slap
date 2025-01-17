@@ -150,7 +150,7 @@ public class TTimeStamp
 
 		bool isFirst = prev == null;
 		bool isEnd = next == null;
-		TimeSpan nextStart = isEnd ? next.Start : totalDuration;
+		TimeSpan nextStart = isEnd ? totalDuration : next.Start;
 
 		TimeSpan pad = Pad > 0 ? TimeSpan.FromSeconds(Pad) : padDef;
 

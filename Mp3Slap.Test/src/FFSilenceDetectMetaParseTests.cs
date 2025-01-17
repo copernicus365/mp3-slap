@@ -2,7 +2,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Test;
 
-public class FFSilenceDetectMetaParseTests : FFSilenceDetectBase
+public class FFSilenceDetectMetaParseTests : SilenceDetectBase
 {
 	[Fact]
 	public void Test1()

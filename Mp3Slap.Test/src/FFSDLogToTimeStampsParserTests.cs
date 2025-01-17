@@ -3,7 +3,7 @@ using Mp3Slap.SilenceDetect;
 
 namespace Test;
 
-public class FFSDLogToTimeStampsParserTests : FFSilenceDetectBase
+public class FFSDLogToTimeStampsParserTests : SilenceDetectBase
 {
 	[Fact]
 	public void GenLog()
