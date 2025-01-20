@@ -16,13 +16,61 @@ public class TrackTimeStampsCsvTests : SilenceDetectBase
 	}
 
 	[Fact]
-	public void PARSE1()
+	public void Parse_1NumCsv_1()
 	{
-		string csvText = csvLog_gen_subs();
+		string csvText = csvLog_1num_v1();
 
 		SilDetTimeStampsCSVParser cparser = new();
 		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
+
+		int expCount = 17;
+
+		True(cparser.Count == expCount);
+
+		True(cparser.CombineCuts());
+		cparser.FixMetaCountIfNeeded();
+
+		expCount = 14;
+		True(cparser.Count == expCount && cparser.Meta.count == expCount);
+
+		SilDetTimeStampsCSVWriter csv = cparser.ToCsv();
+
+		string result = csv.WriteToString();
+
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
+
+		if(WriteParsedLogs)
+			File.WriteAllText(writePath, result);
 	}
+
+	[Fact]
+	public void Parse_2NumCsv_1()
+	{
+		string csvText = csvLog_2num_v1();
+
+		SilDetTimeStampsCSVParser cparser = new();
+		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
+
+		int expCount = 54;
+
+		True(cparser.Count == expCount);
+
+		True(cparser.CombineCuts());
+		cparser.FixMetaCountIfNeeded();
+
+		expCount = 50;
+		True(cparser.Count == expCount && cparser.Meta.count == expCount);
+
+		SilDetTimeStampsCSVWriter csv = cparser.ToCsv();
+
+		string result = csv.WriteToString();
+
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
+
+		if(WriteParsedLogs)
+			File.WriteAllText(writePath, result);
+	}
+
 
 	[Fact]
 	public void ParseLargeCsv_WithSubs_Gen()
@@ -37,6 +85,7 @@ public class TrackTimeStampsCsvTests : SilenceDetectBase
 		True(cparser.Count == expCount);
 
 		True(cparser.CombineCuts());
+		cparser.FixMetaCountIfNeeded();
 
 		expCount = 50;
 		True(cparser.Count == expCount && cparser.Meta.count == expCount);

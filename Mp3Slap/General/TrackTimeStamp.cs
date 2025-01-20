@@ -60,22 +60,31 @@ public class TrackTimeStamp
 
 
 	public const string CSVHeader = "Start,End,Duration,Pad,SoundStart,SoundEnd,SoundDuration,SilenceDuration,";
+	public const string CSVHeaderShort = "Start,End,Duration,";
 
-	public TimeSpan Start { get; init; }
+	public static string GetHeader(bool forShort) => forShort ? CSVHeaderShort : CSVHeader;
 
-	public TimeSpan End { get; init; }
+	public void SetDurations()
+	{
+		if(End > TimeSpan.Zero)
+			Duration = End - Start;
+	}
 
-	public TimeSpan Duration { get; init; }
+	public TimeSpan Start { get; set; }
 
-	public TimeSpan Pad { get; init; }
+	public TimeSpan End { get; set; }
 
-	public TimeSpan SoundStart { get; init; }
+	public TimeSpan Duration { get; set; }
 
-	public TimeSpan SoundEnd { get; init; }
+	public TimeSpan Pad { get; set; }
 
-	public TimeSpan SoundDuration { get; init; }
+	public TimeSpan SoundStart { get; set; }
 
-	public TimeSpan SilenceDuration { get; init; }
+	public TimeSpan SoundEnd { get; set; }
+
+	public TimeSpan SoundDuration { get; set; }
+
+	public TimeSpan SilenceDuration { get; set; }
 
 	public bool IsCut { get; set; }
 
@@ -86,17 +95,17 @@ public class TrackTimeStamp
 
 	public override string ToString() => ToCsvString();
 
-	public string ToCsvString()
-		=> USENEWCSV ? ToCsvStringNEW() : ToCsvStringOLD();
+	//public string ToCsvString(bool getShort = false)
+	//	=> ToCsvStringNEW();
 
-	public static bool USENEWCSV = true;
 
-	public string ToCsvStringShort()
+	public string ToShortCsvString()
 		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, ";
 
-	public string ToCsvStringNEW()
+	public string ToCsvString()
 		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, {Pad.TotalSeconds:0.00}, {SoundStart.ToString(TSFrmt)}, {SoundEnd.ToString(TSFrmt)}, {SoundDuration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, ";
-
-	public string ToCsvStringOLD()
-		=> $"{SoundStart.ToString(TSFrmt)}, {SoundEnd.ToString(TSFrmt)}, {SoundDuration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, {Pad.TotalSeconds:0.00}, {Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, ";
 }
+
+//public static bool USENEWCSV = true;
+//
+//public string ToCsvStringOLD() => $"{SoundStart.ToString(TSFrmt)}, {SoundEnd.ToString(TSFrmt)}, {SoundDuration.ToString(TSFrmt)}, {SilenceDuration.TotalSeconds:0.00}, {Pad.TotalSeconds:0.00}, {Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}, {Duration.ToString(TSFrmt)}, ";

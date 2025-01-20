@@ -19,6 +19,8 @@ public class SilDetTimeStampsCSVParser
 
 	public List<TrackTimeStamp> Stamps { get => _stamps; set => _stamps = value; }
 
+	public SResult Result { get; set; }
+
 	List<TrackTimeStamp> _stamps;
 	List<TTimeStamp> _tstamps;
 
@@ -35,14 +37,16 @@ public class SilDetTimeStampsCSVParser
 
 	string[] lines;
 
-	public List<TrackTimeStamp> Parse(
+	public void Parse(
 		string text,
 		bool combineCuts = true,
 		bool fixMetaCountToNew = true)
 	{
 		lines = text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-		if(lines.IsNulle())
-			return null;
+		if(lines.IsNulle()) {
+			setError("Empty lines");
+			return;
+		}
 
 		string fline = lines[0];
 		if(fline[0] == '#' && fline.Contains('{')) {
@@ -87,8 +91,8 @@ public class SilDetTimeStampsCSVParser
 				out TrackTimeStamp stamp);
 
 			if(!pass) {
-				string err = $"Fail to parse stamp: {itm.ErrorMsg}".Print();
-				throw new Exception(err);
+				setError($"Fail to parse stamp: {itm.ErrorMsg}");
+				return;
 			}
 
 			Stamps.Add(stamp);
@@ -101,8 +105,11 @@ public class SilDetTimeStampsCSVParser
 				FixMetaCountIfNeeded();
 		}
 
-		return Stamps;
+		Result = new(true);
 	}
+
+	void setError(string msg)
+		=> Result = new SResult(false, msg);
 
 	public SilDetTimeStampsCSVWriter ToCsv()
 	{
@@ -160,9 +167,9 @@ public class SilDetTimeStampsCSVParser
 
 			TrackTimeStamp lastCutSt = arr[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
 
-			TrackTimeStamp cStamp = new(st.SoundStart, lastCutSt.SoundEnd, silenceDuration: lastCutSt.SilenceDuration, st.Pad);
-
-			arr[i] = cStamp;
+			st.End = lastCutSt.End;
+			st.SoundEnd = lastCutSt.SoundEnd;
+			st.SetDurations();
 
 			negIndexSince = 0;
 		}

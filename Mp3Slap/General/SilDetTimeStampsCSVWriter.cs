@@ -51,7 +51,8 @@ public class SilDetTimeStampsCSVWriter
 
 
 	public string WriteToString(
-		bool includeCSVHeader = true)
+		bool includeCSVHeader = true,
+		bool getShortCsv = false)
 	{
 		StringBuilder sb = new();
 
@@ -59,11 +60,13 @@ public class SilDetTimeStampsCSVWriter
 		sb.AppendLine($"# {json}");
 
 		if(includeCSVHeader)
-			sb.AppendLine(TrackTimeStamp.CSVHeader);
+			sb.AppendLine(TrackTimeStamp.GetHeader(getShortCsv));
 
 		for(int i = 0; i < Stamps.Count; i++) {
 			TrackTimeStamp st = Stamps[i];
-			string res = st.ToCsvString();
+			string res = getShortCsv
+				? st.ToShortCsvString()
+				: st.ToCsvString();
 			sb.AppendLine(res);
 		}
 		sb.AppendLine();

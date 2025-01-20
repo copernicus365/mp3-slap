@@ -25,10 +25,16 @@ public abstract class SilenceDetectBase : BaseTest
 
 
 	public string csvLog_gen()
-	=> DataString($"{SampleResultsDirName}/log#01-genesis.mp3#silencedetect-parsed.csv");
+		=> DataString($"{SampleResultsDirName}/log#01-genesis.mp3#silencedetect-parsed.csv");
 
 	public string csvLog_gen_subs()
 		=> DataString($"{SampleResultsDirName}/log#01-genesis-3.1-with-subs.mp3#silencedetect-parsed.csv");
+
+	public string csvLog_1num_v1()
+		=> DataString($"{SampleResultsDirName}/samples1/log-1time-v1.csv");
+
+	public string csvLog_2num_v1()
+		=> DataString($"{SampleResultsDirName}/samples1/log-2time-v1.csv");
 
 	public string csvLog_gen_short()
 		=> DataString($"{SampleResultsDirName}/log#01-gen-short.mp3#silencedetect-parsed.csv");

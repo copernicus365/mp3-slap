@@ -1,0 +1,21 @@
+# {"count":5,"pad":0.3,"meta":{"duration":"04:04:09.8100000"}}
+0
+0:05:47.50
+579.59
+# = 0:09:39.59
+0:13:53.59
+0:18:11.87
+0:22:06.05
+0:25:36.95 
+0:29:29.98
+0:33:02.25
+-0:34:57.81
+-0:35:52.05
+-0:36:04.91
+0:37:37.82
+0:41:30.11
++0:43:30.00
+0:45:45.41
++0:50:00.00
+# GOING to require last item if single is END / final full duration, NOT another Start
+# user can handle by: 1) making the last item have start,end (2 vals), or accept this...

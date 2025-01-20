@@ -56,7 +56,8 @@ public class ProcessSilDetCSV
 		SilDetTimeStampsCSVParser cparser = new();
 		SilDetTimeStampsCSVWriter writer = new();
 
-		List<TrackTimeStamp> stamps = cparser.Parse(csvLog);
+		cparser.Parse(csvLog);
+		List<TrackTimeStamp> stamps = cparser.Stamps;
 
 		int origCnt = stamps.Count;
 

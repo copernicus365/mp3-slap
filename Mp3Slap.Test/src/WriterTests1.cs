@@ -7,8 +7,6 @@ namespace Mp3Slap.Test;
 
 public class WriterTests1 : SilenceDetectBase
 {
-	static TimeSpan pd = TimeSpan.FromSeconds(0.3);
-
 	[Fact]
 	public void ParseLargeCsv_WithSubs_Gen()
 	{
@@ -17,9 +15,9 @@ public class WriterTests1 : SilenceDetectBase
 
 		wr.InitForWrite(stamps: GetStamps1(), meta);
 
-		string csv = wr.WriteToString(includeCSVHeader: true);
-
-		// {"duration":3.3,"pad":0.3,"meta":{"duration":"04:04:09.8100000","start":0.025056}}
+		string csv = wr.WriteToString(
+			includeCSVHeader: true,
+			getShortCsv: false);
 
 		string writePath = GetDataDirPath($"{SampleResultsDirName}/log#01-gen-short.mp3#silencedetect-parsed.csv");
 

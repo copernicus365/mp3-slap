@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Mp3Slap.General;
@@ -28,6 +29,7 @@ public class TTimeStamp
 	public int ColsCount { get; private set; }
 	string[] arr;
 
+
 	/// <summary>
 	/// Purpose is to RAW parse directly from string a single CSV line,
 	/// handling ALL possible / available input types (which have varying number
@@ -40,7 +42,7 @@ public class TTimeStamp
 	public bool ParseRawLine(string line)
 	{
 		line = line.NullIfEmptyTrimmed();
-		if(line == null || line.Length < 2)
+		if(line.IsNulle())
 			return false;
 
 		IsCut = line[0] == '-';
@@ -57,30 +59,28 @@ public class TTimeStamp
 		if(len != 8) {
 
 			if(len == 1) {
-				if(!TryParseTSLenient(arr[0], out TimeSpan ts))
-					return false;
-				End = ts;
-
-				return End >= TimeSpan.Zero;
-			}
-			else if(len == 2) {
-				if(!TryParseTSLenient(arr[0], out TimeSpan ts))
+				if(!TryParseDoubleSecsElseTSLenient(arr[0], out TimeSpan ts))
 					return false;
 				Start = ts;
 
-				if(TryParseTSLenient(arr[1], out ts))
-					End = ts;
-				else {
-					double dVal = arr[1].ToDouble(-2);
-					if(dVal <= 0)
-						return false;
+				return IsValid = Start >= TimeSpan.Zero;
+			}
+			else if(len == 2) {
 
-					// but is this seconds? minutes? so no allow??
-					// however, only one that makes sense of a true decimal is
-					// seconds, eg 4.413 in minutes?! but 4.413 in seconds, fine
-					ts = TimeSpan.FromSeconds(dVal);
-				}
-				return Start >= TimeSpan.Zero && End > Start;
+				(bool success, bool isTS, TimeSpan ts, double db) = TryParseDoubleSecsElseTSLenient(arr[0]);
+				if(!success) //(!TryParseTSLenient(arr[0], out TimeSpan ts))
+					return false;
+				Start = ts;
+
+				(success, isTS, ts, db) = TryParseDoubleSecsElseTSLenient(arr[1]);
+				if(!success)
+					return false;
+
+				End = isTS
+					? ts
+					: ts += Start; // treating 2nd DOUBLE VALUE **as duration**
+
+				return IsValid = Start >= TimeSpan.Zero && End > Start;
 			}
 
 			return false;
@@ -121,19 +121,48 @@ public class TTimeStamp
 		if(SoundStart < TimeSpan.Zero || SoundEnd < SoundStart)
 			return false;
 
-		return true;
+		return IsValid = true;
+	}
+
+	public static (bool success, bool isTS, TimeSpan ts, double db) TryParseDoubleSecsElseTSLenient(string s)
+	{
+		if(s.IndexOf(':') > 0) {
+			return TryParseTSLenient(s, out TimeSpan ts)
+				? (true, true, ts, default)
+				: (false, true, default, default);
+		}
+
+		if(double.TryParse(s, out double dval)) {
+			TimeSpan ts = TimeSpan.FromSeconds(dval);
+			return (true, false, ts, dval);
+		}
+
+		return default;
+	}
+
+
+	public static bool TryParseDoubleSecsElseTSLenient([NotNullWhen(true)] string s, out TimeSpan result)
+	{
+		if(s.IndexOf(':') > 0)
+			return TryParseTSLenient(s, out result);
+
+		if(double.TryParse(s, out double dval)) {
+			result = TimeSpan.FromSeconds(dval);
+			return true;
+		}
+
+		result = default;
+		return false;
 	}
 
 	public static bool TryParseTSLenient([NotNullWhen(true)] string s, out TimeSpan result)
 	{
+		int colonCnt = s.Count(c => c == ':');
+		if(colonCnt == 1)
+			s = "0:" + s;
+
 		if(TimeSpan.TryParse(s, null, out result))
 			return true;
-
-		if(s.Count(c => c == ':') == 1) {
-			s = "0:" + s;
-			if(TimeSpan.TryParse(s, null, out result))
-				return true;
-		}
 
 		return false;
 	}
@@ -156,7 +185,7 @@ public class TTimeStamp
 
 		switch(ColsCount) {
 			case 1: {
-				Start = isFirst ? TimeSpan.Zero : prev.End;
+				//Start = isFirst ? TimeSpan.Zero : prev.End;
 				End = nextStart;
 				Duration = End - Start;
 				if(Duration <= TimeSpan.Zero)
@@ -172,7 +201,9 @@ public class TTimeStamp
 				return true;
 			}
 			case 2: {
-				// I think REQUIRE End to be set
+				// NOTE: Though it DID have 2 cols, 2nd one must have been 0 / 00:00:00
+
+				//// I think REQUIRE End to be set
 				if(End <= TimeSpan.Zero) {
 					if(!isEnd)
 						return SetError("2: No End");
@@ -231,6 +262,17 @@ public class TTimeStamp
 		ErrorMsg = msg;
 		return IsValid = false;
 	}
+
+
+	public override string ToString() => ToCsvString();
+
+	public string ToCsvString()
+		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}{(IsAdd ? ", -add" : null)}{(IsCut ? ", -cut" : null)}{(IsValid ? "" : $" -invalid {ErrorMsg}")}";
+
+
+	public const string TSFrmt = @"h\:mm\:ss\.ff";
+
+
 
 	//public TrackTimeStamp ToTrackTimeStamp()
 	//{
