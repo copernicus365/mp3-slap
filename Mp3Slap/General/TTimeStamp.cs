@@ -185,6 +185,10 @@ public class TTimeStamp
 
 		switch(ColsCount) {
 			case 1: {
+
+				if(IsAdd)
+					return SetError("1: Adds can't be a singleton / only start time, must have an end..."); // just simplify things...
+
 				//Start = isFirst ? TimeSpan.Zero : prev.End;
 				End = nextStart;
 				Duration = End - Start;
@@ -198,6 +202,8 @@ public class TTimeStamp
 					IsAdd = IsAdd,
 					IsCut = IsCut,
 				};
+
+				
 				return true;
 			}
 			case 2: {

@@ -1,0 +1,24 @@
+# {"count":10,"pad":0.3,"meta":{"duration":"00:12:30.00"}}
+0, 01:00
+60,
+120,
+180, 60
+04:00, 60
+05:00, 05:55
+06:00
+420,120
+09:00
+00:10:00.00
+-11:00, 12:00
+12:00, 13:00
+
+# ADD is valid / kept because cuts short prev time
++12:30, 14:00
+14:00, 15:00
+
+# next, ADD but IGNORED bec prev time wasn't cut short
++15:00, 16:00
+16:00, 17:00
+
+
+

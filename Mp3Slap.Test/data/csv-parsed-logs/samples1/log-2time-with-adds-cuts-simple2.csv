@@ -1,0 +1,26 @@
+00:00, 01:00
+
+# notes:
+# we FORBID adds with only 1 / start time
+# It's true, with only 2 times, it seems dumb to do or need adds
+# Like if 1m-3m needs to change to 1m-2m, 2m-3m, you would already
+# have to ADD "2m-3m", so why not just manually alter the first
+# "-3m" to "-2m"?
+# But for more than just 2-times, it's really convenient to not
+# have to then calculate durations. Also, IF the added start time doesn't
+# overlap the previous end time, the add aspect is just ignored
+
+# KISS: really simple point clarifies:
+# ADD 
+01:00, 04:00
++01:30, 02:30
++02:30, 03:00
+# last one, tho is 2 adds in a row, the 2nd of them is IGNORED as and
+# add bec prev (add, yes, but it doesn't matter) ended at 2:30, so no cut time
+
+03:00, 04:30
+
+# above demonstrates the first '04:00' is just TOTALLY ignored and lost
+# adds always have to have end times and that simplifies this,
+# making adds LIMITED to cutting the p
+

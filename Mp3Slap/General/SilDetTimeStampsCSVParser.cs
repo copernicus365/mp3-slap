@@ -141,40 +141,85 @@ public class SilDetTimeStampsCSVParser
 
 	public static bool CombineCuts(ref List<TrackTimeStamp> stamps)
 	{
-		if(stamps.IsNulle() || stamps.None(s => s.IsCut))
+		if(stamps.IsNulle())
 			return false;
 
-		TrackTimeStamp[] arr = [.. stamps];
+		bool hasSubs = !stamps.None(s => s.IsCut);
+		bool hasAdds = !stamps.None(s => s.IsAdd); ;
 
-		if(arr[0].IsCut)
-			arr[0].IsCut = false; // can't be valid i any case, but logic below depends on this
+		if(!hasSubs && !hasAdds)
+			return false;
 
-		int negIndexSince = 0;
+		if(hasSubs) {
+			TrackTimeStamp[] arr = [.. stamps];
 
-		for(int i = arr.Length - 1; i >= 0; i--) {
-			TrackTimeStamp st = arr[i];
+			if(arr[0].IsCut)
+				arr[0].IsCut = false; // can't be valid i any case, but logic below depends on this
 
-			bool hasPrevNegatives = negIndexSince > 0;
+			int negIndexSince = 0;
 
-			if(st.IsCut) {
+			for(int i = arr.Length - 1; i >= 0; i--) {
+				TrackTimeStamp st = arr[i];
+
+				bool hasPrevNegatives = negIndexSince > 0;
+
+				if(st.IsCut) {
+					if(!hasPrevNegatives)
+						negIndexSince = i;
+					continue;
+				}
+
 				if(!hasPrevNegatives)
-					negIndexSince = i;
-				continue;
+					continue;
+
+				TrackTimeStamp lastCutSt = arr[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
+
+				st.End = lastCutSt.End;
+				st.SoundEnd = lastCutSt.SoundEnd;
+				st.SetDurations();
+
+				negIndexSince = 0;
 			}
 
-			if(!hasPrevNegatives)
-				continue;
-
-			TrackTimeStamp lastCutSt = arr[negIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
-
-			st.End = lastCutSt.End;
-			st.SoundEnd = lastCutSt.SoundEnd;
-			st.SetDurations();
-
-			negIndexSince = 0;
+			stamps = arr.Where(st => !st.IsCut).ToList();
 		}
 
-		stamps = arr.Where(st => !st.IsCut).ToList();
+		if(hasAdds && stamps.NotNulle()) {
+
+			TrackTimeStamp[] arr = [.. stamps];
+
+			//if(arr[0].IsCut)
+			//	arr[0].IsCut = false; // can't be valid i any case, but logic below depends on this
+
+			int addIndexSince = 0;
+
+			for(int i = arr.Length - 1; i >= 0; i--) {
+				TrackTimeStamp st = arr[i];
+
+				bool hasPrevNegatives = addIndexSince > 0;
+
+				if(st.IsCut) {
+					if(!hasPrevNegatives)
+						addIndexSince = i;
+					continue;
+				}
+
+				if(!hasPrevNegatives)
+					continue;
+
+				TrackTimeStamp lastCutSt = arr[addIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
+
+				st.End = lastCutSt.End;
+				st.SoundEnd = lastCutSt.SoundEnd;
+				st.SetDurations();
+
+				addIndexSince = 0;
+			}
+
+			stamps = arr.Where(st => !st.IsCut).ToList();
+		}
+
+
 		return true; // even if somehow count is same (?), fact is some WERE marked as Cut
 
 		//FixMetaCountIfNeeded();

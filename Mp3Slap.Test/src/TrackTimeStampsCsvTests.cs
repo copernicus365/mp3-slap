@@ -71,6 +71,33 @@ public class TrackTimeStampsCsvTests : SilenceDetectBase
 			File.WriteAllText(writePath, result);
 	}
 
+	[Fact]
+	public void Parse_2NumCsv_Adds_Cuts_Simpl1()
+	{
+		string csvText = csvLog_2num_adds_cuts_simple1();
+
+		SilDetTimeStampsCSVParser cparser = new();
+		cparser.Parse(csvText, combineCuts: false, fixMetaCountToNew: false);
+
+		int expCount = 8;
+
+		True(cparser.Count == expCount);
+
+		True(cparser.CombineCuts());
+		cparser.FixMetaCountIfNeeded();
+
+		expCount = 7;
+		True(cparser.Count == expCount && cparser.Meta.count == expCount);
+
+		SilDetTimeStampsCSVWriter csv = cparser.ToCsv();
+
+		string result = csv.WriteToString();
+
+		string writePath = GetDataDirPath($"{SampleResultsDirName}/write-temp/parsed-combine-1.csv");
+
+		if(WriteParsedLogs)
+			File.WriteAllText(writePath, result);
+	}
 
 	[Fact]
 	public void ParseLargeCsv_WithSubs_Gen()
