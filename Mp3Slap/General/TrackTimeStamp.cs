@@ -93,7 +93,7 @@ public class TrackTimeStamp
 	/// <summary>
 	/// Just for diagnostic purposes, TT has extra iequatables etc to make easy comparisons...
 	/// </summary>
-	public TTimeStamp ToTT()
+	public TTimeStamp ToTT(bool ignoreCuts = false, bool clearPad = false)
 	{
 		TTimeStamp tt = new() {
 			Start = Start,
@@ -106,7 +106,15 @@ public class TrackTimeStamp
 			SilenceDuration = SilenceDuration.TotalSeconds,
 			IsCut = IsCut,
 			IsAdd = IsAdd,
+			IsValid = true
 		};
+
+		if(ignoreCuts)
+			tt.IsCut = tt.IsAdd = false;
+
+		if(clearPad)
+			tt.Pad = 0;
+
 		return tt;
 	}
 

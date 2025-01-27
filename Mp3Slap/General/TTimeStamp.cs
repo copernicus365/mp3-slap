@@ -32,6 +32,7 @@ public class TTimeStamp : IComparable<TTimeStamp>, IComparer<TTimeStamp>, IEquat
 		if(arr.IsNulle())
 			return;
 
+		IsValid = true;
 		int len = arr.Length;
 
 		switch(len) {
@@ -43,6 +44,11 @@ public class TTimeStamp : IComparable<TTimeStamp>, IComparer<TTimeStamp>, IEquat
 				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
 				End = ParseDoubleSecsElseTSLenient_DefOnNull(arr[1]);
 				setDurations();
+				return;
+			case 3:
+				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
+				End = ParseDoubleSecsElseTSLenient_DefOnNull(arr[1]);
+				Duration = ParseDoubleSecsElseTSLenient_DefOnNull(arr[2]);
 				return;
 			case 8:
 				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
@@ -431,5 +437,27 @@ public class TTimeStamp : IComparable<TTimeStamp>, IComparer<TTimeStamp>, IEquat
 	public static bool operator >=(TTimeStamp left, TTimeStamp right) => left is null ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
 
 	#endregion
+
+
+	public static TTimeStamp[] ParseFromFullString(string input, double pad = 0)
+	{
+		TTimeStamp[] arr = input.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+			.Select(ln => {
+				if(ln.StartsWith('#'))
+					return null;
+
+				string[] vals = ln.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+				if(vals.IsNulle())
+					return null;
+
+				TTimeStamp stamp = new(vals);
+				if(pad > 0 && stamp.Pad == 0 && stamp.ColsCount < 3)
+					stamp.Pad = pad;
+
+				return stamp;
+			})
+			.ToArray();
+		return arr;
+	}
 
 }
