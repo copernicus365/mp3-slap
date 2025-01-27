@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Mp3Slap.General;
 
@@ -10,24 +11,87 @@ public enum TStampType
 
 }
 
-public class TTimeStamp
+public class TTimeStamp : IComparable<TTimeStamp>, IComparer<TTimeStamp>, IEquatable<TTimeStamp>
 {
 	public TimeSpan Start;
 	public TimeSpan End;
 	public TimeSpan Duration;
+	public double Pad;
 	public TimeSpan SoundStart;
 	public TimeSpan SoundEnd;
 	public TimeSpan SoundDuration;
 	public double SilenceDuration;
-	public double Pad;
 	public bool IsCut;
 	public bool IsAdd;
+
+
+	public TTimeStamp() { }
+
+	public TTimeStamp(params string[] arr)
+	{
+		if(arr.IsNulle())
+			return;
+
+		int len = arr.Length;
+
+		switch(len) {
+			case 1:
+				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
+				// setDurations - no end so not poss
+				return;
+			case 2:
+				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
+				End = ParseDoubleSecsElseTSLenient_DefOnNull(arr[1]);
+				setDurations();
+				return;
+			case 8:
+				Start = ParseDoubleSecsElseTSLenient_DefOnNull(arr[0]);
+				End = ParseDoubleSecsElseTSLenient_DefOnNull(arr[1]);
+				Duration = ParseDoubleSecsElseTSLenient_DefOnNull(arr[2]);
+				Pad = double.Parse(arr[3]);
+				SoundStart = ParseDoubleSecsElseTSLenient_DefOnNull(arr[4]);
+				SoundEnd = ParseDoubleSecsElseTSLenient_DefOnNull(arr[5]);
+				SoundDuration = ParseDoubleSecsElseTSLenient_DefOnNull(arr[6]);
+				SilenceDuration = double.Parse(arr[7]);
+				return;
+			default: throw new ArgumentOutOfRangeException();
+		}
+	}
+
+	/// <summary>Mostly just for diagnostics, so priv for now...</summary>
+	void setDurations()
+	{
+		if(End > TimeSpan.Zero)
+			Duration = End - Start;
+		if(SoundEnd > TimeSpan.Zero)
+			SoundDuration = SoundEnd - SoundStart;
+	}
+
+	public int Compare(TTimeStamp x, TTimeStamp y)
+	{
+		if(x is null || y is null) return 1;
+
+		int comp;
+
+		if(!comp1(x.Start, y.Start, out comp)) return comp;
+		if(!comp1(x.End, y.End, out comp)) return comp;
+		if(!comp1(x.Duration, y.Duration, out comp)) return comp;
+		if(!comp1(x.SoundStart, y.SoundStart, out comp)) return comp;
+		if(!comp1(x.SoundEnd, y.SoundEnd, out comp)) return comp;
+		if(!comp1(x.SoundDuration, y.SoundDuration, out comp)) return comp;
+		if(!comp1(x.SilenceDuration, y.SilenceDuration, out comp)) return comp;
+		if(!comp1(x.Pad, y.Pad, out comp)) return comp;
+		if(!comp1(x.IsCut, y.IsCut, out comp)) return comp;
+		if(!comp1(x.IsAdd, y.IsAdd, out comp)) return comp;
+		return 0;
+	}
 
 	public bool IsValid;
 	public string ErrorMsg;
 
 	public int ColsCount { get; private set; }
 	string[] arr;
+
 
 
 	/// <summary>
@@ -43,7 +107,7 @@ public class TTimeStamp
 	{
 		line = line.NullIfEmptyTrimmed();
 		if(line.IsNulle())
-			return false;
+			return setError("Null or empty");
 
 		IsCut = line[0] == '-';
 		IsAdd = line[0] == '+';
@@ -59,53 +123,57 @@ public class TTimeStamp
 		if(len != 8) {
 
 			if(len == 1) {
-				if(!TryParseDoubleSecsElseTSLenient(arr[0], out TimeSpan ts))
-					return false;
+				string val = arr[0];
+
+				if(!TryParseDoubleSecsElseTSLenient(val, out TimeSpan ts))
+					return setError($"1: invalid time `{val}`");
 				Start = ts;
 
-				return IsValid = Start >= TimeSpan.Zero;
+				return setErrorIfInvalidDuration(Start < TimeSpan.Zero);
 			}
 			else if(len == 2) {
 
-				(bool success, bool isTS, TimeSpan ts, double db) = TryParseDoubleSecsElseTSLenient(arr[0]);
-				if(!success) //(!TryParseTSLenient(arr[0], out TimeSpan ts))
-					return false;
+				string val = arr[0];
+				(bool success, bool isTS, TimeSpan ts, double db) = TryParseDoubleSecsElseTSLenient(val);
+				if(!success)
+					return setError($"2a: invalid time `{val}`");
 				Start = ts;
 
-				(success, isTS, ts, db) = TryParseDoubleSecsElseTSLenient(arr[1]);
+				val = arr[1];
+				(success, isTS, ts, db) = TryParseDoubleSecsElseTSLenient(val);
 				if(!success)
-					return false;
+					return setError($"2b: invalid time `{val}`");
 
 				End = isTS
 					? ts
 					: ts += Start; // treating 2nd DOUBLE VALUE **as duration**
 
-				return IsValid = Start >= TimeSpan.Zero && End > Start;
+				return setErrorIfInvalidDuration(Start < TimeSpan.Zero || End <= Start);
 			}
 
-			return false;
+			return setError($"{len}: invalid count of line items");
 		}
 
 		for(int i = 0; i < arr.Length; i++) {
 			string val = arr[i];
 			if(val == null)
-				return false;
+				return setError("8: null/empty");
 
 			if(i == 3 || i == 7) {
 				double dVal = val.ToDouble(-2);
 				if(dVal < -1)
-					return false;
+					return setError($"8 double: negative num `{val}`");
 
 				switch(i) {
 					case 3: Pad = dVal; break;
 					case 7: SilenceDuration = dVal; break;
-					default: return false;
+					default: throw new ArgumentOutOfRangeException();
 				}
 				continue;
 			}
 
 			if(!TryParseTSLenient(val, out TimeSpan ts))
-				return false;
+				return setError($"8: invalid time `{val}`");
 
 			switch(i) {
 				case 0: Start = ts; break;
@@ -114,15 +182,118 @@ public class TTimeStamp
 				case 4: SoundStart = ts; break;
 				case 5: SoundEnd = ts; break;
 				case 6: SoundDuration = ts; break;
-				default: return false;
+				default: throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		if(SoundStart < TimeSpan.Zero || SoundEnd < SoundStart)
-			return false;
-
-		return IsValid = true;
+		return setErrorIfInvalidDuration(SoundStart < TimeSpan.Zero || SoundEnd < SoundStart);
 	}
+
+	public bool Init(
+		TTimeStamp prev,
+		TTimeStamp next,
+		TimeSpan totalDuration,
+		TimeSpan padDef,
+		out TrackTimeStamp stamp)
+	{
+		stamp = null;
+
+		bool isFirst = prev == null;
+		bool isEnd = next == null;
+		TimeSpan nextStart = isEnd ? totalDuration : next.Start;
+
+		TimeSpan pad = Pad > 0 ? TimeSpan.FromSeconds(Pad) : padDef;
+
+		switch(ColsCount) {
+			case 1: {
+
+				if(isEnd) {
+					if(totalDuration <= TimeSpan.Zero)
+						return setError("1: Last item can't be a single (start) time if total duration wasn't specified somewhere otherwise. In that case last item must have 2 times, ie: [start, end]");
+				}
+				else if(next.IsAdd) {
+
+				}
+
+				//if(IsAdd)
+				//	return setError("1: Adds can't be a singleton / only start time, must have an end..."); // just simplify things...
+
+				//Start = isFirst ? TimeSpan.Zero : prev.End;
+				End = nextStart;
+				Duration = End - Start;
+				if(Duration <= TimeSpan.Zero)
+					return setError("1: Negative duration");
+
+				stamp = new TrackTimeStamp() {
+					Start = Start,
+					End = End,
+					Duration = Duration,
+					Pad = pad,
+					IsAdd = IsAdd,
+					IsCut = IsCut,
+				};
+
+
+				return true;
+			}
+			case 2: {
+				// NOTE: Though it DID have 2 cols, 2nd one must have been 0 / 00:00:00
+
+				//// I think REQUIRE End to be set
+				if(End <= TimeSpan.Zero) {
+					if(!isEnd)
+						return setError("2: No End");
+					End = nextStart;
+				}
+				Duration = End - Start;
+
+				if(Duration <= TimeSpan.Zero)
+					return setError("1: Negative duration");
+
+				stamp = new TrackTimeStamp() {
+					Start = Start,
+					End = End,
+					Duration = Duration,
+					Pad = pad,
+					IsAdd = IsAdd,
+					IsCut = IsCut,
+				};
+				return true;
+			}
+			case 8: {
+				if(!isFirst) {
+					if(Start == default || SoundStart == default)
+						return setError("8: starts not set");
+				}
+				if(!isEnd) {
+					if(End == default || SoundEnd == default)
+						return setError("8: ends not set");
+				}
+
+				if(Duration == default && End != default)
+					Duration = End - Start;
+				if(SoundDuration == default && SoundEnd != default)
+					SoundDuration = SoundEnd - SoundStart;
+
+				stamp = new TrackTimeStamp() {
+					Start = Start,
+					End = End,
+					Pad = pad,
+					Duration = Duration,
+					SoundStart = SoundStart,
+					SoundEnd = SoundEnd,
+					SoundDuration = SoundDuration,
+					IsAdd = IsAdd,
+					IsCut = IsCut,
+					SilenceDuration = default
+				};
+				return true;
+			}
+			default: throw new ArgumentOutOfRangeException(nameof(ColsCount));
+		}
+	}
+
+
 
 	public static (bool success, bool isTS, TimeSpan ts, double db) TryParseDoubleSecsElseTSLenient(string s)
 	{
@@ -140,6 +311,14 @@ public class TTimeStamp
 		return default;
 	}
 
+	public static TimeSpan ParseDoubleSecsElseTSLenient_DefOnNull([NotNullWhen(true)] string s)
+	{
+		if(s.IsNulle())
+			return default;
+		if(!TryParseDoubleSecsElseTSLenient(s, out TimeSpan result))
+			throw new ArgumentException();
+		return result;
+	}
 
 	public static bool TryParseDoubleSecsElseTSLenient([NotNullWhen(true)] string s, out TimeSpan result)
 	{
@@ -168,105 +347,18 @@ public class TTimeStamp
 	}
 
 
-	public bool Init(
-		TTimeStamp prev,
-		TTimeStamp next,
-		TimeSpan totalDuration,
-		TimeSpan padDef,
-		out TrackTimeStamp stamp)
-	{
-		stamp = null;
-
-		bool isFirst = prev == null;
-		bool isEnd = next == null;
-		TimeSpan nextStart = isEnd ? totalDuration : next.Start;
-
-		TimeSpan pad = Pad > 0 ? TimeSpan.FromSeconds(Pad) : padDef;
-
-		switch(ColsCount) {
-			case 1: {
-
-				if(IsAdd)
-					return SetError("1: Adds can't be a singleton / only start time, must have an end..."); // just simplify things...
-
-				//Start = isFirst ? TimeSpan.Zero : prev.End;
-				End = nextStart;
-				Duration = End - Start;
-				if(Duration <= TimeSpan.Zero)
-					return SetError("1: Negative duration");
-				stamp = new TrackTimeStamp() {
-					Start = Start,
-					End = End,
-					Duration = Duration,
-					Pad = pad,
-					IsAdd = IsAdd,
-					IsCut = IsCut,
-				};
-
-				
-				return true;
-			}
-			case 2: {
-				// NOTE: Though it DID have 2 cols, 2nd one must have been 0 / 00:00:00
-
-				//// I think REQUIRE End to be set
-				if(End <= TimeSpan.Zero) {
-					if(!isEnd)
-						return SetError("2: No End");
-					End = nextStart;
-				}
-				Duration = End - Start;
-
-				if(Duration <= TimeSpan.Zero)
-					return SetError("1: Negative duration");
-
-				stamp = new TrackTimeStamp() {
-					Start = Start,
-					End = End,
-					Duration = Duration,
-					Pad = pad,
-					IsAdd = IsAdd,
-					IsCut = IsCut,
-				};
-				return true;
-			}
-			case 8: {
-				if(!isFirst) {
-					if(Start == default || SoundStart == default)
-						return SetError("8: starts not set");
-				}
-				if(!isEnd) {
-					if(End == default || SoundEnd == default)
-						return SetError("8: ends not set");
-				}
-
-				if(Duration == default && End != default)
-					Duration = End - Start;
-				if(SoundDuration == default && SoundEnd != default)
-					SoundDuration = SoundEnd - SoundStart;
-
-				stamp = new TrackTimeStamp() {
-					Start = Start,
-					End = End,
-					Pad = pad,
-					Duration = Duration,
-					SoundStart = SoundStart,
-					SoundEnd = SoundEnd,
-					SoundDuration = SoundDuration,
-					IsAdd = IsAdd,
-					IsCut = IsCut,
-					SilenceDuration = default
-				};
-				return true;
-			}
-			default: throw new ArgumentOutOfRangeException(nameof(ColsCount));
-		}
-	}
-
-	public bool SetError(string msg)
+	bool setError(string msg)
 	{
 		ErrorMsg = msg;
 		return IsValid = false;
+	}
+
+
+	bool setErrorIfInvalidDuration(bool error = true)
+	{
+		if(error)
+			ErrorMsg = "Invalid duration";
+		return IsValid = !error;
 	}
 
 
@@ -275,16 +367,69 @@ public class TTimeStamp
 	public string ToCsvString()
 		=> $"{Start.ToString(TSFrmt)}, {End.ToString(TSFrmt)}{(IsAdd ? ", -add" : null)}{(IsCut ? ", -cut" : null)}{(IsValid ? "" : $" -invalid {ErrorMsg}")}";
 
+	public int CompareTo(TTimeStamp other)
+		=> Compare(this, other);
+
+	public bool Equals(TTimeStamp other)
+		=> Compare(this, other) == 0;
 
 	public const string TSFrmt = @"h\:mm\:ss\.ff";
 
 
+	#region -- Equals etc boiler --
 
-	//public TrackTimeStamp ToTrackTimeStamp()
-	//{
-	//	throw new NotImplementedException();
-	//	//TrackTimeStamp stamp = new(SoundStart, SoundEnd, SoundDuration, SilenceDuration, Pad) { IsCut = IsCut };
-	//	//TrackTimeStamp stamp = new(SoundStart, SoundEnd, dur, silence, pad) { IsCut = isCut };
-	//	//return stamp;
-	//}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool comp1(TimeSpan t1, TimeSpan t2, out int comp)
+	{
+		comp = t1.CompareTo(t2);
+		return comp == 0;
+	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool comp1(double t1, double t2, out int comp)
+	{
+		comp = t1.CompareTo(t2);
+		return comp == 0;
+	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool comp1(bool t1, bool t2, out int comp)
+	{
+		comp = t1.CompareTo(t2);
+		return comp == 0;
+	}
+
+	public override bool Equals(object obj)
+	{
+		if(ReferenceEquals(this, obj))
+			return true;
+
+		if(obj is null)
+			return false;
+
+		return Equals(obj as TTimeStamp);
+	}
+
+	public override int GetHashCode() => throw new NotImplementedException();
+
+	public static bool operator ==(TTimeStamp left, TTimeStamp right)
+	{
+		if(left is null) {
+			return right is null;
+		}
+
+		int comp = left.CompareTo(right);
+		return comp == 0;
+	}
+
+	public static bool operator !=(TTimeStamp left, TTimeStamp right) => !(left == right);
+
+	public static bool operator <(TTimeStamp left, TTimeStamp right) => left is null ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+
+	public static bool operator <=(TTimeStamp left, TTimeStamp right) => left is null || left.CompareTo(right) <= 0;
+
+	public static bool operator >(TTimeStamp left, TTimeStamp right) => left is not null && left.CompareTo(right) > 0;
+
+	public static bool operator >=(TTimeStamp left, TTimeStamp right) => left is null ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
+
+	#endregion
+
 }

@@ -145,7 +145,7 @@ public class SilDetTimeStampsCSVParser
 			return false;
 
 		bool hasSubs = !stamps.None(s => s.IsCut);
-		bool hasAdds = !stamps.None(s => s.IsAdd); ;
+		bool hasAdds = !stamps.None(s => s.IsAdd);
 
 		if(!hasSubs && !hasAdds)
 			return false;
@@ -188,32 +188,22 @@ public class SilDetTimeStampsCSVParser
 
 			TrackTimeStamp[] arr = [.. stamps];
 
-			//if(arr[0].IsCut)
-			//	arr[0].IsCut = false; // can't be valid i any case, but logic below depends on this
+			// LOOK AHEAD +1 LOOP, IF NEXT ISADD, if needed it's Start time cuts down current item's start time
+			// arr.Length - 1 --> IGNORE final IsAdd, it already was calculated on 2nd to last look ahead
+			for(int i = 0; i < arr.Length - 1; i++) {
+				TrackTimeStamp nxt = arr[i + 1];
 
-			int addIndexSince = 0;
+				if(!nxt.IsAdd)
+					continue;
 
-			for(int i = arr.Length - 1; i >= 0; i--) {
 				TrackTimeStamp st = arr[i];
 
-				bool hasPrevNegatives = addIndexSince > 0;
-
-				if(st.IsCut) {
-					if(!hasPrevNegatives)
-						addIndexSince = i;
-					continue;
-				}
-
-				if(!hasPrevNegatives)
+				if(st.End <= nxt.Start)
 					continue;
 
-				TrackTimeStamp lastCutSt = arr[addIndexSince]; // "last" = ASC order. if 3,4,5 are cuts, last = [5]
-
-				st.End = lastCutSt.End;
-				st.SoundEnd = lastCutSt.SoundEnd;
+				st.End = nxt.Start;
+				st.SoundStart = nxt.SoundStart; // TOO COMPLEX !! **MUST** JUST OVERWRITE for KISS!! There's no valid way Start/End changes and the sound-start etc doesn't
 				st.SetDurations();
-
-				addIndexSince = 0;
 			}
 
 			stamps = arr.Where(st => !st.IsCut).ToList();

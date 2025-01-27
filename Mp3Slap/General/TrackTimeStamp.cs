@@ -90,6 +90,25 @@ public class TrackTimeStamp
 
 	public bool IsAdd { get; set; }
 
+	/// <summary>
+	/// Just for diagnostic purposes, TT has extra iequatables etc to make easy comparisons...
+	/// </summary>
+	public TTimeStamp ToTT()
+	{
+		TTimeStamp tt = new() {
+			Start = Start,
+			End = End,
+			Duration = Duration,
+			Pad = Pad.TotalSeconds,
+			SoundStart = SoundStart,
+			SoundEnd = SoundEnd,
+			SoundDuration = SoundDuration,
+			SilenceDuration = SilenceDuration.TotalSeconds,
+			IsCut = IsCut,
+			IsAdd = IsAdd,
+		};
+		return tt;
+	}
 
 	public const string TSFrmt = @"h\:mm\:ss\.ff";
 

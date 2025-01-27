@@ -14,13 +14,22 @@
 # ADD 
 01:00, 04:00
 +01:30, 02:30
-+02:30, 03:00
-# last one, tho is 2 adds in a row, the 2nd of them is IGNORED as and
++02:15, 04:00
++03:30, 05:00
+# last one, tho is 2 adds in a row, the 2nd of them is IGNORED as an
 # add bec prev (add, yes, but it doesn't matter) ended at 2:30, so no cut time
 
-03:00, 04:30
+06:00, 07:30
 
 # above demonstrates the first '04:00' is just TOTALLY ignored and lost
 # adds always have to have end times and that simplifies this,
 # making adds LIMITED to cutting the p
 
+## Expected result:
+# 
+# 00:00, 01:00
+# 01:00, 01:30
+# 01:30, 02:15
+# 02:15, 03:30
+# 03:30, 05:00
+# 06:00, 07:30
