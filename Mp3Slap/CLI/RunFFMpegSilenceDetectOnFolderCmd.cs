@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-using CommandLine.EasyBuilder.Auto;
+using CommandLine.EasyBuilder;
 
 using Mp3Slap.SilenceDetect;
 

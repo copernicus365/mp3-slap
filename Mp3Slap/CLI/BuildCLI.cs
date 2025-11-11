@@ -18,15 +18,16 @@ public static class BuildCLI
 			.AddAutoCommand<SilenceDetectGroupCmd>(); // "sd" / "silence-detect"
 
 		sdGroup
-			.Auto<RunFFMpegSilenceDetectOnFolderCmd>(); // "run-ff" / "run-ff-full"
+
+			.AddAutoCommand<RunFFMpegSilenceDetectOnFolderCmd>(); // "run-ff" / "run-ff-full"
 
 		Command csvLogsCmd = sdGroup
 			.AddAutoCommand<ProcessCsvLogsFoldersCmd>() // "csvs" / "process-sd-csv-group"
 			;
 
 		csvLogsCmd
-			.Auto<ProcessCsvLogCmd>() // "single" / "process-single-sd-csv"
-			.Auto<FFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
+			.AddAutoCommand<ProcessCsvLogCmd>() // "single" / "process-single-sd-csv"
+			.AddAutoCommand<FFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
 			;
 
 		r.AddAutoCommand<SetDirectoryCmd>()
@@ -35,21 +36,3 @@ public static class BuildCLI
 		return r;
 	}
 }
-
-//Command sdGroup = r
-//	.AddAutoCommand<SilenceDetectGroupCmd>(); // "sd" / "silence-detect"
-
-//sdGroup
-//	.AddAutoCommand<FullFolderGroupCmd>() // "gr" / "group"
-//	.Auto<RunFFMpegSilenceDetectOnFolderCmd>() // "run-ff" / "run-ff-full"
-//	.Auto<ProcessCsvLogsFoldersCmd>() // "csv-logs" / "csvs",
-//	;
-
-//sdGroup
-//	.AddAutoCommand<SDCsvGroupCmd>() // "csv" / "sd-csv"
-//	.Auto<FFLogToCsvSingleCmd>() // "ff-to-csv" / "fflog-to-csv"
-//	.Auto<ProcessCsvLogCmd>() // "csv-log" / "single"
-//	;
-
-//r.AddAutoCommand<SetDirectoryCmd>()
-//	.AddAutoCommand<PrintCurrDirectoryCmd>();

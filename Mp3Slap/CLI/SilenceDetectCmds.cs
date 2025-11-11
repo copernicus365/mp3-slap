@@ -1,7 +1,6 @@
 using System.CommandLine;
 
 using CommandLine.EasyBuilder;
-using CommandLine.EasyBuilder.Auto;
 
 using Mp3Slap.SilenceDetect;
 
@@ -32,7 +31,7 @@ public class SilenceDetectBase
 		Required = true)]
 	public string DurationsStr {
 		get => Durations?.JoinToString(",");
-		set => Durations = ArgParsers.DoubleArray(value, out _parseDurationsError);
+		set => Durations = ArgParser.DoubleArray(value, out _parseDurationsError);
 	}
 
 	protected string _parseDurationsError;

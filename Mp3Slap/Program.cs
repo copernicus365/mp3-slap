@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 using Mp3Slap.CLI.SilenceDetect;
 
@@ -15,25 +14,32 @@ public class Program
 
 		RootCommand rootCmd = BuildCLI.BuildApp();
 
-		if(args.CountN() == 1 && args[0].NullIfEmptyTrimmed() == "-h")
-			args = null; // if no arguments, we already invoke 'help' below. but for that needs loop to stay open
+		bool doLoop = args.IsNulle();
+		string cmdLine = doLoop ? "-h" : null;
 
-		if(args.NotNulle()) {
-			rootCmd.Invoke(args);
-			return 0;
-		}
+		do {
+			ParseResult res = args != null
+				? rootCmd.Parse(args)
+				: rootCmd.Parse(cmdLine);
 
-		// if no args, we keep the input loop going, but first display help output
-		rootCmd.Invoke("-h");
+			args = null;
 
-		while(true) {
+			if(res.Errors.Any()) {
+				foreach(var err in res.Errors) {
+					WriteLine($"Error: {err.Message}");
+				}
+				continue;
+			}
+
+			int dRes = await res.InvokeAsync();
+
 			Write("\nInput: ");
-			string arg = ReadLine();
 
-			int res = arg == null
-				? await rootCmd.InvokeAsync(args)
-				: await rootCmd.InvokeAsync(arg);
-		}
+			cmdLine = ReadLine();
+
+			WriteLine();
+		} while(doLoop);
+		return 0;
 	}
 
 	public static bool IsDebug;

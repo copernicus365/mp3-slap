@@ -66,7 +66,8 @@ public class SilDetTimeStampsCSVParserTests : SilenceDetectBase
 
 		bool countShouldChange = expCount != expCountAfterCuts;
 
-		True(cparser.CombineCuts());
+		bool ccc = cparser.CombineCuts();
+		True(ccc);
 		cparser.FixMetaCountIfNeeded();
 
 		if(expCountAfterCuts >= 0) {

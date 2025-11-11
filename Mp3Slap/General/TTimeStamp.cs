@@ -154,6 +154,8 @@ public class TTimeStamp : IComparable<TTimeStamp>, IComparer<TTimeStamp>, IEquat
 					? ts
 					: ts += Start; // treating 2nd DOUBLE VALUE **as duration**
 
+				Duration = End - Start; // <-- Ensure Duration is set for 2-col case
+
 				return setErrorIfInvalidDuration(Start < TimeSpan.Zero || End <= Start);
 			}
 
