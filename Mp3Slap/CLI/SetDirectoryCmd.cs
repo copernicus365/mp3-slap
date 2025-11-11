@@ -32,8 +32,8 @@ public class SetDirectoryCmd
 			path;
 
 		$@"Changed root directory:
-old: {origDir}
-new: {Program.CurrentDirectory}".Print();
+TO: {Program.CurrentDirectory}
+WAS: {origDir}".Print();
 	}
 }
 

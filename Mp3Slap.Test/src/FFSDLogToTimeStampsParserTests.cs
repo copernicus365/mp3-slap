@@ -7,15 +7,16 @@ public class FFSDLogToTimeStampsParserTests : SilenceDetectBase
 {
 	[Fact]
 	public void GenLog()
-		=> _RunParse_BasicCount_Test("log#niv-suchet-01-genesis.mp3#silencedetect.log", 49);
+		=> _RunParse_BasicCount_Test("log#gen1_79#silencedetect.log", 79); // 49);
 
-	[Fact]
-	public void GenOlderLog()
-		=> _RunParse_BasicCount_Test("log#niv-suchet-01-genesis.mp3#silencedetect-OLD.log", 51);
+	//[Fact]
+	//public void GenOlderLog()
+	//	=> _RunParse_BasicCount_Test("log#niv-suchet-01-genesis.mp3#silencedetect-OLD.log", 51);
 
-	[Fact]
-	public void DanLog()
-		=> _RunParse_BasicCount_Test("log#niv-suchet-27-daniel.mp3#silencedetect.log", 17);
+	// lost this log...
+	//[Fact]
+	//public void DanLog()
+	//	=> _RunParse_BasicCount_Test("log#niv-suchet-27-daniel.mp3#silencedetect.log", 17);
 
 	void _RunParse_BasicCount_Test(string logName, int expectedCount)
 	{
@@ -30,7 +31,7 @@ public class FFSDLogToTimeStampsParserTests : SilenceDetectBase
 		(int min, int max)? expectedCountRange = null)
 	{
 		True(log != null);
-		
+
 		FFSDLogToTimeStampsParser parser = new(log);
 
 		List<TrackTimeStamp> tracks = parser.Parse();

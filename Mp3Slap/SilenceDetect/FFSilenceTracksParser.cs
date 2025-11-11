@@ -64,11 +64,14 @@ public partial class FFSDLogToTimeStampsParser(string log, double pad = FFSDLogT
 			Stamps.Add(stamp);
 		}
 
-		if(Meta != null && Meta.duration > TimeSpan.Zero) {
-			double endDur = Meta.duration.TotalSeconds;
+		bool hasMetaDur = Meta != null && Meta.duration > TimeSpan.Zero;
 
-			double sil = endDur - lastEnd;
-			Stamps.Add(new TrackTimeStamp(lastEnd, endDur, silenceDuration: 0, pad: pad));
+		if(hasMetaDur) {
+			double endDur = Meta.duration.TotalSeconds;
+			double finalDurBasedOnMeta = endDur - lastEnd;
+			if(finalDurBasedOnMeta > 0.5) { // sometimes is NEGATIVE, meta's duration rounds to .00
+				Stamps.Add(new TrackTimeStamp(lastEnd, endDur, silenceDuration: 0, pad: pad));
+			}
 		}
 		else {
 			double endDur = 0.001;

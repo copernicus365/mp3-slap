@@ -13,8 +13,8 @@ public class FFSilenceTracks_ToScriptNotUsed_Tests : SilenceDetectBase
 	public void TestWriteSplitScript()
 	{
 		FFSDLogToTimeStampsParser split = new FFSDLogToTimeStampsParserTests().ParseFFSDLog(
-			GetSampleFFSilLog("log#niv-suchet-01-genesis.mp3#silencedetect.log"),
-			expectedCountRange: (49, 51)); // don't know why it's 49 right now, but...
+			GetSampleFFSilLog("log#gen1_79#silencedetect.log"),
+			expectedCountRange: (79, 81)); //(49, 51)); // don't know why it's 49 right now, but...
 
 		string script = _ToScriptRude2(split, "gen.mp3", "gen-{i}.mp3");
 	}

@@ -4,12 +4,12 @@ namespace Test;
 
 public abstract class SilenceDetectBase : BaseTest
 {
-	public static string GetSampleFFSilLogPATH(string fname)
-		=> $"ffsil-logs/{fname}";
+	public static string GetSampleFFSilenceLogPATH(string fname)
+		=> $"fflogs/{fname}";
 		//=> $"sample-ffmpeg-silence-logs/{fname}";
 
 	public string GetSampleFFSilLog(string fname)
-		=> DataString(GetSampleFFSilLogPATH(fname));
+		=> DataString(GetSampleFFSilenceLogPATH(fname));
 
 	public static List<TrackTimeStamp> GetStamps1()
 	{

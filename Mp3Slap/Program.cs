@@ -14,15 +14,30 @@ public class Program
 
 		RootCommand rootCmd = BuildCLI.BuildApp();
 
-		bool doLoop = args.IsNulle();
+		bool hasArgs = args.NotNulle();
+		bool doLoop = !hasArgs;
 		string cmdLine = doLoop ? "-h" : null;
+		bool forLoopDoHelpFirstRun = true;
 
 		do {
-			ParseResult res = args != null
+			if(!hasArgs) {
+				if(forLoopDoHelpFirstRun) {
+					cmdLine = "-h";
+					forLoopDoHelpFirstRun = false;
+				}
+				else {
+					Write("> ");
+					cmdLine = ReadLine();
+					WriteLine();
+				}
+			}
+
+			ParseResult res = hasArgs
 				? rootCmd.Parse(args)
 				: rootCmd.Parse(cmdLine);
 
 			args = null;
+			hasArgs = false;
 
 			if(res.Errors.Any()) {
 				foreach(var err in res.Errors) {
@@ -32,11 +47,6 @@ public class Program
 			}
 
 			int dRes = await res.InvokeAsync();
-
-			Write("\nInput: ");
-
-			cmdLine = ReadLine();
-
 			WriteLine();
 		} while(doLoop);
 		return 0;
